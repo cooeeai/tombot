@@ -104,7 +104,7 @@ trait Service extends JsonSupport {
       request <- Marshal(payload).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.POST,
-        uri = "https://graph.facebook.com/v2.6/me/messages?access_token=$token",
+        uri = s"https://graph.facebook.com/v2.6/me/messages?access_token=$token",
         entity = request))
       entity <- Unmarshal(response.entity).to[String]
     } yield ()
