@@ -7,6 +7,7 @@ import akka.http.scaladsl.model.{HttpMethods, HttpRequest, RequestEntity, Status
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.ActorMaterializer
+import com.typesafe.config.{ConfigFactory, Config}
 import spray.json._
 
 import scala.util.Properties
@@ -50,11 +51,13 @@ trait Service extends JsonSupport {
 
   val http = Http()
 
+  def config: Config
   val logger: LoggingAdapter
 
   val token = "EAAW4wYExjKYBAJvdLNWqZAKm7HG3ZCi5S3dfO7zsw6gGuwZCLMJiRqfyOAZCuUQsahlZAnIymyntWLo7YnSq87yAG4j6yoF2ce1RqSFZBhcKOZBlR7Isg1rZApKIZBzHhTEfvI2s3Ec5ohI24yCBZCj95iQ4H6tmWsTtCdt4lUGrakxwZDZD"
 
   def sendGenericMessage(sender: String): Unit = {
+    logger.debug("sending generic message to sender: " + sender)
     val messageData = JsObject(
       "attachment" -> JsObject(
         "type" -> JsString("template"),
@@ -98,6 +101,7 @@ trait Service extends JsonSupport {
       "recipient" -> JsObject("id" -> JsString(sender)),
       "message" -> messageData
     )
+    logger.debug("sending payload:\n" + payload.prettyPrint)
     for {
       request <- Marshal(payload).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
@@ -109,11 +113,13 @@ trait Service extends JsonSupport {
   }
 
   def sendTextMessage(sender: String, text: String): Unit = {
+    logger.debug("sending text message: [" + text + "] to sender: " + sender)
     val messageData = JsObject("text" -> JsString(text))
     val payload = JsObject(
       "recipient" -> JsObject("id" -> JsString(sender)),
       "message" -> messageData
     )
+    logger.debug("sending payload:\n" + payload.prettyPrint)
     for {
       request <- Marshal(payload).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
@@ -125,11 +131,6 @@ trait Service extends JsonSupport {
   }
 
   val routes =
-    pathPrefix("img") {
-      path(Segment) { filename =>
-        getFromResource(s"images/$filename")
-      }
-    } ~
     path("webhook") {
       get {
         parameters("hub.verify_token", "hub.challenge") { (token, challenge) =>
@@ -142,22 +143,31 @@ trait Service extends JsonSupport {
       } ~
       post {
         entity(as[Response]) { response =>
+          logger.debug("received body:\n" + response.toJson.prettyPrint)
           val messagingEvents = response.entry.head.messaging
           for (event <- messagingEvents) {
             val sender = event.sender.id
             if (event.message.isDefined) {
+              logger.debug("event.message is defined")
               val text = event.message.get.text
+              logger.debug("text: [" + text + "]")
               if (text == "/buy") {
                 sendGenericMessage(sender)
               } else {
                 sendTextMessage(sender, "echo: " + text)
               }
             } else if (event.postback.isDefined) {
+              logger.debug("event.postback is defined")
               sendTextMessage(sender, event.postback.get.payload)
             }
           }
           complete(StatusCodes.OK)
         }
+      }
+    } ~
+    pathPrefix("img") {
+      path(Segment) { filename =>
+        getFromResource(s"images/$filename")
       }
     }
 
@@ -165,6 +175,7 @@ trait Service extends JsonSupport {
 
 object Main extends App with Service {
 
+  override val config = ConfigFactory.load()
   override val logger = Logging(system, getClass)
 
   val port = Properties.envOrElse("PORT", "8080").toInt
