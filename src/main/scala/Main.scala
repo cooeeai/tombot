@@ -101,7 +101,7 @@ trait Service extends JsonSupport {
       "message" -> messageData
     )
     for {
-      request <- Marshal(payload.compactPrint).to[RequestEntity]
+      request <- Marshal(payload).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.POST,
         uri = "https://graph.facebook.com/v2.6/me/messages?access_token=$token",
@@ -117,7 +117,7 @@ trait Service extends JsonSupport {
       "message" -> messageData
     )
     for {
-      request <- Marshal(payload.compactPrint).to[RequestEntity]
+      request <- Marshal(payload).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.POST,
         uri = s"https://graph.facebook.com/v2.6/me/messages?access_token=$token",
