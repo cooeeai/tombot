@@ -9,6 +9,7 @@ import akka.stream.ActorMaterializer
 import spray.json.{DefaultJsonProtocol, JsArray, JsObject, JsString}
 
 import scala.io.StdIn
+import scala.util.Properties
 
 /**
   * Created by markmo on 16/07/2016.
@@ -157,7 +158,9 @@ trait Service extends JsonSupport {
 
 object Main extends App with Service {
 
-  val bindingFuture = http.bindAndHandle(routes, "0.0.0.0", 9000)
+  val port = Properties.envOrElse("PORT", "8080").toInt
+
+  val bindingFuture = http.bindAndHandle(routes, "0.0.0.0", port)
 
 //  println("Server online at http://localhost:8080/\nPress RETURN to stop...")
 //  StdIn.readLine() // let it run until user presses return
