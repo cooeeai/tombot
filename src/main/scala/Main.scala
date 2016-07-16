@@ -3,14 +3,12 @@ import akka.event.{Logging, LoggingAdapter}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.marshalling.Marshal
-import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.{HttpMethods, HttpRequest, RequestEntity, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.ActorMaterializer
 import spray.json._
 
-import scala.io.StdIn
 import scala.util.Properties
 
 /**
@@ -64,31 +62,31 @@ trait Service extends JsonSupport {
           "template_type" -> JsString("generic"),
           "elements" -> JsArray(
             JsObject(
-              "title" -> JsString("First card"),
-              "subtitle" -> JsString("Element #1 of an hscroll"),
-              "image_url" -> JsString("http://messengerdemo.parseapp.com/img/rift.png"),
+              "title" -> JsString("iPhone 6s 64GB Space Grey"),
+              "subtitle" -> JsString("4.7 inch (diagonal) Retina HD display"),
+              "image_url" -> JsString("https://cryptic-caverns-85624.herokuapp.com/img/iphone-6s-front-spacegrey-400.jpg"),
               "buttons" -> JsArray(
                 JsObject(
                   "type" -> JsString("web_url"),
-                  "url" -> JsString("https://www.messenger.com"),
-                  "title" -> JsString("web url")
+                  "url" -> JsString("https://www.telstra.com.au/mobile-phones/mobiles-on-a-plan/iphone-6s"),
+                  "title" -> JsString("Details")
                 ),
                 JsObject(
                   "type" -> JsString("postback"),
-                  "title" -> JsString("Postback"),
-                  "payload" -> JsString("Payload for first element in a generic bubble")
+                  "title" -> JsString("Buy"),
+                  "payload" -> JsString("Order for iPhone 6s 64GB Space Grey")
                 )
               )
             ),
             JsObject(
-              "title" -> JsString("Second card"),
-              "subtitle" -> JsString("Element #2 of an hscroll"),
-              "image_url" -> JsString("http://messengerdemo.parseapp.com/img/gearvr.png"),
+              "title" -> JsString("iPhone 6s Plus 64GB Silver"),
+              "subtitle" -> JsString("5.5 inch (diagonal) Retina HD display"),
+              "image_url" -> JsString("https://cryptic-caverns-85624.herokuapp.com/img/iphone-6s-plus-silver-400.jpg"),
               "buttons" -> JsArray(
                 JsObject(
                   "type" -> JsString("postback"),
-                  "title" -> JsString("Postback"),
-                  "payload" -> JsString("Payload for first element in a generic bubble")
+                  "title" -> JsString("Buy"),
+                  "payload" -> JsString("Order for iPhone 6s Plus 64GB Silver")
                 )
               )
             )
@@ -127,6 +125,9 @@ trait Service extends JsonSupport {
   }
 
   val routes =
+    path("img" / RemainingPath) { filename =>
+      getFromResource(s"images/$filename")
+    } ~
     path("webhook") {
       get {
         parameters("hub.verify_token", "hub.challenge") { (token, challenge) =>
