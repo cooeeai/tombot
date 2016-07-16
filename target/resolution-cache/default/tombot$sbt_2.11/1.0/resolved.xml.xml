@@ -4,7 +4,7 @@
 		module="tombot$sbt_2.11"
 		revision="1.0"
 		status="integration"
-		publication="20160716154914"
+		publication="20160716180410"
 	/>
 	<configurations>
 		<conf name="default" visibility="public"/>
@@ -13,5 +13,30 @@
 	</publications>
 	<dependencies>
 		<dependency org="org.scala-sbt" name="sbt" rev="0.13.8" conf="default->default(compile)"/>
+		<dependency org="io.spray" name="sbt-revolver" rev="0.8.0" conf="default->default(compile)" scalaVersion="2.10" sbtVersion="0.13"/>
+		<dependency org="com.eed3si9n" name="sbt-assembly" rev="0.14.3" conf="default->default(compile)" scalaVersion="2.10" sbtVersion="0.13"/>
+		<dependency org="org.scalactic" name="scalactic_2.10" rev="2.2.1" conf="default->default(compile)"/>
+		<dependency org="org.scala-lang" name="scala-library" rev="2.10.4" conf="default->default(compile)" info.apiURL="http://www.scala-lang.org/api/2.10.4/"/>
+		<dependency org="org.scala-lang" name="scala-reflect" rev="2.10.4" conf="default->default(compile)" info.apiURL="http://www.scala-lang.org/api/2.10.4/"/>
+		<dependency org="org.pantsbuild" name="jarjar" rev="1.6.0" conf="default->default(compile)"/>
+		<dependency org="org.apache.ant" name="ant" rev="1.9.6" conf="default->default(compile)"/>
+		<dependency org="org.apache.ant" name="ant-launcher" rev="1.9.6" conf="default->default(compile)"/>
+		<dependency org="org.ow2.asm" name="asm" rev="5.0.4" conf="default->default(compile)"/>
+		<dependency org="org.ow2.asm" name="asm-commons" rev="5.0.4" conf="default->default(compile)"/>
+		<dependency org="org.ow2.asm" name="asm-tree" rev="5.0.4" conf="default->default(compile)"/>
+		<dependency org="org.apache.maven" name="maven-plugin-api" rev="3.3.3" conf="default->default(compile)"/>
+		<dependency org="org.apache.maven" name="maven-model" rev="3.3.3" conf="default->default(compile)"/>
+		<dependency org="org.codehaus.plexus" name="plexus-utils" rev="3.0.20" conf="default->default(compile)"/>
+		<dependency org="org.apache.maven" name="maven-artifact" rev="3.3.3" conf="default->default(compile)"/>
+		<dependency org="org.eclipse.sisu" name="org.eclipse.sisu.plexus" rev="0.3.0" conf="default->default(compile)"/>
+		<dependency org="javax.enterprise" name="cdi-api" rev="1.0" conf="default->default(compile)"/>
+		<dependency org="javax.annotation" name="jsr250-api" rev="1.0" conf="default->default(compile)"/>
+		<dependency org="javax.inject" name="javax.inject" rev="1" conf="default->default(compile)"/>
+		<dependency org="org.eclipse.sisu" name="org.eclipse.sisu.inject" rev="0.3.0" conf="default->default(compile)"/>
+		<dependency org="org.codehaus.plexus" name="plexus-component-annotations" rev="1.5.5" conf="default->default(compile)"/>
+		<dependency org="org.codehaus.plexus" name="plexus-classworlds" rev="2.5.2" conf="default->default(compile)"/>
+		<dependency org="com.typesafe.sbt" name="sbt-native-packager" rev="1.1.0-RC1" conf="default->default(compile)" scalaVersion="2.10" sbtVersion="0.13"/>
+		<dependency org="org.apache.commons" name="commons-compress" rev="1.4.1" conf="default->default(compile)"/>
+		<dependency org="org.tukaani" name="xz" rev="1.0" conf="default->default(compile)"/>
 	</dependencies>
 </ivy-module>

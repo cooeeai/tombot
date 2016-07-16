@@ -49,7 +49,7 @@ trait Service extends JsonSupport {
 
   val http = Http()
 
-  val token = "EAARttFnTItIBAEj38AfDToLxKlfKJIJjZBR8uv40LZAf8wNxnvcJst2DhzF4OmANZAz56IuugAwzP3VmFpu1Rzbo0wc3k45zNbq80nP2oeXxZAZC3OZBtNhVpecHr8kBf9OhQSYrIMao9DJ7ZAx6cDNqbHiAdtatt9ZAcxYl6G2A6QZDZD"
+  val token = "EAAW4wYExjKYBANiZAy2yTmrQCpB58U3vAeo3XVkjAmhKaGLYnOws8lfAihKEBf5YkER7pZCRNY1p5uuZCOJwIEzNaEdh0OlZBQdubCnYE8VCyaRbL7ZBDKrpMhonJ0PxqbLAKwoFa0oa0YFqC8RycFkIAEt564iihCcHjqDhZC8gZDZD"
 
   def sendGenericMessage(sender: String): Unit = {
     val messageData = JsObject(

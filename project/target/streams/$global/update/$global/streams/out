@@ -5,21 +5,618 @@
 [debug] 	refresh = false
 [debug] resolving dependencies for configuration 'compile'
 [debug] == resolving dependencies for default#tombot-build;0.1-SNAPSHOT [compile]
+[debug] == resolving dependencies default#tombot-build;0.1-SNAPSHOT->io.spray#sbt-revolver;0.8.0 [compile->default(compile)]
+[info] Resolving io.spray#sbt-revolver;0.8.0 ...
+[debug] sbt-chain: Checking cache for: dependency: io.spray#sbt-revolver;0.8.0 {compile=[default(compile)]}
+[debug] sbt-chain: module revision found in cache: io.spray#sbt-revolver;0.8.0
+[debug] 	found io.spray#sbt-revolver;0.8.0 in sbt-chain
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] == resolving dependencies default#tombot-build;0.1-SNAPSHOT->com.eed3si9n#sbt-assembly;0.14.3 [compile->default(compile)]
+[info] Resolving com.eed3si9n#sbt-assembly;0.14.3 ...
+[debug] sbt-chain: Checking cache for: dependency: com.eed3si9n#sbt-assembly;0.14.3 {compile=[default(compile)]}
+[debug] sbt-chain: module revision found in cache: com.eed3si9n#sbt-assembly;0.14.3
+[debug] 	found com.eed3si9n#sbt-assembly;0.14.3 in sbt-chain
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.scalactic#scalactic_2.10;2.2.1 [compile->default(compile)]
+[info] Resolving org.scalactic#scalactic_2.10;2.2.1 ...
+[debug] sbt-chain: Checking cache for: dependency: org.scalactic#scalactic_2.10;2.2.1 {compile=[default(compile)]}
+[debug] sbt-chain: module revision found in cache: org.scalactic#scalactic_2.10;2.2.1
+[debug] 	found org.scalactic#scalactic_2.10;2.2.1 in sbt-chain
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.scalactic#scalactic_2.10;2.2.1 [compile->runtime]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.scalactic#scalactic_2.10;2.2.1 [compile->compile]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-library;2.10.4 [compile->master(compile)]
+[info] Resolving org.scala-lang#scala-library;2.10.4 ...
+[debug] sbt-chain: Checking cache for: dependency: org.scala-lang#scala-library;2.10.4 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] sbt-chain: module revision found in cache: org.scala-lang#scala-library;2.10.4
+[debug] 	found org.scala-lang#scala-library;2.10.4 in sbt-chain
+[debug] 	[2.10.4] org.scala-lang#scala-library;2.10.4
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-library;2.10.4 [compile->compile(*)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-library;2.10.4 [compile->runtime(*)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-library;2.10.4 [compile->compile]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-reflect;2.10.4 [compile->master(compile)]
+[info] Resolving org.scala-lang#scala-reflect;2.10.4 ...
+[debug] sbt-chain: Checking cache for: dependency: org.scala-lang#scala-reflect;2.10.4 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] sbt-chain: module revision found in cache: org.scala-lang#scala-reflect;2.10.4
+[debug] 	found org.scala-lang#scala-reflect;2.10.4 in sbt-chain
+[debug] 	[2.10.4] org.scala-lang#scala-reflect;2.10.4
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-reflect;2.10.4 [compile->compile(*)]
+[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [compile->master(*)]
+[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [compile->compile(*)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-reflect;2.10.4 [compile->runtime(*)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-reflect;2.10.4 [compile->compile]
+[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [runtime->compile]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-library;2.10.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-library;2.10.4 [runtime->compile]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-reflect;2.10.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-reflect;2.10.4 [runtime->compile]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.scalactic#scalactic_2.10;2.2.1 [compile->master]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.pantsbuild#jarjar;1.6.0 [compile->default(compile)]
+[info] Resolving org.pantsbuild#jarjar;1.6.0 ...
+[debug] sbt-chain: Checking cache for: dependency: org.pantsbuild#jarjar;1.6.0 {compile=[default(compile)]}
+[debug] sbt-chain: module revision found in cache: org.pantsbuild#jarjar;1.6.0
+[debug] 	found org.pantsbuild#jarjar;1.6.0 in sbt-chain
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.pantsbuild#jarjar;1.6.0 [compile->runtime]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.pantsbuild#jarjar;1.6.0 [compile->compile]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.ant#ant;1.9.6 [compile->master(compile)]
+[info] Resolving org.apache.ant#ant;1.9.6 ...
+[debug] sbt-chain: Checking cache for: dependency: org.apache.ant#ant;1.9.6 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] sbt-chain: module revision found in cache: org.apache.ant#ant;1.9.6
+[debug] 	found org.apache.ant#ant;1.9.6 in sbt-chain
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.ant#ant;1.9.6 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.ant#ant;1.9.6->org.apache.ant#ant-launcher;1.9.6 [compile->master(compile)]
+[info] Resolving org.apache.ant#ant-launcher;1.9.6 ...
+[debug] sbt-chain: Checking cache for: dependency: org.apache.ant#ant-launcher;1.9.6 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] sbt-chain: module revision found in cache: org.apache.ant#ant-launcher;1.9.6
+[debug] 	found org.apache.ant#ant-launcher;1.9.6 in sbt-chain
+[debug] == resolving dependencies org.apache.ant#ant;1.9.6->org.apache.ant#ant-launcher;1.9.6 [compile->compile(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.ant#ant;1.9.6 [compile->runtime(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.ant#ant;1.9.6 [compile->compile]
+[debug] == resolving dependencies org.apache.ant#ant;1.9.6->org.apache.ant#ant-launcher;1.9.6 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.ant#ant;1.9.6->org.apache.ant#ant-launcher;1.9.6 [runtime->compile]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm;5.0.4 [compile->master(compile)]
+[info] Resolving org.ow2.asm#asm;5.0.4 ...
+[debug] sbt-chain: Checking cache for: dependency: org.ow2.asm#asm;5.0.4 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] sbt-chain: module revision found in cache: org.ow2.asm#asm;5.0.4
+[debug] 	found org.ow2.asm#asm;5.0.4 in sbt-chain
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm;5.0.4 [compile->compile(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm;5.0.4 [compile->runtime(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm;5.0.4 [compile->compile]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm-commons;5.0.4 [compile->master(compile)]
+[info] Resolving org.ow2.asm#asm-commons;5.0.4 ...
+[debug] sbt-chain: Checking cache for: dependency: org.ow2.asm#asm-commons;5.0.4 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] sbt-chain: module revision found in cache: org.ow2.asm#asm-commons;5.0.4
+[debug] 	found org.ow2.asm#asm-commons;5.0.4 in sbt-chain
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm-commons;5.0.4 [compile->compile(*)]
+[debug] == resolving dependencies org.ow2.asm#asm-commons;5.0.4->org.ow2.asm#asm-tree;5.0.4 [compile->master(compile)]
+[info] Resolving org.ow2.asm#asm-tree;5.0.4 ...
+[debug] sbt-chain: Checking cache for: dependency: org.ow2.asm#asm-tree;5.0.4 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] sbt-chain: module revision found in cache: org.ow2.asm#asm-tree;5.0.4
+[debug] 	found org.ow2.asm#asm-tree;5.0.4 in sbt-chain
+[debug] == resolving dependencies org.ow2.asm#asm-commons;5.0.4->org.ow2.asm#asm-tree;5.0.4 [compile->compile(*)]
+[debug] == resolving dependencies org.ow2.asm#asm-tree;5.0.4->org.ow2.asm#asm;5.0.4 [compile->master(compile)]
+[debug] == resolving dependencies org.ow2.asm#asm-tree;5.0.4->org.ow2.asm#asm;5.0.4 [compile->compile(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm-commons;5.0.4 [compile->runtime(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm-commons;5.0.4 [compile->compile]
+[debug] == resolving dependencies org.ow2.asm#asm-commons;5.0.4->org.ow2.asm#asm-tree;5.0.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.ow2.asm#asm-commons;5.0.4->org.ow2.asm#asm-tree;5.0.4 [runtime->compile]
+[debug] == resolving dependencies org.ow2.asm#asm-tree;5.0.4->org.ow2.asm#asm;5.0.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.ow2.asm#asm-tree;5.0.4->org.ow2.asm#asm;5.0.4 [runtime->compile]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.maven#maven-plugin-api;3.3.3 [compile->master(compile)]
+[info] Resolving org.apache.maven#maven-plugin-api;3.3.3 ...
+[debug] sbt-chain: Checking cache for: dependency: org.apache.maven#maven-plugin-api;3.3.3 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] sbt-chain: module revision found in cache: org.apache.maven#maven-plugin-api;3.3.3
+[debug] 	found org.apache.maven#maven-plugin-api;3.3.3 in sbt-chain
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.maven#maven-plugin-api;3.3.3 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-model;3.3.3 [compile->master(compile)]
+[info] Resolving org.apache.maven#maven-model;3.3.3 ...
+[debug] sbt-chain: Checking cache for: dependency: org.apache.maven#maven-model;3.3.3 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] sbt-chain: module revision found in cache: org.apache.maven#maven-model;3.3.3
+[debug] 	found org.apache.maven#maven-model;3.3.3 in sbt-chain
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-model;3.3.3 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.maven#maven-model;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [compile->master(compile)]
+[info] Resolving org.codehaus.plexus#plexus-utils;3.0.20 ...
+[debug] sbt-chain: Checking cache for: dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] sbt-chain: module revision found in cache: org.codehaus.plexus#plexus-utils;3.0.20
+[debug] 	found org.codehaus.plexus#plexus-utils;3.0.20 in sbt-chain
+[debug] == resolving dependencies org.apache.maven#maven-model;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-artifact;3.3.3 [compile->master(compile)]
+[info] Resolving org.apache.maven#maven-artifact;3.3.3 ...
+[debug] sbt-chain: Checking cache for: dependency: org.apache.maven#maven-artifact;3.3.3 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] sbt-chain: module revision found in cache: org.apache.maven#maven-artifact;3.3.3
+[debug] 	found org.apache.maven#maven-artifact;3.3.3 in sbt-chain
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-artifact;3.3.3 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.maven#maven-artifact;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [compile->master(compile)]
+[debug] == resolving dependencies org.apache.maven#maven-artifact;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0 [compile->master(compile)]
+[info] Resolving org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0 ...
+[debug] sbt-chain: Checking cache for: dependency: org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] sbt-chain: module revision found in cache: org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0
+[debug] 	found org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0 in sbt-chain
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0 [compile->compile(*)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->javax.enterprise#cdi-api;1.0 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[info] Resolving javax.enterprise#cdi-api;1.0 ...
+[debug] sbt-chain: Checking cache for: dependency: javax.enterprise#cdi-api;1.0 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] sbt-chain: module revision found in cache: javax.enterprise#cdi-api;1.0
+[debug] 	found javax.enterprise#cdi-api;1.0 in sbt-chain
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->javax.enterprise#cdi-api;1.0 [compile->compile(*)]
+[debug] excluding dependency: org.jboss.interceptor#jboss-interceptor-api;1.1 {compile=[compile(*), master(*)], runtime=[runtime(*)]} in compile
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.annotation#jsr250-api;1.0 [compile->master(*)]
+[debug] excluding dependency: org.jboss.interceptor#jboss-interceptor-api;1.1 {compile=[compile(*), master(*)], runtime=[runtime(*)]} in compile
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[info] Resolving javax.annotation#jsr250-api;1.0 ...
+[debug] sbt-chain: Checking cache for: dependency: javax.annotation#jsr250-api;1.0 {compile=[compile(*), master(*)], runtime=[runtime(*)]}
+[debug] sbt-chain: module revision found in cache: javax.annotation#jsr250-api;1.0
+[debug] 	found javax.annotation#jsr250-api;1.0 in sbt-chain
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.annotation#jsr250-api;1.0 [compile->compile(*)]
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.inject#javax.inject;1 [compile->master(*)]
+[debug] excluding dependency: org.jboss.interceptor#jboss-interceptor-api;1.1 {compile=[compile(*), master(*)], runtime=[runtime(*)]} in compile
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[info] Resolving javax.inject#javax.inject;1 ...
+[debug] sbt-chain: Checking cache for: dependency: javax.inject#javax.inject;1 {compile=[compile(*), master(*)], runtime=[runtime(*)]}
+[debug] sbt-chain: module revision found in cache: javax.inject#javax.inject;1
+[debug] 	found javax.inject#javax.inject;1 in sbt-chain
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.inject#javax.inject;1 [compile->compile(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.eclipse.sisu#org.eclipse.sisu.inject;0.3.0 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[info] Resolving org.eclipse.sisu#org.eclipse.sisu.inject;0.3.0 ...
+[debug] sbt-chain: Checking cache for: dependency: org.eclipse.sisu#org.eclipse.sisu.inject;0.3.0 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] sbt-chain: module revision found in cache: org.eclipse.sisu#org.eclipse.sisu.inject;0.3.0
+[debug] 	found org.eclipse.sisu#org.eclipse.sisu.inject;0.3.0 in sbt-chain
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.eclipse.sisu#org.eclipse.sisu.inject;0.3.0 [compile->compile(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-component-annotations;1.5.5 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[info] Resolving org.codehaus.plexus#plexus-component-annotations;1.5.5 ...
+[debug] sbt-chain: Checking cache for: dependency: org.codehaus.plexus#plexus-component-annotations;1.5.5 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] sbt-chain: module revision found in cache: org.codehaus.plexus#plexus-component-annotations;1.5.5
+[debug] 	found org.codehaus.plexus#plexus-component-annotations;1.5.5 in sbt-chain
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-component-annotations;1.5.5 [compile->compile(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-classworlds;2.5.2 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[info] Resolving org.codehaus.plexus#plexus-classworlds;2.5.2 ...
+[debug] sbt-chain: Checking cache for: dependency: org.codehaus.plexus#plexus-classworlds;2.5.2 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] sbt-chain: module revision found in cache: org.codehaus.plexus#plexus-classworlds;2.5.2
+[debug] 	found org.codehaus.plexus#plexus-classworlds;2.5.2 in sbt-chain
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-classworlds;2.5.2 [compile->compile(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-utils;3.0.20 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-utils;3.0.20 [compile->compile(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.maven#maven-plugin-api;3.3.3 [compile->runtime(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.maven#maven-plugin-api;3.3.3 [compile->compile]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-model;3.3.3 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-model;3.3.3 [runtime->compile]
+[debug] == resolving dependencies org.apache.maven#maven-model;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.maven#maven-model;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->compile]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-artifact;3.3.3 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-artifact;3.3.3 [runtime->compile]
+[debug] == resolving dependencies org.apache.maven#maven-artifact;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.maven#maven-artifact;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->compile]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0 [runtime->compile]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->javax.enterprise#cdi-api;1.0 [runtime->runtime(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->javax.enterprise#cdi-api;1.0 [runtime->compile]
+[debug] excluding dependency: org.jboss.interceptor#jboss-interceptor-api;1.1 {compile=[compile(*), master(*)], runtime=[runtime(*)]} in runtime
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.annotation#jsr250-api;1.0 [runtime->runtime(*)]
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.annotation#jsr250-api;1.0 [runtime->compile]
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.inject#javax.inject;1 [runtime->runtime(*)]
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.inject#javax.inject;1 [runtime->compile]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.eclipse.sisu#org.eclipse.sisu.inject;0.3.0 [runtime->runtime(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.eclipse.sisu#org.eclipse.sisu.inject;0.3.0 [runtime->compile]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-component-annotations;1.5.5 [runtime->runtime(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-component-annotations;1.5.5 [runtime->compile]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-classworlds;2.5.2 [runtime->runtime(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-classworlds;2.5.2 [runtime->compile]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->runtime(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->compile]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.ant#ant;1.9.6 [runtime->runtime(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.ant#ant;1.9.6 [runtime->compile]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm;5.0.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm;5.0.4 [runtime->compile]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm-commons;5.0.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm-commons;5.0.4 [runtime->compile]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.maven#maven-plugin-api;3.3.3 [runtime->runtime(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.maven#maven-plugin-api;3.3.3 [runtime->compile]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.pantsbuild#jarjar;1.6.0 [compile->master]
+[debug] == resolving dependencies default#tombot-build;0.1-SNAPSHOT->com.typesafe.sbt#sbt-native-packager;1.1.0-RC1 [compile->default(compile)]
+[info] Resolving com.typesafe.sbt#sbt-native-packager;1.1.0-RC1 ...
+[debug] sbt-chain: Checking cache for: dependency: com.typesafe.sbt#sbt-native-packager;1.1.0-RC1 {compile=[default(compile)]}
+[debug] sbt-chain: module revision found in cache: com.typesafe.sbt#sbt-native-packager;1.1.0-RC1
+[debug] 	found com.typesafe.sbt#sbt-native-packager;1.1.0-RC1 in sbt-chain
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.commons#commons-compress;1.4.1 [compile->default(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@54f96074
+[info] Resolving org.apache.commons#commons-compress;1.4.1 ...
+[debug] sbt-chain: Checking cache for: dependency: org.apache.commons#commons-compress;1.4.1 {compile=[default(compile)]}
+[debug] sbt-chain: module revision found in cache: org.apache.commons#commons-compress;1.4.1
+[debug] 	found org.apache.commons#commons-compress;1.4.1 in sbt-chain
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.commons#commons-compress;1.4.1 [compile->runtime]
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.commons#commons-compress;1.4.1 [compile->compile]
+[debug] == resolving dependencies org.apache.commons#commons-compress;1.4.1->org.tukaani#xz;1.0 [compile->master(*)]
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@202cda58
+[info] Resolving org.tukaani#xz;1.0 ...
+[debug] sbt-chain: Checking cache for: dependency: org.tukaani#xz;1.0 {compile=[compile(*), master(*)], runtime=[runtime(*)]}
+[debug] sbt-chain: module revision found in cache: org.tukaani#xz;1.0
+[debug] 	found org.tukaani#xz;1.0 in sbt-chain
+[debug] == resolving dependencies org.apache.commons#commons-compress;1.4.1->org.tukaani#xz;1.0 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.commons#commons-compress;1.4.1->org.tukaani#xz;1.0 [compile->runtime(*)]
+[debug] == resolving dependencies org.apache.commons#commons-compress;1.4.1->org.tukaani#xz;1.0 [compile->compile]
+[debug] == resolving dependencies org.apache.commons#commons-compress;1.4.1->org.tukaani#xz;1.0 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.commons#commons-compress;1.4.1->org.tukaani#xz;1.0 [runtime->compile]
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.commons#commons-compress;1.4.1 [compile->master]
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.ant#ant;1.9.6 [compile->default(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.ant#ant;1.9.6 [compile->runtime]
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.ant#ant;1.9.6 [compile->compile]
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.ant#ant;1.9.6 [compile->master]
 [debug] resolving dependencies for configuration 'runtime'
 [debug] == resolving dependencies for default#tombot-build;0.1-SNAPSHOT [runtime]
 [debug] == resolving dependencies for default#tombot-build;0.1-SNAPSHOT [compile]
+[debug] == resolving dependencies default#tombot-build;0.1-SNAPSHOT->io.spray#sbt-revolver;0.8.0 [compile->default(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] == resolving dependencies default#tombot-build;0.1-SNAPSHOT->com.eed3si9n#sbt-assembly;0.14.3 [compile->default(compile)]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.scalactic#scalactic_2.10;2.2.1 [compile->default(compile)]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.scalactic#scalactic_2.10;2.2.1 [compile->runtime]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.scalactic#scalactic_2.10;2.2.1 [compile->compile]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-library;2.10.4 [compile->master(compile)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-library;2.10.4 [compile->compile(*)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-reflect;2.10.4 [compile->master(compile)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-reflect;2.10.4 [compile->compile(*)]
+[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [compile->master(*)]
+[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [compile->compile(*)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-library;2.10.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-library;2.10.4 [runtime->compile]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-reflect;2.10.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-reflect;2.10.4 [runtime->compile]
+[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [runtime->compile]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.scalactic#scalactic_2.10;2.2.1 [compile->master]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.pantsbuild#jarjar;1.6.0 [compile->default(compile)]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.pantsbuild#jarjar;1.6.0 [compile->runtime]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.pantsbuild#jarjar;1.6.0 [compile->compile]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.ant#ant;1.9.6 [compile->master(compile)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.ant#ant;1.9.6 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.ant#ant;1.9.6->org.apache.ant#ant-launcher;1.9.6 [compile->master(compile)]
+[debug] == resolving dependencies org.apache.ant#ant;1.9.6->org.apache.ant#ant-launcher;1.9.6 [compile->compile(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm;5.0.4 [compile->master(compile)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm;5.0.4 [compile->compile(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm-commons;5.0.4 [compile->master(compile)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm-commons;5.0.4 [compile->compile(*)]
+[debug] == resolving dependencies org.ow2.asm#asm-commons;5.0.4->org.ow2.asm#asm-tree;5.0.4 [compile->master(compile)]
+[debug] == resolving dependencies org.ow2.asm#asm-commons;5.0.4->org.ow2.asm#asm-tree;5.0.4 [compile->compile(*)]
+[debug] == resolving dependencies org.ow2.asm#asm-tree;5.0.4->org.ow2.asm#asm;5.0.4 [compile->master(compile)]
+[debug] == resolving dependencies org.ow2.asm#asm-tree;5.0.4->org.ow2.asm#asm;5.0.4 [compile->compile(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.maven#maven-plugin-api;3.3.3 [compile->master(compile)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.maven#maven-plugin-api;3.3.3 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-model;3.3.3 [compile->master(compile)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-model;3.3.3 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.maven#maven-model;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [compile->master(compile)]
+[debug] == resolving dependencies org.apache.maven#maven-model;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-artifact;3.3.3 [compile->master(compile)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-artifact;3.3.3 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.maven#maven-artifact;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [compile->master(compile)]
+[debug] == resolving dependencies org.apache.maven#maven-artifact;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0 [compile->compile(*)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->javax.enterprise#cdi-api;1.0 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->javax.enterprise#cdi-api;1.0 [compile->compile(*)]
+[debug] excluding dependency: org.jboss.interceptor#jboss-interceptor-api;1.1 {compile=[compile(*), master(*)], runtime=[runtime(*)]} in compile
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.annotation#jsr250-api;1.0 [compile->master(*)]
+[debug] excluding dependency: org.jboss.interceptor#jboss-interceptor-api;1.1 {compile=[compile(*), master(*)], runtime=[runtime(*)]} in compile
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.annotation#jsr250-api;1.0 [compile->compile(*)]
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.inject#javax.inject;1 [compile->master(*)]
+[debug] excluding dependency: org.jboss.interceptor#jboss-interceptor-api;1.1 {compile=[compile(*), master(*)], runtime=[runtime(*)]} in compile
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.inject#javax.inject;1 [compile->compile(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.eclipse.sisu#org.eclipse.sisu.inject;0.3.0 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.eclipse.sisu#org.eclipse.sisu.inject;0.3.0 [compile->compile(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-component-annotations;1.5.5 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-component-annotations;1.5.5 [compile->compile(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-classworlds;2.5.2 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-classworlds;2.5.2 [compile->compile(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-utils;3.0.20 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-utils;3.0.20 [compile->compile(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.ant#ant;1.9.6 [runtime->runtime(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.ant#ant;1.9.6 [runtime->compile]
+[debug] == resolving dependencies org.apache.ant#ant;1.9.6->org.apache.ant#ant-launcher;1.9.6 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.ant#ant;1.9.6->org.apache.ant#ant-launcher;1.9.6 [runtime->compile]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm;5.0.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm;5.0.4 [runtime->compile]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm-commons;5.0.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm-commons;5.0.4 [runtime->compile]
+[debug] == resolving dependencies org.ow2.asm#asm-commons;5.0.4->org.ow2.asm#asm-tree;5.0.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.ow2.asm#asm-commons;5.0.4->org.ow2.asm#asm-tree;5.0.4 [runtime->compile]
+[debug] == resolving dependencies org.ow2.asm#asm-tree;5.0.4->org.ow2.asm#asm;5.0.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.ow2.asm#asm-tree;5.0.4->org.ow2.asm#asm;5.0.4 [runtime->compile]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.maven#maven-plugin-api;3.3.3 [runtime->runtime(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.maven#maven-plugin-api;3.3.3 [runtime->compile]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-model;3.3.3 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-model;3.3.3 [runtime->compile]
+[debug] == resolving dependencies org.apache.maven#maven-model;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.maven#maven-model;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->compile]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-artifact;3.3.3 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-artifact;3.3.3 [runtime->compile]
+[debug] == resolving dependencies org.apache.maven#maven-artifact;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.maven#maven-artifact;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->compile]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0 [runtime->compile]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->javax.enterprise#cdi-api;1.0 [runtime->runtime(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->javax.enterprise#cdi-api;1.0 [runtime->compile]
+[debug] excluding dependency: org.jboss.interceptor#jboss-interceptor-api;1.1 {compile=[compile(*), master(*)], runtime=[runtime(*)]} in runtime
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.annotation#jsr250-api;1.0 [runtime->runtime(*)]
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.annotation#jsr250-api;1.0 [runtime->compile]
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.inject#javax.inject;1 [runtime->runtime(*)]
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.inject#javax.inject;1 [runtime->compile]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.eclipse.sisu#org.eclipse.sisu.inject;0.3.0 [runtime->runtime(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.eclipse.sisu#org.eclipse.sisu.inject;0.3.0 [runtime->compile]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-component-annotations;1.5.5 [runtime->runtime(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-component-annotations;1.5.5 [runtime->compile]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-classworlds;2.5.2 [runtime->runtime(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-classworlds;2.5.2 [runtime->compile]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->runtime(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->compile]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.pantsbuild#jarjar;1.6.0 [compile->master]
+[debug] == resolving dependencies default#tombot-build;0.1-SNAPSHOT->com.typesafe.sbt#sbt-native-packager;1.1.0-RC1 [compile->default(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.commons#commons-compress;1.4.1 [compile->default(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@1dbef6ba
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@6cd6d68e
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.commons#commons-compress;1.4.1 [compile->runtime]
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.commons#commons-compress;1.4.1 [compile->compile]
+[debug] == resolving dependencies org.apache.commons#commons-compress;1.4.1->org.tukaani#xz;1.0 [compile->master(*)]
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@4b8d2859
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@21ec1cb4
+[debug] == resolving dependencies org.apache.commons#commons-compress;1.4.1->org.tukaani#xz;1.0 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.commons#commons-compress;1.4.1->org.tukaani#xz;1.0 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.commons#commons-compress;1.4.1->org.tukaani#xz;1.0 [runtime->compile]
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.commons#commons-compress;1.4.1 [compile->master]
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.ant#ant;1.9.6 [compile->default(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.ant#ant;1.9.6 [compile->runtime]
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.ant#ant;1.9.6 [compile->compile]
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.ant#ant;1.9.6 [compile->master]
 [debug] resolving dependencies for configuration 'test'
 [debug] == resolving dependencies for default#tombot-build;0.1-SNAPSHOT [test]
 [debug] == resolving dependencies for default#tombot-build;0.1-SNAPSHOT [runtime]
 [debug] == resolving dependencies for default#tombot-build;0.1-SNAPSHOT [compile]
+[debug] == resolving dependencies default#tombot-build;0.1-SNAPSHOT->io.spray#sbt-revolver;0.8.0 [compile->default(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] == resolving dependencies default#tombot-build;0.1-SNAPSHOT->com.eed3si9n#sbt-assembly;0.14.3 [compile->default(compile)]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.scalactic#scalactic_2.10;2.2.1 [compile->default(compile)]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.scalactic#scalactic_2.10;2.2.1 [compile->runtime]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.scalactic#scalactic_2.10;2.2.1 [compile->compile]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-library;2.10.4 [compile->master(compile)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-library;2.10.4 [compile->compile(*)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-reflect;2.10.4 [compile->master(compile)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-reflect;2.10.4 [compile->compile(*)]
+[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [compile->master(*)]
+[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [compile->compile(*)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-library;2.10.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-library;2.10.4 [runtime->compile]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-reflect;2.10.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-reflect;2.10.4 [runtime->compile]
+[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [runtime->compile]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.scalactic#scalactic_2.10;2.2.1 [compile->master]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.pantsbuild#jarjar;1.6.0 [compile->default(compile)]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.pantsbuild#jarjar;1.6.0 [compile->runtime]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.pantsbuild#jarjar;1.6.0 [compile->compile]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.ant#ant;1.9.6 [compile->master(compile)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.ant#ant;1.9.6 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.ant#ant;1.9.6->org.apache.ant#ant-launcher;1.9.6 [compile->master(compile)]
+[debug] == resolving dependencies org.apache.ant#ant;1.9.6->org.apache.ant#ant-launcher;1.9.6 [compile->compile(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm;5.0.4 [compile->master(compile)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm;5.0.4 [compile->compile(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm-commons;5.0.4 [compile->master(compile)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm-commons;5.0.4 [compile->compile(*)]
+[debug] == resolving dependencies org.ow2.asm#asm-commons;5.0.4->org.ow2.asm#asm-tree;5.0.4 [compile->master(compile)]
+[debug] == resolving dependencies org.ow2.asm#asm-commons;5.0.4->org.ow2.asm#asm-tree;5.0.4 [compile->compile(*)]
+[debug] == resolving dependencies org.ow2.asm#asm-tree;5.0.4->org.ow2.asm#asm;5.0.4 [compile->master(compile)]
+[debug] == resolving dependencies org.ow2.asm#asm-tree;5.0.4->org.ow2.asm#asm;5.0.4 [compile->compile(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.maven#maven-plugin-api;3.3.3 [compile->master(compile)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.maven#maven-plugin-api;3.3.3 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-model;3.3.3 [compile->master(compile)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-model;3.3.3 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.maven#maven-model;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [compile->master(compile)]
+[debug] == resolving dependencies org.apache.maven#maven-model;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-artifact;3.3.3 [compile->master(compile)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-artifact;3.3.3 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.maven#maven-artifact;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [compile->master(compile)]
+[debug] == resolving dependencies org.apache.maven#maven-artifact;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0 [compile->compile(*)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->javax.enterprise#cdi-api;1.0 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->javax.enterprise#cdi-api;1.0 [compile->compile(*)]
+[debug] excluding dependency: org.jboss.interceptor#jboss-interceptor-api;1.1 {compile=[compile(*), master(*)], runtime=[runtime(*)]} in compile
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.annotation#jsr250-api;1.0 [compile->master(*)]
+[debug] excluding dependency: org.jboss.interceptor#jboss-interceptor-api;1.1 {compile=[compile(*), master(*)], runtime=[runtime(*)]} in compile
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.annotation#jsr250-api;1.0 [compile->compile(*)]
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.inject#javax.inject;1 [compile->master(*)]
+[debug] excluding dependency: org.jboss.interceptor#jboss-interceptor-api;1.1 {compile=[compile(*), master(*)], runtime=[runtime(*)]} in compile
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.inject#javax.inject;1 [compile->compile(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.eclipse.sisu#org.eclipse.sisu.inject;0.3.0 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.eclipse.sisu#org.eclipse.sisu.inject;0.3.0 [compile->compile(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-component-annotations;1.5.5 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-component-annotations;1.5.5 [compile->compile(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-classworlds;2.5.2 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-classworlds;2.5.2 [compile->compile(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-utils;3.0.20 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-utils;3.0.20 [compile->compile(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.ant#ant;1.9.6 [runtime->runtime(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.ant#ant;1.9.6 [runtime->compile]
+[debug] == resolving dependencies org.apache.ant#ant;1.9.6->org.apache.ant#ant-launcher;1.9.6 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.ant#ant;1.9.6->org.apache.ant#ant-launcher;1.9.6 [runtime->compile]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm;5.0.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm;5.0.4 [runtime->compile]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm-commons;5.0.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm-commons;5.0.4 [runtime->compile]
+[debug] == resolving dependencies org.ow2.asm#asm-commons;5.0.4->org.ow2.asm#asm-tree;5.0.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.ow2.asm#asm-commons;5.0.4->org.ow2.asm#asm-tree;5.0.4 [runtime->compile]
+[debug] == resolving dependencies org.ow2.asm#asm-tree;5.0.4->org.ow2.asm#asm;5.0.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.ow2.asm#asm-tree;5.0.4->org.ow2.asm#asm;5.0.4 [runtime->compile]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.maven#maven-plugin-api;3.3.3 [runtime->runtime(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.maven#maven-plugin-api;3.3.3 [runtime->compile]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-model;3.3.3 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-model;3.3.3 [runtime->compile]
+[debug] == resolving dependencies org.apache.maven#maven-model;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.maven#maven-model;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->compile]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-artifact;3.3.3 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-artifact;3.3.3 [runtime->compile]
+[debug] == resolving dependencies org.apache.maven#maven-artifact;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.maven#maven-artifact;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->compile]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0 [runtime->compile]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->javax.enterprise#cdi-api;1.0 [runtime->runtime(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->javax.enterprise#cdi-api;1.0 [runtime->compile]
+[debug] excluding dependency: org.jboss.interceptor#jboss-interceptor-api;1.1 {compile=[compile(*), master(*)], runtime=[runtime(*)]} in runtime
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.annotation#jsr250-api;1.0 [runtime->runtime(*)]
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.annotation#jsr250-api;1.0 [runtime->compile]
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.inject#javax.inject;1 [runtime->runtime(*)]
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.inject#javax.inject;1 [runtime->compile]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.eclipse.sisu#org.eclipse.sisu.inject;0.3.0 [runtime->runtime(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.eclipse.sisu#org.eclipse.sisu.inject;0.3.0 [runtime->compile]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-component-annotations;1.5.5 [runtime->runtime(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-component-annotations;1.5.5 [runtime->compile]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-classworlds;2.5.2 [runtime->runtime(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-classworlds;2.5.2 [runtime->compile]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->runtime(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->compile]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.pantsbuild#jarjar;1.6.0 [compile->master]
+[debug] == resolving dependencies default#tombot-build;0.1-SNAPSHOT->com.typesafe.sbt#sbt-native-packager;1.1.0-RC1 [compile->default(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.commons#commons-compress;1.4.1 [compile->default(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@4ed1e21f
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@2372f440
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@58d148c7
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.commons#commons-compress;1.4.1 [compile->runtime]
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.commons#commons-compress;1.4.1 [compile->compile]
+[debug] == resolving dependencies org.apache.commons#commons-compress;1.4.1->org.tukaani#xz;1.0 [compile->master(*)]
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@62c552f1
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@56217a1d
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@464976e
+[debug] == resolving dependencies org.apache.commons#commons-compress;1.4.1->org.tukaani#xz;1.0 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.commons#commons-compress;1.4.1->org.tukaani#xz;1.0 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.commons#commons-compress;1.4.1->org.tukaani#xz;1.0 [runtime->compile]
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.commons#commons-compress;1.4.1 [compile->master]
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.ant#ant;1.9.6 [compile->default(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.ant#ant;1.9.6 [compile->runtime]
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.ant#ant;1.9.6 [compile->compile]
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.ant#ant;1.9.6 [compile->master]
 [debug] resolving dependencies for configuration 'provided'
 [debug] == resolving dependencies for default#tombot-build;0.1-SNAPSHOT [provided]
 [debug] == resolving dependencies default#tombot-build;0.1-SNAPSHOT->org.scala-lang#scala-library;2.10.4 [provided->default(compile)]
-[info] Resolving org.scala-lang#scala-library;2.10.4 ...
-[debug] sbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@10c2ddf4
-[debug] sbt-chain: module revision found in cache: org.scala-lang#scala-library;2.10.4
-[debug] 	found org.scala-lang#scala-library;2.10.4 in sbt-chain
-[debug] 	[2.10.4] org.scala-lang#scala-library;2.10.4
 [debug] == resolving dependencies default#tombot-build;0.1-SNAPSHOT->org.scala-lang#scala-library;2.10.4 [provided->runtime]
 [debug] == resolving dependencies default#tombot-build;0.1-SNAPSHOT->org.scala-lang#scala-library;2.10.4 [provided->compile]
 [debug] == resolving dependencies default#tombot-build;0.1-SNAPSHOT->org.scala-lang#scala-library;2.10.4 [provided->master]
@@ -64,25 +661,16 @@
 [debug] == resolving dependencies org.scala-sbt#classpath;0.13.8->org.scala-lang#scala-compiler;2.10.4 [compile->compile]
 [debug] == resolving dependencies org.scala-lang#scala-compiler;2.10.4->org.scala-lang#scala-library;2.10.4 [compile->master(*)]
 [debug] == resolving dependencies org.scala-lang#scala-compiler;2.10.4->org.scala-lang#scala-library;2.10.4 [compile->compile(*)]
-[debug] == resolving dependencies org.scala-lang#scala-compiler;2.10.4->org.scala-lang#scala-library;2.10.4 [compile->runtime(*)]
-[debug] == resolving dependencies org.scala-lang#scala-compiler;2.10.4->org.scala-lang#scala-library;2.10.4 [compile->compile]
 [debug] == resolving dependencies org.scala-lang#scala-compiler;2.10.4->org.scala-lang#scala-reflect;2.10.4 [compile->master(*)]
-[info] Resolving org.scala-lang#scala-reflect;2.10.4 ...
-[debug] sbt-chain: Checking cache for: dependency: org.scala-lang#scala-reflect;2.10.4 {compile=[compile(*), master(*)], runtime=[runtime(*)]}
-[debug] sbt-chain: module revision found in cache: org.scala-lang#scala-reflect;2.10.4
-[debug] 	found org.scala-lang#scala-reflect;2.10.4 in sbt-chain
-[debug] 	[2.10.4] org.scala-lang#scala-reflect;2.10.4
 [debug] == resolving dependencies org.scala-lang#scala-compiler;2.10.4->org.scala-lang#scala-reflect;2.10.4 [compile->compile(*)]
 [debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [compile->master(*)]
 [debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [compile->compile(*)]
-[debug] == resolving dependencies org.scala-lang#scala-compiler;2.10.4->org.scala-lang#scala-reflect;2.10.4 [compile->runtime(*)]
-[debug] == resolving dependencies org.scala-lang#scala-compiler;2.10.4->org.scala-lang#scala-reflect;2.10.4 [compile->compile]
-[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [runtime->runtime(*)]
-[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [runtime->compile]
 [debug] == resolving dependencies org.scala-lang#scala-compiler;2.10.4->org.scala-lang#scala-library;2.10.4 [runtime->runtime(*)]
 [debug] == resolving dependencies org.scala-lang#scala-compiler;2.10.4->org.scala-lang#scala-library;2.10.4 [runtime->compile]
 [debug] == resolving dependencies org.scala-lang#scala-compiler;2.10.4->org.scala-lang#scala-reflect;2.10.4 [runtime->runtime(*)]
 [debug] == resolving dependencies org.scala-lang#scala-compiler;2.10.4->org.scala-lang#scala-reflect;2.10.4 [runtime->compile]
+[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [runtime->compile]
 [debug] == resolving dependencies org.scala-sbt#classpath;0.13.8->org.scala-lang#scala-compiler;2.10.4 [compile->master]
 [debug] == resolving dependencies org.scala-sbt#classpath;0.13.8->org.scala-lang#scala-library;2.10.4 [compile->default(compile)]
 [debug] == resolving dependencies org.scala-sbt#classpath;0.13.8->org.scala-lang#scala-library;2.10.4 [compile->runtime]
@@ -341,23 +929,8 @@
 [debug] == resolving dependencies org.scala-lang.modules#scala-pickling_2.10;0.10.0->org.scalamacros#quasiquotes_2.10;2.0.1 [compile->master(compile)]
 [info] Resolving org.scalamacros#quasiquotes_2.10;2.0.1 ...
 [debug] sbt-chain: Checking cache for: dependency: org.scalamacros#quasiquotes_2.10;2.0.1 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
-[info] Resolving org.scalamacros#quasiquotes_2.10;2.0.1 ...
-[debug] sbt-chain-delegate: Checking cache for: dependency: org.scalamacros#quasiquotes_2.10;2.0.1 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
-[debug] 		tried https://repo.typesafe.com/typesafe/ivy-releases/org.scalamacros/quasiquotes_2.10/2.0.1/ivys/ivy.xml
-[debug] CLIENT ERROR: Not Found url=https://repo.typesafe.com/typesafe/ivy-releases/org.scalamacros/quasiquotes_2.10/2.0.1/ivys/ivy.xml
-[debug] 	typesafe-ivy-releases: no ivy file found for org.scalamacros#quasiquotes_2.10;2.0.1
-[debug] 		tried https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases/org.scalamacros/quasiquotes_2.10/2.0.1/ivys/ivy.xml
-[debug] CLIENT ERROR: Not Found url=https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases/org.scalamacros/quasiquotes_2.10/2.0.1/ivys/ivy.xml
-[debug] 	sbt-plugin-releases: no ivy file found for org.scalamacros#quasiquotes_2.10;2.0.1
-[debug] 		tried /Users/markmo/.ivy2/local/org.scalamacros/quasiquotes_2.10/2.0.1/ivys/ivy.xml
-[debug] 	local: no ivy file found for org.scalamacros#quasiquotes_2.10;2.0.1
-[debug] 		tried /Users/markmo/.activator/repository/org.scalamacros/quasiquotes_2.10/2.0.1/ivys/ivy.xml
-[debug] 	activator-launcher-local: no ivy file found for org.scalamacros#quasiquotes_2.10;2.0.1
-[debug] 		tried /Users/markmo/libs/activator-dist-1.3.10/repository/org.scalamacros/quasiquotes_2.10/2.0.1/ivys/ivy.xml
-[debug] 	activator-local: found md file for org.scalamacros#quasiquotes_2.10;2.0.1
-[debug] 		=> /Users/markmo/libs/activator-dist-1.3.10/repository/org.scalamacros/quasiquotes_2.10/2.0.1/ivys/ivy.xml (2.0.1)
-[debug] 	[NOT REQUIRED] org.scalamacros#quasiquotes_2.10;2.0.1!ivy.xml(ivy.original)
-[debug] 	found org.scalamacros#quasiquotes_2.10;2.0.1 in activator-local
+[debug] sbt-chain: module revision found in cache: org.scalamacros#quasiquotes_2.10;2.0.1
+[debug] 	found org.scalamacros#quasiquotes_2.10;2.0.1 in sbt-chain
 [debug] == resolving dependencies org.scala-lang.modules#scala-pickling_2.10;0.10.0->org.scalamacros#quasiquotes_2.10;2.0.1 [compile->compile(*)]
 [debug] == resolving dependencies org.scalamacros#quasiquotes_2.10;2.0.1->org.scala-lang#scala-library;2.10.4 [compile->master(compile)]
 [debug] == resolving dependencies org.scalamacros#quasiquotes_2.10;2.0.1->org.scala-lang#scala-library;2.10.4 [compile->compile(*)]
@@ -728,6 +1301,176 @@
 [debug] resolving dependencies for configuration 'compile-internal'
 [debug] == resolving dependencies for default#tombot-build;0.1-SNAPSHOT [compile-internal]
 [debug] == resolving dependencies for default#tombot-build;0.1-SNAPSHOT [compile]
+[debug] == resolving dependencies default#tombot-build;0.1-SNAPSHOT->io.spray#sbt-revolver;0.8.0 [compile->default(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] == resolving dependencies default#tombot-build;0.1-SNAPSHOT->com.eed3si9n#sbt-assembly;0.14.3 [compile->default(compile)]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.scalactic#scalactic_2.10;2.2.1 [compile->default(compile)]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.scalactic#scalactic_2.10;2.2.1 [compile->runtime]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.scalactic#scalactic_2.10;2.2.1 [compile->compile]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-library;2.10.4 [compile->master(compile)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-library;2.10.4 [compile->compile(*)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-reflect;2.10.4 [compile->master(compile)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-reflect;2.10.4 [compile->compile(*)]
+[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [compile->master(*)]
+[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [compile->compile(*)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-library;2.10.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-library;2.10.4 [runtime->compile]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-reflect;2.10.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-reflect;2.10.4 [runtime->compile]
+[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [runtime->compile]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.scalactic#scalactic_2.10;2.2.1 [compile->master]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.pantsbuild#jarjar;1.6.0 [compile->default(compile)]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.pantsbuild#jarjar;1.6.0 [compile->runtime]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.pantsbuild#jarjar;1.6.0 [compile->compile]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.ant#ant;1.9.6 [compile->master(compile)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.ant#ant;1.9.6 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.ant#ant;1.9.6->org.apache.ant#ant-launcher;1.9.6 [compile->master(compile)]
+[debug] == resolving dependencies org.apache.ant#ant;1.9.6->org.apache.ant#ant-launcher;1.9.6 [compile->compile(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm;5.0.4 [compile->master(compile)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm;5.0.4 [compile->compile(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm-commons;5.0.4 [compile->master(compile)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm-commons;5.0.4 [compile->compile(*)]
+[debug] == resolving dependencies org.ow2.asm#asm-commons;5.0.4->org.ow2.asm#asm-tree;5.0.4 [compile->master(compile)]
+[debug] == resolving dependencies org.ow2.asm#asm-commons;5.0.4->org.ow2.asm#asm-tree;5.0.4 [compile->compile(*)]
+[debug] == resolving dependencies org.ow2.asm#asm-tree;5.0.4->org.ow2.asm#asm;5.0.4 [compile->master(compile)]
+[debug] == resolving dependencies org.ow2.asm#asm-tree;5.0.4->org.ow2.asm#asm;5.0.4 [compile->compile(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.maven#maven-plugin-api;3.3.3 [compile->master(compile)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.maven#maven-plugin-api;3.3.3 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-model;3.3.3 [compile->master(compile)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-model;3.3.3 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.maven#maven-model;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [compile->master(compile)]
+[debug] == resolving dependencies org.apache.maven#maven-model;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-artifact;3.3.3 [compile->master(compile)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-artifact;3.3.3 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.maven#maven-artifact;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [compile->master(compile)]
+[debug] == resolving dependencies org.apache.maven#maven-artifact;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0 [compile->compile(*)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->javax.enterprise#cdi-api;1.0 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->javax.enterprise#cdi-api;1.0 [compile->compile(*)]
+[debug] excluding dependency: org.jboss.interceptor#jboss-interceptor-api;1.1 {compile=[compile(*), master(*)], runtime=[runtime(*)]} in compile
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.annotation#jsr250-api;1.0 [compile->master(*)]
+[debug] excluding dependency: org.jboss.interceptor#jboss-interceptor-api;1.1 {compile=[compile(*), master(*)], runtime=[runtime(*)]} in compile
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.annotation#jsr250-api;1.0 [compile->compile(*)]
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.inject#javax.inject;1 [compile->master(*)]
+[debug] excluding dependency: org.jboss.interceptor#jboss-interceptor-api;1.1 {compile=[compile(*), master(*)], runtime=[runtime(*)]} in compile
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.inject#javax.inject;1 [compile->compile(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.eclipse.sisu#org.eclipse.sisu.inject;0.3.0 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.eclipse.sisu#org.eclipse.sisu.inject;0.3.0 [compile->compile(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-component-annotations;1.5.5 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-component-annotations;1.5.5 [compile->compile(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-classworlds;2.5.2 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-classworlds;2.5.2 [compile->compile(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-utils;3.0.20 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-utils;3.0.20 [compile->compile(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.ant#ant;1.9.6 [runtime->runtime(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.ant#ant;1.9.6 [runtime->compile]
+[debug] == resolving dependencies org.apache.ant#ant;1.9.6->org.apache.ant#ant-launcher;1.9.6 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.ant#ant;1.9.6->org.apache.ant#ant-launcher;1.9.6 [runtime->compile]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm;5.0.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm;5.0.4 [runtime->compile]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm-commons;5.0.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm-commons;5.0.4 [runtime->compile]
+[debug] == resolving dependencies org.ow2.asm#asm-commons;5.0.4->org.ow2.asm#asm-tree;5.0.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.ow2.asm#asm-commons;5.0.4->org.ow2.asm#asm-tree;5.0.4 [runtime->compile]
+[debug] == resolving dependencies org.ow2.asm#asm-tree;5.0.4->org.ow2.asm#asm;5.0.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.ow2.asm#asm-tree;5.0.4->org.ow2.asm#asm;5.0.4 [runtime->compile]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.maven#maven-plugin-api;3.3.3 [runtime->runtime(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.maven#maven-plugin-api;3.3.3 [runtime->compile]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-model;3.3.3 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-model;3.3.3 [runtime->compile]
+[debug] == resolving dependencies org.apache.maven#maven-model;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.maven#maven-model;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->compile]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-artifact;3.3.3 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-artifact;3.3.3 [runtime->compile]
+[debug] == resolving dependencies org.apache.maven#maven-artifact;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.maven#maven-artifact;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->compile]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0 [runtime->compile]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->javax.enterprise#cdi-api;1.0 [runtime->runtime(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->javax.enterprise#cdi-api;1.0 [runtime->compile]
+[debug] excluding dependency: org.jboss.interceptor#jboss-interceptor-api;1.1 {compile=[compile(*), master(*)], runtime=[runtime(*)]} in runtime
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.annotation#jsr250-api;1.0 [runtime->runtime(*)]
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.annotation#jsr250-api;1.0 [runtime->compile]
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.inject#javax.inject;1 [runtime->runtime(*)]
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.inject#javax.inject;1 [runtime->compile]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.eclipse.sisu#org.eclipse.sisu.inject;0.3.0 [runtime->runtime(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.eclipse.sisu#org.eclipse.sisu.inject;0.3.0 [runtime->compile]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-component-annotations;1.5.5 [runtime->runtime(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-component-annotations;1.5.5 [runtime->compile]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-classworlds;2.5.2 [runtime->runtime(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-classworlds;2.5.2 [runtime->compile]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->runtime(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->compile]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.pantsbuild#jarjar;1.6.0 [compile->master]
+[debug] == resolving dependencies default#tombot-build;0.1-SNAPSHOT->com.typesafe.sbt#sbt-native-packager;1.1.0-RC1 [compile->default(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.commons#commons-compress;1.4.1 [compile->default(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@6cba1468
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@59bf2d21
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@76b1682e
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@6f2253df
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.commons#commons-compress;1.4.1 [compile->runtime]
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.commons#commons-compress;1.4.1 [compile->compile]
+[debug] == resolving dependencies org.apache.commons#commons-compress;1.4.1->org.tukaani#xz;1.0 [compile->master(*)]
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@73f1fa73
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@e7c0c3b
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@733d0a80
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@18c9a0db
+[debug] == resolving dependencies org.apache.commons#commons-compress;1.4.1->org.tukaani#xz;1.0 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.commons#commons-compress;1.4.1->org.tukaani#xz;1.0 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.commons#commons-compress;1.4.1->org.tukaani#xz;1.0 [runtime->compile]
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.commons#commons-compress;1.4.1 [compile->master]
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.ant#ant;1.9.6 [compile->default(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.ant#ant;1.9.6 [compile->runtime]
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.ant#ant;1.9.6 [compile->compile]
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.ant#ant;1.9.6 [compile->master]
 [debug] == resolving dependencies for default#tombot-build;0.1-SNAPSHOT [optional]
 [debug] == resolving dependencies for default#tombot-build;0.1-SNAPSHOT [provided]
 [debug] == resolving dependencies default#tombot-build;0.1-SNAPSHOT->org.scala-lang#scala-library;2.10.4 [provided->default(compile)]
@@ -757,14 +1500,10 @@
 [debug] == resolving dependencies org.scala-lang#scala-compiler;2.10.4->org.scala-lang#scala-library;2.10.4 [compile->compile(*)]
 [debug] == resolving dependencies org.scala-lang#scala-compiler;2.10.4->org.scala-lang#scala-reflect;2.10.4 [compile->master(*)]
 [debug] == resolving dependencies org.scala-lang#scala-compiler;2.10.4->org.scala-lang#scala-reflect;2.10.4 [compile->compile(*)]
-[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [compile->master(*)]
-[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [compile->compile(*)]
 [debug] == resolving dependencies org.scala-lang#scala-compiler;2.10.4->org.scala-lang#scala-library;2.10.4 [runtime->runtime(*)]
 [debug] == resolving dependencies org.scala-lang#scala-compiler;2.10.4->org.scala-lang#scala-library;2.10.4 [runtime->compile]
 [debug] == resolving dependencies org.scala-lang#scala-compiler;2.10.4->org.scala-lang#scala-reflect;2.10.4 [runtime->runtime(*)]
 [debug] == resolving dependencies org.scala-lang#scala-compiler;2.10.4->org.scala-lang#scala-reflect;2.10.4 [runtime->compile]
-[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [runtime->runtime(*)]
-[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [runtime->compile]
 [debug] == resolving dependencies org.scala-sbt#classpath;0.13.8->org.scala-lang#scala-compiler;2.10.4 [compile->master]
 [debug] == resolving dependencies org.scala-sbt#classpath;0.13.8->org.scala-lang#scala-library;2.10.4 [compile->default(compile)]
 [debug] == resolving dependencies org.scala-sbt#classpath;0.13.8->org.scala-lang#scala-library;2.10.4 [compile->runtime]
@@ -1200,12 +1939,360 @@
 [debug] == resolving dependencies for default#tombot-build;0.1-SNAPSHOT [runtime-internal]
 [debug] == resolving dependencies for default#tombot-build;0.1-SNAPSHOT [runtime]
 [debug] == resolving dependencies for default#tombot-build;0.1-SNAPSHOT [compile]
+[debug] == resolving dependencies default#tombot-build;0.1-SNAPSHOT->io.spray#sbt-revolver;0.8.0 [compile->default(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] == resolving dependencies default#tombot-build;0.1-SNAPSHOT->com.eed3si9n#sbt-assembly;0.14.3 [compile->default(compile)]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.scalactic#scalactic_2.10;2.2.1 [compile->default(compile)]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.scalactic#scalactic_2.10;2.2.1 [compile->runtime]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.scalactic#scalactic_2.10;2.2.1 [compile->compile]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-library;2.10.4 [compile->master(compile)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-library;2.10.4 [compile->compile(*)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-reflect;2.10.4 [compile->master(compile)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-reflect;2.10.4 [compile->compile(*)]
+[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [compile->master(*)]
+[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [compile->compile(*)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-library;2.10.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-library;2.10.4 [runtime->compile]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-reflect;2.10.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-reflect;2.10.4 [runtime->compile]
+[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [runtime->compile]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.scalactic#scalactic_2.10;2.2.1 [compile->master]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.pantsbuild#jarjar;1.6.0 [compile->default(compile)]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.pantsbuild#jarjar;1.6.0 [compile->runtime]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.pantsbuild#jarjar;1.6.0 [compile->compile]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.ant#ant;1.9.6 [compile->master(compile)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.ant#ant;1.9.6 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.ant#ant;1.9.6->org.apache.ant#ant-launcher;1.9.6 [compile->master(compile)]
+[debug] == resolving dependencies org.apache.ant#ant;1.9.6->org.apache.ant#ant-launcher;1.9.6 [compile->compile(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm;5.0.4 [compile->master(compile)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm;5.0.4 [compile->compile(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm-commons;5.0.4 [compile->master(compile)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm-commons;5.0.4 [compile->compile(*)]
+[debug] == resolving dependencies org.ow2.asm#asm-commons;5.0.4->org.ow2.asm#asm-tree;5.0.4 [compile->master(compile)]
+[debug] == resolving dependencies org.ow2.asm#asm-commons;5.0.4->org.ow2.asm#asm-tree;5.0.4 [compile->compile(*)]
+[debug] == resolving dependencies org.ow2.asm#asm-tree;5.0.4->org.ow2.asm#asm;5.0.4 [compile->master(compile)]
+[debug] == resolving dependencies org.ow2.asm#asm-tree;5.0.4->org.ow2.asm#asm;5.0.4 [compile->compile(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.maven#maven-plugin-api;3.3.3 [compile->master(compile)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.maven#maven-plugin-api;3.3.3 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-model;3.3.3 [compile->master(compile)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-model;3.3.3 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.maven#maven-model;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [compile->master(compile)]
+[debug] == resolving dependencies org.apache.maven#maven-model;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-artifact;3.3.3 [compile->master(compile)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-artifact;3.3.3 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.maven#maven-artifact;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [compile->master(compile)]
+[debug] == resolving dependencies org.apache.maven#maven-artifact;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0 [compile->compile(*)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->javax.enterprise#cdi-api;1.0 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->javax.enterprise#cdi-api;1.0 [compile->compile(*)]
+[debug] excluding dependency: org.jboss.interceptor#jboss-interceptor-api;1.1 {compile=[compile(*), master(*)], runtime=[runtime(*)]} in compile
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.annotation#jsr250-api;1.0 [compile->master(*)]
+[debug] excluding dependency: org.jboss.interceptor#jboss-interceptor-api;1.1 {compile=[compile(*), master(*)], runtime=[runtime(*)]} in compile
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.annotation#jsr250-api;1.0 [compile->compile(*)]
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.inject#javax.inject;1 [compile->master(*)]
+[debug] excluding dependency: org.jboss.interceptor#jboss-interceptor-api;1.1 {compile=[compile(*), master(*)], runtime=[runtime(*)]} in compile
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.inject#javax.inject;1 [compile->compile(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.eclipse.sisu#org.eclipse.sisu.inject;0.3.0 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.eclipse.sisu#org.eclipse.sisu.inject;0.3.0 [compile->compile(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-component-annotations;1.5.5 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-component-annotations;1.5.5 [compile->compile(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-classworlds;2.5.2 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-classworlds;2.5.2 [compile->compile(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-utils;3.0.20 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-utils;3.0.20 [compile->compile(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.ant#ant;1.9.6 [runtime->runtime(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.ant#ant;1.9.6 [runtime->compile]
+[debug] == resolving dependencies org.apache.ant#ant;1.9.6->org.apache.ant#ant-launcher;1.9.6 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.ant#ant;1.9.6->org.apache.ant#ant-launcher;1.9.6 [runtime->compile]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm;5.0.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm;5.0.4 [runtime->compile]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm-commons;5.0.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm-commons;5.0.4 [runtime->compile]
+[debug] == resolving dependencies org.ow2.asm#asm-commons;5.0.4->org.ow2.asm#asm-tree;5.0.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.ow2.asm#asm-commons;5.0.4->org.ow2.asm#asm-tree;5.0.4 [runtime->compile]
+[debug] == resolving dependencies org.ow2.asm#asm-tree;5.0.4->org.ow2.asm#asm;5.0.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.ow2.asm#asm-tree;5.0.4->org.ow2.asm#asm;5.0.4 [runtime->compile]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.maven#maven-plugin-api;3.3.3 [runtime->runtime(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.maven#maven-plugin-api;3.3.3 [runtime->compile]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-model;3.3.3 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-model;3.3.3 [runtime->compile]
+[debug] == resolving dependencies org.apache.maven#maven-model;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.maven#maven-model;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->compile]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-artifact;3.3.3 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-artifact;3.3.3 [runtime->compile]
+[debug] == resolving dependencies org.apache.maven#maven-artifact;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.maven#maven-artifact;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->compile]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0 [runtime->compile]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->javax.enterprise#cdi-api;1.0 [runtime->runtime(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->javax.enterprise#cdi-api;1.0 [runtime->compile]
+[debug] excluding dependency: org.jboss.interceptor#jboss-interceptor-api;1.1 {compile=[compile(*), master(*)], runtime=[runtime(*)]} in runtime
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.annotation#jsr250-api;1.0 [runtime->runtime(*)]
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.annotation#jsr250-api;1.0 [runtime->compile]
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.inject#javax.inject;1 [runtime->runtime(*)]
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.inject#javax.inject;1 [runtime->compile]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.eclipse.sisu#org.eclipse.sisu.inject;0.3.0 [runtime->runtime(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.eclipse.sisu#org.eclipse.sisu.inject;0.3.0 [runtime->compile]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-component-annotations;1.5.5 [runtime->runtime(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-component-annotations;1.5.5 [runtime->compile]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-classworlds;2.5.2 [runtime->runtime(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-classworlds;2.5.2 [runtime->compile]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->runtime(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->compile]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.pantsbuild#jarjar;1.6.0 [compile->master]
+[debug] == resolving dependencies default#tombot-build;0.1-SNAPSHOT->com.typesafe.sbt#sbt-native-packager;1.1.0-RC1 [compile->default(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.commons#commons-compress;1.4.1 [compile->default(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@24579b76
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@53aa1846
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@6c59413
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@5292e1b0
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.commons#commons-compress;1.4.1 [compile->runtime]
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.commons#commons-compress;1.4.1 [compile->compile]
+[debug] == resolving dependencies org.apache.commons#commons-compress;1.4.1->org.tukaani#xz;1.0 [compile->master(*)]
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@496d0591
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@63a265a3
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@26f88706
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@5ee354d2
+[debug] == resolving dependencies org.apache.commons#commons-compress;1.4.1->org.tukaani#xz;1.0 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.commons#commons-compress;1.4.1->org.tukaani#xz;1.0 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.commons#commons-compress;1.4.1->org.tukaani#xz;1.0 [runtime->compile]
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.commons#commons-compress;1.4.1 [compile->master]
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.ant#ant;1.9.6 [compile->default(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.ant#ant;1.9.6 [compile->runtime]
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.ant#ant;1.9.6 [compile->compile]
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.ant#ant;1.9.6 [compile->master]
 [debug] == resolving dependencies for default#tombot-build;0.1-SNAPSHOT [optional]
 [debug] resolving dependencies for configuration 'test-internal'
 [debug] == resolving dependencies for default#tombot-build;0.1-SNAPSHOT [test-internal]
 [debug] == resolving dependencies for default#tombot-build;0.1-SNAPSHOT [test]
 [debug] == resolving dependencies for default#tombot-build;0.1-SNAPSHOT [runtime]
 [debug] == resolving dependencies for default#tombot-build;0.1-SNAPSHOT [compile]
+[debug] == resolving dependencies default#tombot-build;0.1-SNAPSHOT->io.spray#sbt-revolver;0.8.0 [compile->default(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] == resolving dependencies default#tombot-build;0.1-SNAPSHOT->com.eed3si9n#sbt-assembly;0.14.3 [compile->default(compile)]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.scalactic#scalactic_2.10;2.2.1 [compile->default(compile)]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.scalactic#scalactic_2.10;2.2.1 [compile->runtime]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.scalactic#scalactic_2.10;2.2.1 [compile->compile]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-library;2.10.4 [compile->master(compile)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-library;2.10.4 [compile->compile(*)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-reflect;2.10.4 [compile->master(compile)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-reflect;2.10.4 [compile->compile(*)]
+[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [compile->master(*)]
+[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [compile->compile(*)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-library;2.10.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-library;2.10.4 [runtime->compile]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-reflect;2.10.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.scalactic#scalactic_2.10;2.2.1->org.scala-lang#scala-reflect;2.10.4 [runtime->compile]
+[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [runtime->compile]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.scalactic#scalactic_2.10;2.2.1 [compile->master]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.pantsbuild#jarjar;1.6.0 [compile->default(compile)]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.pantsbuild#jarjar;1.6.0 [compile->runtime]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.pantsbuild#jarjar;1.6.0 [compile->compile]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.ant#ant;1.9.6 [compile->master(compile)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.ant#ant;1.9.6 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.ant#ant;1.9.6->org.apache.ant#ant-launcher;1.9.6 [compile->master(compile)]
+[debug] == resolving dependencies org.apache.ant#ant;1.9.6->org.apache.ant#ant-launcher;1.9.6 [compile->compile(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm;5.0.4 [compile->master(compile)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm;5.0.4 [compile->compile(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm-commons;5.0.4 [compile->master(compile)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm-commons;5.0.4 [compile->compile(*)]
+[debug] == resolving dependencies org.ow2.asm#asm-commons;5.0.4->org.ow2.asm#asm-tree;5.0.4 [compile->master(compile)]
+[debug] == resolving dependencies org.ow2.asm#asm-commons;5.0.4->org.ow2.asm#asm-tree;5.0.4 [compile->compile(*)]
+[debug] == resolving dependencies org.ow2.asm#asm-tree;5.0.4->org.ow2.asm#asm;5.0.4 [compile->master(compile)]
+[debug] == resolving dependencies org.ow2.asm#asm-tree;5.0.4->org.ow2.asm#asm;5.0.4 [compile->compile(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.maven#maven-plugin-api;3.3.3 [compile->master(compile)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.maven#maven-plugin-api;3.3.3 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-model;3.3.3 [compile->master(compile)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-model;3.3.3 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.maven#maven-model;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [compile->master(compile)]
+[debug] == resolving dependencies org.apache.maven#maven-model;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-artifact;3.3.3 [compile->master(compile)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-artifact;3.3.3 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.maven#maven-artifact;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [compile->master(compile)]
+[debug] == resolving dependencies org.apache.maven#maven-artifact;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0 [compile->compile(*)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->javax.enterprise#cdi-api;1.0 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->javax.enterprise#cdi-api;1.0 [compile->compile(*)]
+[debug] excluding dependency: org.jboss.interceptor#jboss-interceptor-api;1.1 {compile=[compile(*), master(*)], runtime=[runtime(*)]} in compile
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.annotation#jsr250-api;1.0 [compile->master(*)]
+[debug] excluding dependency: org.jboss.interceptor#jboss-interceptor-api;1.1 {compile=[compile(*), master(*)], runtime=[runtime(*)]} in compile
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.annotation#jsr250-api;1.0 [compile->compile(*)]
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.inject#javax.inject;1 [compile->master(*)]
+[debug] excluding dependency: org.jboss.interceptor#jboss-interceptor-api;1.1 {compile=[compile(*), master(*)], runtime=[runtime(*)]} in compile
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.inject#javax.inject;1 [compile->compile(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.eclipse.sisu#org.eclipse.sisu.inject;0.3.0 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.eclipse.sisu#org.eclipse.sisu.inject;0.3.0 [compile->compile(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-component-annotations;1.5.5 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-component-annotations;1.5.5 [compile->compile(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-classworlds;2.5.2 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-classworlds;2.5.2 [compile->compile(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-utils;3.0.20 [compile->master(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-utils;3.0.20 [compile->compile(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.ant#ant;1.9.6 [runtime->runtime(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.ant#ant;1.9.6 [runtime->compile]
+[debug] == resolving dependencies org.apache.ant#ant;1.9.6->org.apache.ant#ant-launcher;1.9.6 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.ant#ant;1.9.6->org.apache.ant#ant-launcher;1.9.6 [runtime->compile]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm;5.0.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm;5.0.4 [runtime->compile]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm-commons;5.0.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.ow2.asm#asm-commons;5.0.4 [runtime->compile]
+[debug] == resolving dependencies org.ow2.asm#asm-commons;5.0.4->org.ow2.asm#asm-tree;5.0.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.ow2.asm#asm-commons;5.0.4->org.ow2.asm#asm-tree;5.0.4 [runtime->compile]
+[debug] == resolving dependencies org.ow2.asm#asm-tree;5.0.4->org.ow2.asm#asm;5.0.4 [runtime->runtime(*)]
+[debug] == resolving dependencies org.ow2.asm#asm-tree;5.0.4->org.ow2.asm#asm;5.0.4 [runtime->compile]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.maven#maven-plugin-api;3.3.3 [runtime->runtime(*)]
+[debug] == resolving dependencies org.pantsbuild#jarjar;1.6.0->org.apache.maven#maven-plugin-api;3.3.3 [runtime->compile]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-model;3.3.3 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-model;3.3.3 [runtime->compile]
+[debug] == resolving dependencies org.apache.maven#maven-model;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.maven#maven-model;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->compile]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-artifact;3.3.3 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.apache.maven#maven-artifact;3.3.3 [runtime->compile]
+[debug] == resolving dependencies org.apache.maven#maven-artifact;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.maven#maven-artifact;3.3.3->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->compile]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.maven#maven-plugin-api;3.3.3->org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0 [runtime->compile]
+[debug] dependency descriptor has been mediated: dependency: org.codehaus.plexus#plexus-utils;3.0.17 {compile=[compile(*), master(compile)], runtime=[runtime(*)]} => dependency: org.codehaus.plexus#plexus-utils;3.0.20 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->javax.enterprise#cdi-api;1.0 [runtime->runtime(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->javax.enterprise#cdi-api;1.0 [runtime->compile]
+[debug] excluding dependency: org.jboss.interceptor#jboss-interceptor-api;1.1 {compile=[compile(*), master(*)], runtime=[runtime(*)]} in runtime
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.annotation#jsr250-api;1.0 [runtime->runtime(*)]
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.annotation#jsr250-api;1.0 [runtime->compile]
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.inject#javax.inject;1 [runtime->runtime(*)]
+[debug] == resolving dependencies javax.enterprise#cdi-api;1.0->javax.inject#javax.inject;1 [runtime->compile]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.eclipse.sisu#org.eclipse.sisu.inject;0.3.0 [runtime->runtime(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.eclipse.sisu#org.eclipse.sisu.inject;0.3.0 [runtime->compile]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-component-annotations;1.5.5 [runtime->runtime(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-component-annotations;1.5.5 [runtime->compile]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-classworlds;2.5.2 [runtime->runtime(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-classworlds;2.5.2 [runtime->compile]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->runtime(*)]
+[debug] == resolving dependencies org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0->org.codehaus.plexus#plexus-utils;3.0.20 [runtime->compile]
+[debug] == resolving dependencies com.eed3si9n#sbt-assembly;0.14.3->org.pantsbuild#jarjar;1.6.0 [compile->master]
+[debug] == resolving dependencies default#tombot-build;0.1-SNAPSHOT->com.typesafe.sbt#sbt-native-packager;1.1.0-RC1 [compile->default(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.commons#commons-compress;1.4.1 [compile->default(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@455f484e
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@193dab33
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@41e4bcb7
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@7550ade5
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@4a728639
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@3ee2d877
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.commons#commons-compress;1.4.1 [compile->runtime]
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.commons#commons-compress;1.4.1 [compile->compile]
+[debug] == resolving dependencies org.apache.commons#commons-compress;1.4.1->org.tukaani#xz;1.0 [compile->master(*)]
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@2ac87b38
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@74556316
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@5cdc2c8b
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@38ef6a02
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@5117d79c
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]} => dependency: org.scala-lang#scala-compiler;2.10.4 {scala-tool=[default, optional(default)]}
+[debug] dependency descriptor has been mediated: sbt.ivyint.MergedDescriptors@8f311e1 => sbt.ivyint.MergedDescriptors@e85437b
+[debug] == resolving dependencies org.apache.commons#commons-compress;1.4.1->org.tukaani#xz;1.0 [compile->compile(*)]
+[debug] == resolving dependencies org.apache.commons#commons-compress;1.4.1->org.tukaani#xz;1.0 [runtime->runtime(*)]
+[debug] == resolving dependencies org.apache.commons#commons-compress;1.4.1->org.tukaani#xz;1.0 [runtime->compile]
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.commons#commons-compress;1.4.1 [compile->master]
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.ant#ant;1.9.6 [compile->default(compile)]
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] dependency descriptor has been mediated: dependency: org.scala-lang#scala-library;2.10.5 {provided=[default(compile)]} => dependency: org.scala-lang#scala-library;2.10.4 {provided=[default(compile)]}
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.ant#ant;1.9.6 [compile->runtime]
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.ant#ant;1.9.6 [compile->compile]
+[debug] == resolving dependencies com.typesafe.sbt#sbt-native-packager;1.1.0-RC1->org.apache.ant#ant;1.9.6 [compile->master]
 [debug] == resolving dependencies for default#tombot-build;0.1-SNAPSHOT [optional]
 [debug] == resolving dependencies for default#tombot-build;0.1-SNAPSHOT [provided]
 [debug] == resolving dependencies default#tombot-build;0.1-SNAPSHOT->org.scala-lang#scala-library;2.10.4 [provided->default(compile)]
@@ -1235,14 +2322,10 @@
 [debug] == resolving dependencies org.scala-lang#scala-compiler;2.10.4->org.scala-lang#scala-library;2.10.4 [compile->compile(*)]
 [debug] == resolving dependencies org.scala-lang#scala-compiler;2.10.4->org.scala-lang#scala-reflect;2.10.4 [compile->master(*)]
 [debug] == resolving dependencies org.scala-lang#scala-compiler;2.10.4->org.scala-lang#scala-reflect;2.10.4 [compile->compile(*)]
-[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [compile->master(*)]
-[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [compile->compile(*)]
 [debug] == resolving dependencies org.scala-lang#scala-compiler;2.10.4->org.scala-lang#scala-library;2.10.4 [runtime->runtime(*)]
 [debug] == resolving dependencies org.scala-lang#scala-compiler;2.10.4->org.scala-lang#scala-library;2.10.4 [runtime->compile]
 [debug] == resolving dependencies org.scala-lang#scala-compiler;2.10.4->org.scala-lang#scala-reflect;2.10.4 [runtime->runtime(*)]
 [debug] == resolving dependencies org.scala-lang#scala-compiler;2.10.4->org.scala-lang#scala-reflect;2.10.4 [runtime->compile]
-[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [runtime->runtime(*)]
-[debug] == resolving dependencies org.scala-lang#scala-reflect;2.10.4->org.scala-lang#scala-library;2.10.4 [runtime->compile]
 [debug] == resolving dependencies org.scala-sbt#classpath;0.13.8->org.scala-lang#scala-compiler;2.10.4 [compile->master]
 [debug] == resolving dependencies org.scala-sbt#classpath;0.13.8->org.scala-lang#scala-library;2.10.4 [compile->default(compile)]
 [debug] == resolving dependencies org.scala-sbt#classpath;0.13.8->org.scala-lang#scala-library;2.10.4 [compile->runtime]
@@ -1725,7 +2808,31 @@
 [debug] == resolving dependencies default#tombot-build;0.1-SNAPSHOT->org.scala-lang#scala-library;2.10.4 [scala-tool->optional(default)]
 [debug] 	resolved ivy file produced in cache
 [debug] :: downloading artifacts ::
+[debug] 	[NOT REQUIRED] io.spray#sbt-revolver;0.8.0!sbt-revolver.jar
+[debug] 	[NOT REQUIRED] com.eed3si9n#sbt-assembly;0.14.3!sbt-assembly.jar
+[debug] 	[NOT REQUIRED] com.typesafe.sbt#sbt-native-packager;1.1.0-RC1!sbt-native-packager.jar
+[debug] 	[NOT REQUIRED] org.scalactic#scalactic_2.10;2.2.1!scalactic_2.10.jar(bundle)
+[debug] 	[NOT REQUIRED] org.pantsbuild#jarjar;1.6.0!jarjar.jar
 [debug] 	[NOT REQUIRED] org.scala-lang#scala-library;2.10.4!scala-library.jar
+[debug] 	[NOT REQUIRED] org.scala-lang#scala-reflect;2.10.4!scala-reflect.jar
+[debug] 	[NOT REQUIRED] org.apache.ant#ant;1.9.6!ant.jar
+[debug] 	[NOT REQUIRED] org.ow2.asm#asm;5.0.4!asm.jar
+[debug] 	[NOT REQUIRED] org.ow2.asm#asm-commons;5.0.4!asm-commons.jar
+[debug] 	[NOT REQUIRED] org.apache.maven#maven-plugin-api;3.3.3!maven-plugin-api.jar
+[debug] 	[NOT REQUIRED] org.apache.ant#ant-launcher;1.9.6!ant-launcher.jar
+[debug] 	[NOT REQUIRED] org.ow2.asm#asm-tree;5.0.4!asm-tree.jar
+[debug] 	[NOT REQUIRED] org.apache.maven#maven-model;3.3.3!maven-model.jar
+[debug] 	[NOT REQUIRED] org.apache.maven#maven-artifact;3.3.3!maven-artifact.jar
+[debug] 	[NOT REQUIRED] org.eclipse.sisu#org.eclipse.sisu.plexus;0.3.0!org.eclipse.sisu.plexus.jar(eclipse-plugin)
+[debug] 	[NOT REQUIRED] org.codehaus.plexus#plexus-utils;3.0.20!plexus-utils.jar
+[debug] 	[NOT REQUIRED] javax.enterprise#cdi-api;1.0!cdi-api.jar
+[debug] 	[NOT REQUIRED] org.eclipse.sisu#org.eclipse.sisu.inject;0.3.0!org.eclipse.sisu.inject.jar(eclipse-plugin)
+[debug] 	[NOT REQUIRED] org.codehaus.plexus#plexus-component-annotations;1.5.5!plexus-component-annotations.jar
+[debug] 	[NOT REQUIRED] org.codehaus.plexus#plexus-classworlds;2.5.2!plexus-classworlds.jar(bundle)
+[debug] 	[NOT REQUIRED] javax.annotation#jsr250-api;1.0!jsr250-api.jar
+[debug] 	[NOT REQUIRED] javax.inject#javax.inject;1!javax.inject.jar
+[debug] 	[NOT REQUIRED] org.apache.commons#commons-compress;1.4.1!commons-compress.jar
+[debug] 	[NOT REQUIRED] org.tukaani#xz;1.0!xz.jar
 [debug] 	[NOT REQUIRED] org.scala-sbt#sbt;0.13.8!sbt.jar
 [debug] 	[NOT REQUIRED] org.scala-sbt#main;0.13.8!main.jar
 [debug] 	[NOT REQUIRED] org.scala-sbt#compiler-interface;0.13.8!compiler-interface-bin.jar
@@ -1755,7 +2862,6 @@
 [debug] 	[NOT REQUIRED] org.scala-sbt#tracking;0.13.8!tracking.jar
 [debug] 	[NOT REQUIRED] org.scala-sbt#testing;0.13.8!testing.jar
 [debug] 	[NOT REQUIRED] org.scala-lang#scala-compiler;2.10.4!scala-compiler.jar
-[debug] 	[NOT REQUIRED] org.scala-lang#scala-reflect;2.10.4!scala-reflect.jar
 [debug] 	[NOT REQUIRED] org.scala-sbt#control;0.13.8!control.jar
 [debug] 	[NOT REQUIRED] org.scala-sbt#collections;0.13.8!collections.jar
 [debug] 	[NOT REQUIRED] jline#jline;2.11!jline.jar
@@ -1772,7 +2878,6 @@
 [debug] 	[NOT REQUIRED] org.json4s#json4s-core_2.10;3.2.10!json4s-core_2.10.jar
 [debug] 	[NOT REQUIRED] org.spire-math#jawn-parser_2.10;0.6.0!jawn-parser_2.10.jar
 [debug] 	[NOT REQUIRED] org.spire-math#json4s-support_2.10;0.6.0!json4s-support_2.10.jar
-[debug] 		tried /Users/markmo/libs/activator-dist-1.3.10/repository/org.scalamacros/quasiquotes_2.10/2.0.1/jars/quasiquotes_2.10.jar
 [debug] 	[NOT REQUIRED] org.scalamacros#quasiquotes_2.10;2.0.1!quasiquotes_2.10.jar
 [debug] 	[NOT REQUIRED] org.json4s#json4s-ast_2.10;3.2.10!json4s-ast_2.10.jar
 [debug] 	[NOT REQUIRED] com.thoughtworks.paranamer#paranamer;2.6!paranamer.jar
@@ -1782,7 +2887,7 @@
 [debug] 	[NOT REQUIRED] org.scala-sbt#apply-macro;0.13.8!apply-macro.jar
 [debug] 	[NOT REQUIRED] org.scala-lang#jline;2.10.4!jline.jar
 [debug] 	[NOT REQUIRED] org.fusesource.jansi#jansi;1.4!jansi.jar
-[debug] :: resolution report :: resolve 8545ms :: artifacts dl 45ms
+[debug] :: resolution report :: resolve 1505ms :: artifacts dl 56ms
 [debug] 	report for default#tombot-build;0.1-SNAPSHOT compile produced in /Users/markmo/src/Bots/tombot/project/target/resolution-cache/reports/default-tombot-build-compile.xml
 [debug] 	report for default#tombot-build;0.1-SNAPSHOT runtime produced in /Users/markmo/src/Bots/tombot/project/target/resolution-cache/reports/default-tombot-build-runtime.xml
 [debug] 	report for default#tombot-build;0.1-SNAPSHOT test produced in /Users/markmo/src/Bots/tombot/project/target/resolution-cache/reports/default-tombot-build-test.xml
@@ -1796,5 +2901,5 @@
 [debug] 	report for default#tombot-build;0.1-SNAPSHOT docs produced in /Users/markmo/src/Bots/tombot/project/target/resolution-cache/reports/default-tombot-build-docs.xml
 [debug] 	report for default#tombot-build;0.1-SNAPSHOT pom produced in /Users/markmo/src/Bots/tombot/project/target/resolution-cache/reports/default-tombot-build-pom.xml
 [debug] 	report for default#tombot-build;0.1-SNAPSHOT scala-tool produced in /Users/markmo/src/Bots/tombot/project/target/resolution-cache/reports/default-tombot-build-scala-tool.xml
-[debug] 	resolve done (8545ms resolve - 45ms download)
+[debug] 	resolve done (1505ms resolve - 56ms download)
 [info] Done updating.

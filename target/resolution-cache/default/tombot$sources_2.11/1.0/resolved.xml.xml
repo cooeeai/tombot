@@ -4,7 +4,7 @@
 		module="tombot$sources_2.11"
 		revision="1.0"
 		status="integration"
-		publication="20160716154916"
+		publication="20160716180624"
 	/>
 	<configurations>
 		<conf name="compile" visibility="public" description=""/>
