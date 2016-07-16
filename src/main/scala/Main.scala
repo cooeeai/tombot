@@ -3,6 +3,7 @@ import akka.event.{Logging, LoggingAdapter}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.marshalling.Marshal
+import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.{HttpMethods, HttpRequest, RequestEntity, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.unmarshalling.Unmarshal
@@ -103,7 +104,7 @@ trait Service extends JsonSupport {
       request <- Marshal(payload.compactPrint).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.POST,
-        uri = s"https://graph.facebook.com/v2.6/me/messages?access_token=$token",
+        uri = "https://graph.facebook.com/v2.6/me/messages?access_token=$token",
         entity = request))
       entity <- Unmarshal(response.entity).to[String]
     } yield ()
