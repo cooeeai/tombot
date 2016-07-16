@@ -81,7 +81,7 @@ trait Service extends JsonSupport {
             JsObject(
               "title" -> JsString("iPhone 6s Plus 64GB Silver"),
               "subtitle" -> JsString("5.5 inch (diagonal) Retina HD display"),
-              "image_url" -> JsString("https://cryptic-caverns-85624.herokuapp.com/img/iphone-6s-plus-silver-400.jpg"),
+              "image_url" -> JsString("https://cryptic-caverns-85624.herokuapp.com/img/iphone-6s-plus-front-silver-400.jpg"),
               "buttons" -> JsArray(
                 JsObject(
                   "type" -> JsString("postback"),
@@ -125,8 +125,10 @@ trait Service extends JsonSupport {
   }
 
   val routes =
-    path("img" / RemainingPath) { filename =>
-      getFromResource(s"images/$filename")
+    pathPrefix("img") {
+      path(Segment) { filename =>
+        getFromResource(s"images/$filename")
+      }
     } ~
     path("webhook") {
       get {
@@ -169,9 +171,9 @@ object Main extends App with Service {
 
   val bindingFuture = http.bindAndHandle(routes, "0.0.0.0", port)
 
-//  println("Server online at http://localhost:8080/\nPress RETURN to stop...")
-//  StdIn.readLine() // let it run until user presses return
-//  bindingFuture
-//    .flatMap(_.unbind()) // trigger unbinding from the port
-//    .onComplete(_ => system.terminate()) // and shutdown when done
+  //  println("Server online at http://localhost:8080/\nPress RETURN to stop...")
+  //  StdIn.readLine() // let it run until user presses return
+  //  bindingFuture
+  //    .flatMap(_.unbind()) // trigger unbinding from the port
+  //    .onComplete(_ => system.terminate()) // and shutdown when done
 }
