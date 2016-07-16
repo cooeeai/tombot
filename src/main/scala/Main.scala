@@ -1,4 +1,5 @@
 import akka.actor.ActorSystem
+import akka.event.{Logging, LoggingAdapter}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.marshalling.Marshal
@@ -6,7 +7,7 @@ import akka.http.scaladsl.model.{HttpMethods, HttpRequest, RequestEntity, Status
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.ActorMaterializer
-import spray.json.{DefaultJsonProtocol, JsArray, JsObject, JsString}
+import spray.json._
 
 import scala.io.StdIn
 import scala.util.Properties
@@ -39,7 +40,7 @@ trait JsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val postbackJsonFormat = jsonFormat1(Postback)
   implicit val messagingJsonFormat = jsonFormat5(Messaging)
   implicit val entryJsonFormat = jsonFormat3(Entry)
-  implicit val responseJsonFormat = jsonFormat2(Response)
+  implicit val responseJsonFormat = jsonFormat(Response, "object", "entry")
 }
 
 trait Service extends JsonSupport {
@@ -49,6 +50,8 @@ trait Service extends JsonSupport {
   implicit val executionContext = system.dispatcher
 
   val http = Http()
+
+  val logger: LoggingAdapter
 
   val token = "EAAW4wYExjKYBAJvdLNWqZAKm7HG3ZCi5S3dfO7zsw6gGuwZCLMJiRqfyOAZCuUQsahlZAnIymyntWLo7YnSq87yAG4j6yoF2ce1RqSFZBhcKOZBlR7Isg1rZApKIZBzHhTEfvI2s3Ec5ohI24yCBZCj95iQ4H6tmWsTtCdt4lUGrakxwZDZD"
 
@@ -143,7 +146,7 @@ trait Service extends JsonSupport {
               if (text == "/buy") {
                 sendGenericMessage(sender)
               } else {
-                sendTextMessage(sender, "echo: " + text.substring(0, 200))
+                sendTextMessage(sender, "echo: " + text)
               }
             } else if (event.postback.isDefined) {
               sendTextMessage(sender, event.postback.get.payload)
@@ -157,6 +160,8 @@ trait Service extends JsonSupport {
 }
 
 object Main extends App with Service {
+
+  override val logger = Logging(system, getClass)
 
   val port = Properties.envOrElse("PORT", "8080").toInt
 
