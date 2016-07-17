@@ -27,7 +27,7 @@ trait Service extends JsonSupport {
 
   def catalogService = new CatalogService(config)
 
-  def token = config.getString("FB_PAGE_ACCESS_TOKEN")
+  def token = System.getenv("FB_PAGE_ACCESS_TOKEN")
 
   def sendGenericMessage(sender: String): Unit = {
     logger.info("sending generic message to sender: " + sender)
