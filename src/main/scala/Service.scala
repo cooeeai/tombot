@@ -2,7 +2,7 @@ import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshalling.Marshal
-import akka.http.scaladsl.model.{HttpMethods, HttpRequest, RequestEntity, StatusCodes}
+import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.PathMatchers.Segment
 import akka.http.scaladsl.unmarshalling.Unmarshal
@@ -110,6 +110,9 @@ trait Service extends JsonSupport {
       path(Segment) { filename =>
         getFromResource(s"images/$filename")
       }
+    } ~
+    path("") {
+      complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>Welcome to Tombot</h1>"))
     }
 
 }

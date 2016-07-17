@@ -1,0 +1,6 @@
+{
+  "name": "Tombot",
+  "description": "A Commerce Bot for Facebook Messenger using Scala and Akka.",
+  "website": "https://github.com/markmo/tombot",
+  "success_url": "/"
+}
