@@ -54,10 +54,10 @@ trait Service extends JsonSupport {
   def config: Config
   val logger: LoggingAdapter
 
-  val token = "EAAW4wYExjKYBAJvdLNWqZAKm7HG3ZCi5S3dfO7zsw6gGuwZCLMJiRqfyOAZCuUQsahlZAnIymyntWLo7YnSq87yAG4j6yoF2ce1RqSFZBhcKOZBlR7Isg1rZApKIZBzHhTEfvI2s3Ec5ohI24yCBZCj95iQ4H6tmWsTtCdt4lUGrakxwZDZD"
+  val token = "EAAW4wYExjKYBAAtl9rGuizoIZABJdNRZCZAZAt7n5SOdhzei29o0aQPPHExmsifXfUzwFZCRzousgQuwgFu2cU0eNDZCZApWkZAVo6yDWZBOoA0gtJZBQR0MB9p4QyvPDYELWNAdWZA4iElWpiWpSyeZAOUhuwYzWiEzw5n0bqTBcylVDAZDZD"
 
   def sendGenericMessage(sender: String): Unit = {
-    logger.debug("sending generic message to sender: " + sender)
+    logger.info("sending generic message to sender: " + sender)
     val messageData = JsObject(
       "attachment" -> JsObject(
         "type" -> JsString("template"),
@@ -101,7 +101,7 @@ trait Service extends JsonSupport {
       "recipient" -> JsObject("id" -> JsString(sender)),
       "message" -> messageData
     )
-    logger.debug("sending payload:\n" + payload.prettyPrint)
+    logger.info("sending payload:\n" + payload.prettyPrint)
     for {
       request <- Marshal(payload).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
@@ -113,13 +113,13 @@ trait Service extends JsonSupport {
   }
 
   def sendTextMessage(sender: String, text: String): Unit = {
-    logger.debug("sending text message: [" + text + "] to sender: " + sender)
+    logger.info("sending text message: [" + text + "] to sender: " + sender)
     val messageData = JsObject("text" -> JsString(text))
     val payload = JsObject(
       "recipient" -> JsObject("id" -> JsString(sender)),
       "message" -> messageData
     )
-    logger.debug("sending payload:\n" + payload.prettyPrint)
+    logger.info("sending payload:\n" + payload.prettyPrint)
     for {
       request <- Marshal(payload).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
@@ -143,21 +143,21 @@ trait Service extends JsonSupport {
       } ~
       post {
         entity(as[Response]) { response =>
-          logger.debug("received body:\n" + response.toJson.prettyPrint)
+          logger.info("received body:\n" + response.toJson.prettyPrint)
           val messagingEvents = response.entry.head.messaging
           for (event <- messagingEvents) {
             val sender = event.sender.id
             if (event.message.isDefined) {
-              logger.debug("event.message is defined")
+              logger.info("event.message is defined")
               val text = event.message.get.text
-              logger.debug("text: [" + text + "]")
+              logger.info("text: [" + text + "]")
               if (text == "/buy") {
                 sendGenericMessage(sender)
               } else {
                 sendTextMessage(sender, "echo: " + text)
               }
             } else if (event.postback.isDefined) {
-              logger.debug("event.postback is defined")
+              logger.info("event.postback is defined")
               sendTextMessage(sender, event.postback.get.payload)
             }
           }
