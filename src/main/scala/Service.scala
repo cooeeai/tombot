@@ -61,6 +61,7 @@ trait Service extends JsonSupport {
       "message" -> messageData
     )
     logger.info("sending payload:\n" + payload.prettyPrint)
+    logger.info("token: " + token)
     for {
       request <- Marshal(payload).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
