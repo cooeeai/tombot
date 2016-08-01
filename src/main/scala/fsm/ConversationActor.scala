@@ -137,9 +137,7 @@ class ConversationActor @Inject()(
     sendTextMessage(sender, greetings(random.nextInt(greetings.size)))
 
   def shrug(sender: String) =
-    //sendTextMessage(sender, "¯\\_(ツ)_/¯ " + shrugs(random.nextInt(shrugs.size)))
-    sendTextMessage(sender, shrugs(random.nextInt(shrugs.size)))
-
+    sendTextMessage(sender, "¯\\_(ツ)_/¯ " + shrugs(random.nextInt(shrugs.size)))
 
   def sendTextMessage(sender: String, text: String): Unit = {
     log.info("sending text message: [" + text + "] to sender: " + sender)
