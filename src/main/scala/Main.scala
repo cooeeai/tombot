@@ -1,5 +1,6 @@
 import akka.event.Logging
 import com.typesafe.config.ConfigFactory
+import services.Service
 
 import scala.util.Properties
 
@@ -8,12 +9,14 @@ import scala.util.Properties
   */
 object Main extends App with Service {
 
-  implicit override val config = ConfigFactory.load()
+  override val config = ConfigFactory.load()
   override val logger = Logging(system, getClass)
 
   val port = Properties.envOrElse("PORT", "8080").toInt
 
   val bindingFuture = http.bindAndHandle(routes, config.getString("http.interface"), config.getInt("http.port"))
+
+  setupWelcomeGreeting()
 
 //  println("Server online at http://localhost:8080/\nPress RETURN to stop...")
 //  StdIn.readLine() // let it run until user presses return

@@ -1,11 +1,14 @@
+package services
+
+import com.google.inject.Inject
 import com.typesafe.config.Config
-import facebookmessengerapi.{Element, LinkButton, PostbackButton}
+import facebookmessenger.{Element, LinkButton, PostbackButton}
 import spray.json.JsString
 
 /**
   * Created by markmo on 17/07/2016.
   */
-class CatalogService(config: Config) {
+class CatalogService @Inject()(config: Config) {
 
   val api = config.getString("api.host")
 
