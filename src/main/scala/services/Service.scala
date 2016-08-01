@@ -49,9 +49,11 @@ trait Service extends FbJsonSupport with WitJsonSupport {
   val logger: LoggingAdapter
 
   def catalogService = new CatalogService(config)
+
   def paymentService = new PaymentService(config)
 
   def fbApiToken = System.getenv("FB_PAGE_ACCESS_TOKEN")
+
   def witApiToken = System.getenv("WIT_AI_API_TOKEN")
 
   val fsm = system.actorOf(GuiceAkkaExtension(system).props(ConversationActor.name))

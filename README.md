@@ -10,18 +10,18 @@ Simple test at this stage. Will echo any message, except when `/buy` slash comma
 [![Deploy to Heroku](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
 
 <table width="100%" style="border: none; margin-top: 20px;">
-<tr>
-<td style="border: none;">
-<img src="assets/echo.png" title="Echo action" width="231" height="300">
-<br>
-Echo action
-</td>
-<td style="border: none;">
-<img src="assets/buy.png" title="Echo action" width="231" height="300">
-<br>
-Buy action
-</td>
-</tr>
+    <tr>
+        <td style="border: none;">
+            <img src="assets/echo.png" title="Echo action" width="231" height="300">
+            <br>
+            Echo action
+        </td>
+        <td style="border: none;">
+            <img src="assets/buy.png" title="Echo action" width="231" height="300">
+            <br>
+            Buy action
+        </td>
+    </tr>
 </table>
 
 <img src="assets/thread.png" title="Echo action" width="368" height="500">

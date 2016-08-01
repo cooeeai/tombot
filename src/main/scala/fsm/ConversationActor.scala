@@ -115,9 +115,6 @@ class ConversationActor @Inject()(
       log.debug("received Respond event")
       log.debug("looking up address: " + text)
       lazy val f = addressService.getAddress(text)
-//      lazy val t = after(duration = timeout, using = system.scheduler)(Future.failed(new TimeoutException("future timed out")))
-//      val fWithTimeout = Future firstCompletedOf Seq(f, t)
-//      fWithTimeout.onComplete {
       f withTimeout new TimeoutException("future timed out") onComplete {
         case Success(response) =>
           log.debug("received address lookup response:\n" + response.toJson.prettyPrint)
@@ -204,14 +201,6 @@ class ConversationActor @Inject()(
               timestamp = 1428444852L,
               elements = elements,
               address = address,
-//              address = Address(
-//                street1 = "11 Underscore Road",
-//                street2 = "",
-//                city = "Melbourne",
-//                postcode = "3000",
-//                state = "VIC",
-//                country = "Australia"
-//              ),
               summary = Summary(
                 subtotal = BigDecimal("1047.00"),
                 shippingCost = BigDecimal("25.00"),
@@ -240,6 +229,7 @@ object ConversationActor extends NamedActor {
 
   override final val name = "ConversationActor"
 
+  // events
   case class Greet(sender: String)
   case class Qualify(sender: String, productType: Option[String])
   case class Buy(sender: String, productType: String)
