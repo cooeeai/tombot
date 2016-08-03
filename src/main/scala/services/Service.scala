@@ -88,21 +88,21 @@ trait Service extends FbJsonSupport with WitJsonSupport {
 
   def setupWelcomeGreeting(): Unit = {
     logger.info("Setting up welcome greeting")
-//    val payload = JsObject(
-//      "setting_type" -> JsString("greeting"),
-//      "greeting" -> JsObject(
-//        "text" -> JsString("Hi, my name is Tom")
-//      )
-//    )
     val payload = JsObject(
-      "setting_type" -> JsString("call_to_actions"),
-      "thread_state" -> JsString("new_thread"),
-      "call_to_actions" -> JsArray(
-        JsObject(
-          "payload" -> JsString("Hi, my name is Tom")
-          )
-        )
+      "setting_type" -> JsString("greeting"),
+      "greeting" -> JsObject(
+        "text" -> JsString("Hi, my name is Tom")
       )
+    )
+//    val payload = JsObject(
+//      "setting_type" -> JsString("call_to_actions"),
+//      "thread_state" -> JsString("new_thread"),
+//      "call_to_actions" -> JsArray(
+//        JsObject(
+//          "payload" -> JsString("Hi, my name is Tom")
+//          )
+//        )
+//      )
     logger.info("sending payload:\n" + payload.toJson.prettyPrint)
     for {
       request <- Marshal(payload).to[RequestEntity]
