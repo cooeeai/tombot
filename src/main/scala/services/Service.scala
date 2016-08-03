@@ -97,10 +97,11 @@ trait Service extends FbJsonSupport with WitJsonSupport {
     val payload = JsObject(
       "setting_type" -> JsString("call_to_actions"),
       "thread_state" -> JsString("new_thread"),
-      "call_to_actions" -> JsArray(JsObject(
-        "message" -> JsObject(
-          "text" -> JsString("Hi, my name is Tom")
-        )))
+      "call_to_actions" -> JsArray(
+        JsObject(
+          "payload" -> JsString("Hi, my name is Tom")
+          )
+        )
       )
     logger.info("sending payload:\n" + payload.toJson.prettyPrint)
     for {
