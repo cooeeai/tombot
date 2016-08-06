@@ -183,7 +183,7 @@ class ConversationActor @Inject()(
                 subtitle = "Please login to use",
                 itemURL = "",
                 imageURL = s"$api/img/bot.png",
-                buttons = LoginButton(s"$api/authenticate") :: Nil
+                buttons = LoginButton(s"$api/authorize") :: Nil
               ) :: Nil
             )
           )
