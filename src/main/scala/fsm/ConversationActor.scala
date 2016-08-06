@@ -180,9 +180,9 @@ class ConversationActor @Inject()(
               templateType = "generic",
               elements = Element(
                 title = "Welcome to T-Corp",
-                subtitle = "",
+                subtitle = "Please login to use",
                 itemURL = "",
-                imageURL = "",
+                imageURL = s"$api/img/bot.png",
                 buttons = LoginButton(s"$api/authenticate") :: Nil
               ) :: Nil
             )
