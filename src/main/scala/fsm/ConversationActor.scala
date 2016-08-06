@@ -74,6 +74,7 @@ class ConversationActor @Inject()(
         }
       } else {
         sendLoginMessage(sender)
+        stay
       }
     case Event(Respond(sender, _), _) =>
       log.debug("received Respond event")

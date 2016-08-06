@@ -1,7 +1,7 @@
 package facebookmessenger
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import spray.json._
+import spray.json.{JsString, _}
 
 /**
   * Created by markmo on 17/07/2016.
@@ -132,19 +132,28 @@ trait FbJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
         "title" -> JsString(p.title),
         "payload" -> p.payload
       )
+      case b: LoginButton => JsObject(
+        "type" -> JsString(b.buttonType),
+        "url" -> JsString(b.url)
+      )
     }
 
     def read(value: JsValue) = {
       value.asJsObject.getFields("type") match {
         case Seq(JsString(buttonType)) if buttonType == "web_url" =>
           value.asJsObject.getFields("title", "url") match {
-            case Seq(JsString(title), JsString(url)) => LinkButton(title.toString, url.toString)
+            case Seq(JsString(title), JsString(url)) => LinkButton(title, url)
             case _ => throw DeserializationException("LinkButton expected")
           }
         case Seq(JsString(buttonType)) if buttonType == "postback" =>
           value.asJsObject.getFields("title", "payload") match {
-            case Seq(JsString(title), payload: JsValue) => PostbackButton(title.toString, payload)
+            case Seq(JsString(title), payload: JsValue) => PostbackButton(title, payload)
             case _ => throw DeserializationException("PostbackButton expected")
+          }
+        case Seq(JsString(buttonType)) if buttonType == "account_link" =>
+          value.asJsObject.getFields("url") match {
+            case Seq(JsString(url)) => LoginButton(url)
+            case _ => throw DeserializationException("LoginButton expected")
           }
         case _ => throw DeserializationException("Button expected")
       }
