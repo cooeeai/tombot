@@ -1,0 +1,23 @@
+@(api: String, redirectURI: String, successURI: String)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+</head>
+<body>
+  <form action="@api" method="post">
+    <div>
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username">
+    </div>
+    <div>
+      <label for="password">Password:</label>
+      <input type="text" id="password" name="password">
+    </div>
+    <input type="hidden" name="redirect-uri" value="@redirectURI">
+    <input type="hidden" name="redirect-success-uri" value="@successURI">
+    <button type="submit">Login</button>
+  </form>
+</body>
+</html>

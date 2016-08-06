@@ -12,6 +12,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.PathMatchers.Segment
 import akka.http.scaladsl.server.{MalformedRequestContentRejection, RejectionHandler}
 import akka.http.scaladsl.unmarshalling.Unmarshal
+import akkahttptwirl.TwirlSupport._
 import akka.stream.ActorMaterializer
 import akkaguice.{AkkaModule, GuiceAkkaExtension}
 import com.google.inject.Guice
@@ -288,6 +289,19 @@ trait Service extends FbJsonSupport with WitJsonSupport {
           // a 200 status code must be sent back within 20 seconds,
           // otherwise the request will timeout on the Facebook end
           complete(StatusCodes.OK)
+        }
+      }
+    } ~
+    path("authorize") {
+      get {
+        parameters("account_linking_token", "redirect_uri") { (token, redirectURI) =>
+          // Authorization Code, per user, passed to the Account Linking callback
+          val authCode = "1234567890"
+          val successURI = s"$redirectURI&authorization_code=$authCode"
+          val api = config.getString("api.host")
+          complete {
+            html.login.render(s"$api/authenticate", redirectURI, successURI)
+          }
         }
       }
     } ~
