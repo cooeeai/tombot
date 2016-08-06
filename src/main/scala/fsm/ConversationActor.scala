@@ -9,6 +9,7 @@ import akka.pattern.after
 import akka.stream.ActorMaterializer
 import akkaguice.NamedActor
 import com.google.inject.Inject
+import com.typesafe.config.Config
 import facebookmessenger._
 import fsm.ConversationActor.{Data, State}
 import googlemaps.MapsJsonSupport
@@ -26,6 +27,7 @@ class ConversationActor @Inject()(
                                    catalogService: CatalogService,
                                    addressService: AddressService,
                                    paymentService: PaymentService,
+                                   config: Config,
                                    implicit val system: ActorSystem)
   extends Actor
     with ActorLogging
