@@ -26,15 +26,18 @@ case class Response(obj: String, entry: List[Entry])
 
 sealed trait Button {
   val buttonType: String
-  val title: String
 }
 
-case class LinkButton(override val title: String, url: String) extends Button {
+case class LinkButton(title: String, url: String) extends Button {
   override val buttonType = "web_url"
 }
 
-case class PostbackButton(override val title: String, payload: JsValue) extends Button {
+case class PostbackButton(title: String, payload: JsValue) extends Button {
   override val buttonType = "postback"
+}
+
+case class LoginButton(url: String) extends Button {
+  override val buttonType = "account_link"
 }
 
 case class Element(title: String, subtitle: String, itemURL: String, imageURL: String, buttons: List[Button])

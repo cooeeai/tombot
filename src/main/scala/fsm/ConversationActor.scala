@@ -52,6 +52,8 @@ class ConversationActor @Inject()(
 
   def token = System.getenv("FB_PAGE_ACCESS_TOKEN")
 
+  var isAuthenticated = false
+
   startWith(Start, Uninitialized)
 
   when(Start) {
@@ -61,13 +63,17 @@ class ConversationActor @Inject()(
       stay
     case Event(Qualify(sender, productType), _) =>
       log.debug("received Buy event")
-      productType match {
-        case Some(typ) =>
-          sendTextMessage(sender, s"What type of $typ did you have in mind?")
-          goto(Qualifying) using Offer
-        case None =>
-          sendTextMessage(sender, "What did you want to buy?")
-          stay
+      if (isAuthenticated) {
+        productType match {
+          case Some(typ) =>
+            sendTextMessage(sender, s"What type of $typ did you have in mind?")
+            goto(Qualifying) using Offer
+          case None =>
+            sendTextMessage(sender, "What did you want to buy?")
+            stay
+        }
+      } else {
+        sendLoginMessage(sender)
       }
     case Event(Respond(sender, _), _) =>
       log.debug("received Respond event")
@@ -146,6 +152,38 @@ class ConversationActor @Inject()(
       "recipient" -> JsObject("id" -> JsString(sender)),
       "message" -> messageData
     )
+    log.debug("sending payload:\n" + payload.toJson.prettyPrint)
+    for {
+      request <- Marshal(payload).to[RequestEntity]
+      response <- http.singleRequest(HttpRequest(
+        method = HttpMethods.POST,
+        uri = s"https://graph.facebook.com/v2.6/me/messages?access_token=$token",
+        entity = request))
+      entity <- Unmarshal(response.entity).to[String]
+    } yield ()
+  }
+
+  def sendLoginMessage(sender: String): Unit = {
+    log.info("sending login message to sender: " + sender)
+    val payload =
+      GenericMessageTemplate(
+        Recipient(sender),
+        GenericMessage(
+          Attachment(
+            attachmentType = "template",
+            payload = AttachmentPayload(
+              templateType = "generic",
+              elements = Element(
+                title = "Welcome to T-Corp",
+                subtitle = "",
+                itemURL = "",
+                imageURL = "",
+                buttons = LoginButton("") :: Nil
+              ) :: Nil
+            )
+          )
+        )
+      )
     log.debug("sending payload:\n" + payload.toJson.prettyPrint)
     for {
       request <- Marshal(payload).to[RequestEntity]
