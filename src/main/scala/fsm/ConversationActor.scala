@@ -52,6 +52,8 @@ class ConversationActor @Inject()(
 
   def token = System.getenv("FB_PAGE_ACCESS_TOKEN")
 
+  val api = config.getString("api.host")
+
   var isAuthenticated = false
 
   startWith(Start, Uninitialized)
@@ -179,7 +181,7 @@ class ConversationActor @Inject()(
                 subtitle = "",
                 itemURL = "",
                 imageURL = "",
-                buttons = LoginButton("") :: Nil
+                buttons = LoginButton(s"$api/authenticate") :: Nil
               ) :: Nil
             )
           )
