@@ -291,7 +291,8 @@ object ConversationActor extends NamedActor {
   val random = new Random
 
   val shrugs = Vector(
-    "I'm sorry, I did not understand. I don't even have arms.",
+    //"I'm sorry, I did not understand. I don't even have arms.",
+    "I'm sorry, I did not understand. These arms aren't even real.",
     "I'm not that bright sometimes",
     "That's outside my circle of knowledge"
   )

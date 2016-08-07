@@ -273,7 +273,7 @@ trait Service extends FbJsonSupport with WitJsonSupport {
                       } else if (f.contains("read")) {
                         logger.info("received message read event")
                       } else if (f.contains("account_linking")) {
-                        logger.info("received account link")
+                        logger.info("received account linking event")
                         receivedAccountLink(event.convertTo[AccountLinkingEvent])
                       } else {
                         logger.error("webhook received unknown messaging event:\n" + event.prettyPrint)
@@ -294,7 +294,8 @@ trait Service extends FbJsonSupport with WitJsonSupport {
     } ~
     path("authorize") {
       get {
-        parameters("account_linking_token", "redirect_uri") { (token, redirectURI) =>
+        parameters("redirect_uri", "account_linking_token") { (redirectURI, token) =>
+          logger.info("received account linking callback")
           // Authorization Code, per user, passed to the Account Linking callback
           val authCode = "1234567890"
           val successURI = s"$redirectURI&authorization_code=$authCode"
