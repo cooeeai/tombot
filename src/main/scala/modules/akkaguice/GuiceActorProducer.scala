@@ -1,4 +1,4 @@
-package akkaguice
+package modules.akkaguice
 
 import akka.actor.{Actor, IndirectActorProducer}
 import com.google.inject.name.Names

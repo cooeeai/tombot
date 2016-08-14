@@ -2,7 +2,7 @@ package services
 
 import com.google.inject.Inject
 import com.typesafe.config.Config
-import facebookmessenger.{Element, LinkButton, PostbackButton}
+import apis.facebookmessenger.{Element, LinkButton, PostbackButton}
 import spray.json.JsString
 
 /**
@@ -18,15 +18,15 @@ class CatalogService @Inject()(config: Config) {
       subtitle = "4.7 inch (diagonal) Retina HD display",
       itemURL = "https://www.telstra.com.au/mobile-phones/mobiles-on-a-plan/iphone-6s",
       imageURL = s"$api/img/iphone-6s-front-spacegrey-400.jpg",
-      buttons =
+      buttons = List(
         LinkButton(
           title = "More info",
           url = "https://www.telstra.com.au/mobile-phones/mobiles-on-a-plan/iphone-6s"
-        ) ::
+        ),
         PostbackButton(
           title = "Buy",
           payload = JsString("Order for iPhone 6s 64GB Space Grey")
-        ) :: Nil
+        ))
     ) ::
     Element(
       title = "iPhone 6s Plus 64GB Silver",

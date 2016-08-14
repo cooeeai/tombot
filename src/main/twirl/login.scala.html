@@ -1,4 +1,4 @@
-@(api: String, redirectURI: String, successURI: String)
+@(api: String, sender: String, redirectURI: String, successURI: String)
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,10 +13,11 @@
     </div>
     <div>
       <label for="password">Password:</label>
-      <input type="text" id="password" name="password">
+      <input type="password" id="password" name="password">
     </div>
-    <input type="hidden" name="redirect-uri" value="@redirectURI">
-    <input type="hidden" name="redirect-success-uri" value="@successURI">
+    <input type="hidden" name="sender" value="@sender">
+    <input type="hidden" name="redirectURI" value="@redirectURI">
+    <input type="hidden" name="successURI" value="@successURI">
     <button type="submit">Login</button>
   </form>
 </body>

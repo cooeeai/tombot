@@ -1,8 +1,9 @@
-package fsm
+package modules.conversation
 
 import akka.actor.Actor
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names
+import conversationengine.ConversationActor
 import net.codingwell.scalaguice.ScalaModule
 
 /**
@@ -10,8 +11,7 @@ import net.codingwell.scalaguice.ScalaModule
   */
 class ConversationModule extends AbstractModule with ScalaModule {
 
-  override def configure(): Unit = {
+  override def configure(): Unit =
     bind[Actor].annotatedWith(Names.named(ConversationActor.name)).to[ConversationActor]
-  }
 
 }

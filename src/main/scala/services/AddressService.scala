@@ -9,20 +9,23 @@ import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.ActorMaterializer
 import com.google.inject.Inject
 import com.typesafe.config.Config
-import googlemaps.{MapsJsonSupport, MapsResponse}
+import apis.googlemaps.{MapsJsonSupport, MapsResponse}
 
 import scala.concurrent.Future
 
 /**
   * Created by markmo on 30/07/2016.
   */
-class AddressService @Inject()(config: Config, implicit val system: ActorSystem)
+class AddressService @Inject()(config: Config,
+                               implicit val system: ActorSystem)
   extends MapsJsonSupport {
 
+  import system.dispatcher
+
   implicit val materializer = ActorMaterializer()
-  implicit val executionContext = system.dispatcher
 
   val url = config.getString("maps.api.url")
+
   val token = System.getenv("GOOGLE_MAPS_API_TOKEN")
 
   def getAddress(text: String): Future[MapsResponse] = {

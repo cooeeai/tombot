@@ -1,9 +1,10 @@
-package akkaguice
+package modules.akkaguice
 
 import akka.actor.ActorSystem
-import akkaguice.AkkaModule.ActorSystemProvider
+import akka.stream.{ActorMaterializer, Materializer}
 import com.google.inject.{AbstractModule, Inject, Injector, Provider}
 import com.typesafe.config.Config
+import modules.akkaguice.AkkaModule.{ActorSystemProvider, MaterializerProvider}
 import net.codingwell.scalaguice.ScalaModule
 
 /**
@@ -20,12 +21,17 @@ object AkkaModule {
     }
   }
 
+  class MaterializerProvider @Inject()(val system: ActorSystem) extends Provider[Materializer] {
+    override def get() = ActorMaterializer()(system)
+  }
+
 }
 
 class AkkaModule extends AbstractModule with ScalaModule {
 
   override def configure(): Unit = {
     bind[ActorSystem].toProvider[ActorSystemProvider].asEagerSingleton()
+    bind[Materializer].toProvider[MaterializerProvider].asEagerSingleton()
   }
 
 }

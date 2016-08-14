@@ -1,8 +1,8 @@
-package config
+package modules.config
 
 import com.google.inject.{AbstractModule, Provider}
 import com.typesafe.config.{Config, ConfigFactory}
-import config.ConfigModule.ConfigProvider
+import modules.config.ConfigModule.ConfigProvider
 import net.codingwell.scalaguice.ScalaModule
 
 /**
@@ -19,13 +19,12 @@ object ConfigModule {
 /**
   * Binds the application configuration to the [[Config]] interface.
   *
-  * The config is bound as an eager singleton so that errors in the config are detected
+  * The modules.config is bound as an eager singleton so that errors in the modules.config are detected
   * as early as possible.
   */
 class ConfigModule extends AbstractModule with ScalaModule {
 
-  override def configure(): Unit = {
+  override def configure(): Unit =
     bind[Config].toProvider[ConfigProvider].asEagerSingleton()
-  }
 
 }

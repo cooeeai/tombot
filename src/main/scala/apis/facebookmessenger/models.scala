@@ -1,7 +1,7 @@
-package facebookmessenger
+package apis.facebookmessenger
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import spray.json.{JsString, _}
+import spray.json._
 
 /**
   * Created by markmo on 17/07/2016.
@@ -76,7 +76,7 @@ case class ReceiptMessage(attachment: ReceiptAttachment)
 
 case class ReceiptMessageTemplate(recipient: Recipient, message: ReceiptMessage)
 
-case class UserProfile(firstName: String, lastName: String, picture: String, locale: String, timezone: String, gender: String)
+case class UserProfile(firstName: String, lastName: String, picture: String, locale: String, timezone: Int, gender: String)
 
 case class Optin(ref: String)
 
@@ -90,7 +90,9 @@ case class AccountLinking(status: String, authorizationCode: Option[String])
 
 case class AccountLinkingEvent(sender: Sender, recipient: Recipient, timestamp: Long, accountLinking: AccountLinking)
 
-trait FbJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
+case class UserPsid(id: String, recipient: String)
+
+trait FacebookJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val senderJsonFormat = jsonFormat1(Sender)
   implicit val recipientJsonFormat = jsonFormat1(Recipient)
   implicit val messageJsonFormat = jsonFormat3(Message)
@@ -118,6 +120,7 @@ trait FbJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val messageDeliveredEventJsonFormat = jsonFormat3(MessageDeliveredEvent)
   implicit val accountLinkingJsonFormat = jsonFormat(AccountLinking, "status", "authorization_code")
   implicit val accountLinkingEventJsonFormat = jsonFormat(AccountLinkingEvent, "sender", "recipient", "timestamp", "account_linking")
+  implicit val userPsidJsonFormat = jsonFormat2(UserPsid)
 
   implicit object buttonJsonFormat extends RootJsonFormat[Button] {
 

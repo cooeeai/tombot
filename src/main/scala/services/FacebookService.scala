@@ -1,63 +1,46 @@
 package services
 
-import java.net.URLEncoder
-
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.headers.{Authorization, OAuth2BearerToken}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.PathMatchers.Segment
-import akka.http.scaladsl.server.{MalformedRequestContentRejection, RejectionHandler}
 import akka.http.scaladsl.unmarshalling.Unmarshal
+import akka.stream.Materializer
 import akkahttptwirl.TwirlSupport._
-import akka.stream.ActorMaterializer
-import akkaguice.{AkkaModule, GuiceAkkaExtension}
-import com.google.inject.Guice
+import com.google.inject.Inject
 import com.typesafe.config.Config
-import config.ConfigModule
-import facebookmessenger._
-import fsm.ConversationActor.{Buy, Greet, Qualify, Respond}
-import fsm.{ConversationActor, ConversationModule}
-import net.codingwell.scalaguice.InjectorExtensions._
+import apis.facebookmessenger._
+import conversationengine.ConversationActor._
 import spray.json._
 import spray.json.lenses.JsonLenses._
-import witapi.{Meaning, WitJsonSupport}
 
-import scala.concurrent.Future
+import scala.concurrent._
 
 /**
   * Created by markmo on 17/07/2016.
   */
-trait Service extends FbJsonSupport with WitJsonSupport {
+class FacebookService @Inject()(config: Config,
+                                logger: LoggingAdapter,
+                                intentService: IntentService,
+                                conversationService: ConversationService,
+                                userService: UserService,
+                                implicit val system: ActorSystem,
+                                implicit val fm: Materializer)
+  extends FacebookJsonSupport {
 
-  val injector = Guice.createInjector(
-    new ConfigModule(),
-    new AkkaModule(),
-    new ConversationModule()
-  )
-
-  implicit val system = injector.instance[ActorSystem]
-  implicit val materializer = ActorMaterializer()
-  implicit val executionContext = system.dispatcher
+  import StatusCodes._
+  import conversationService._
+  import intentService._
+  import system.dispatcher
 
   val http = Http()
 
-  def config: Config
+  val api = config.getString("api.host")
 
-  val logger: LoggingAdapter
-
-  def catalogService = new CatalogService(config)
-
-  def paymentService = new PaymentService(config)
-
-  def fbApiToken = System.getenv("FB_PAGE_ACCESS_TOKEN")
-
-  def witApiToken = System.getenv("WIT_AI_API_TOKEN")
-
-  val fsm = system.actorOf(GuiceAkkaExtension(system).props(ConversationActor.name))
+  val accessToken = System.getenv("FB_PAGE_ACCESS_TOKEN")
 
   def sendTextMessage(sender: String, text: String): Unit = {
     logger.info("sending text message: [" + text + "] to sender: " + sender)
@@ -71,19 +54,30 @@ trait Service extends FbJsonSupport with WitJsonSupport {
       request <- Marshal(payload).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.POST,
-        uri = s"https://graph.facebook.com/v2.6/me/messages?access_token=$fbApiToken",
+        uri = s"https://graph.facebook.com/v2.6/me/messages?access_token=$accessToken",
         entity = request))
       entity <- Unmarshal(response.entity).to[String]
     } yield ()
   }
 
-  def getUserProfile(userId: String): Future[UserProfile] = {
-    logger.info("getting user profile")
+  // don't know why I can't unmarshal to UserProfile or JsValue
+  def getUserProfile(userId: String): Future[String] = {
+    logger.info("getting user profile for id: " + userId)
     for {
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.GET,
-        uri = s"https://graph.facebook.com/v2.6/me/$userId?fields=first_name,last_name,profile_pic,locale,timezone,gender&access_token=$fbApiToken"))
-      entity <- Unmarshal(response.entity).to[UserProfile]
+        uri = s"https://graph.facebook.com/v2.6/$userId?fields=first_name,last_name,profile_pic,locale,timezone,gender&access_token=$accessToken"))
+      entity <- Unmarshal(response.entity).to[String]
+    } yield entity
+  }
+
+  def getSenderId(accountLinkingToken: String): Future[UserPsid] = {
+    logger.info("getting sender id")
+    for {
+      response <- http.singleRequest(HttpRequest(
+        method = HttpMethods.GET,
+        uri = s"https://graph.facebook.com/v2.6/me?access_token=$accessToken&fields=recipient&account_linking_token=$accountLinkingToken"))
+      entity <- Unmarshal(response.entity).to[UserPsid]
     } yield entity
   }
 
@@ -109,7 +103,7 @@ trait Service extends FbJsonSupport with WitJsonSupport {
       request <- Marshal(payload).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.POST,
-        uri = s"https://graph.facebook.com/v2.6/me/thread_settings?access_token=$fbApiToken",
+        uri = s"https://graph.facebook.com/v2.6/me/thread_settings?access_token=$accessToken",
         entity = request))
       entity <- Unmarshal(response.entity).to[String]
     } yield ()
@@ -153,7 +147,9 @@ trait Service extends FbJsonSupport with WitJsonSupport {
     val sender = event.sender.id
     val recipient = event.recipient.id
     val status = event.accountLinking.status
-    val authCode = event.accountLinking.authorizationCode
+    val authCode = event.accountLinking.authorizationCode.get
+
+    converse(sender, Welcome(sender))
 
     logger.info(
       s"""
@@ -163,7 +159,7 @@ trait Service extends FbJsonSupport with WitJsonSupport {
     )
   }
 
-  def receivedMessage(data: JsObject, event: JsValue): Unit = {
+  def receivedMessage(data: JsObject, event: JsValue, user: User): Unit = {
     val message = event.extract[JsObject]('message)
     val isEcho = message.extract[Boolean](optionalField("is_echo")).getOrElse(false)
     val quickReply = message.extract[Boolean](optionalField("quick_reply")).getOrElse(false)
@@ -179,7 +175,7 @@ trait Service extends FbJsonSupport with WitJsonSupport {
       val response = data.convertTo[Response]
       val messagingEvents = response.entry.head.messaging
       for (event <- messagingEvents) {
-        val sender = event.sender.id
+        val sender = userService.getUserIdOrElse(event.sender.id)
         if (event.message.isDefined) {
           logger.info("event.message is defined")
           val text = event.message.get.text
@@ -190,9 +186,9 @@ trait Service extends FbJsonSupport with WitJsonSupport {
             // how can we bypass this when not needed
             val intent = meaning.getIntent
             intent match {
-              case Some("buy") => fsm ! Qualify(sender, meaning.getEntityValue("product_type"))
-              case Some("greet") => fsm ! Greet(sender)
-              case _ => fsm ! Respond(sender, text)
+              case Some("buy") => converse(sender, Qualify(sender, meaning.getEntityValue("product_type")))
+              case Some("greet") => converse(sender, Greet(sender, user))
+              case _ => converse(sender, Respond(sender, text))
             }
           }
         }
@@ -200,41 +196,36 @@ trait Service extends FbJsonSupport with WitJsonSupport {
     }
   }
 
-  def getIntent(text: String): Future[Meaning] = {
-    logger.info("getting intent of [" + text + "]")
-    val url = config.getString("wit.api.url")
-    val version = config.getString("wit.api.version")
-    val authorization = Authorization(OAuth2BearerToken(witApiToken))
-    for {
-      response <- http.singleRequest(HttpRequest(
-        method = HttpMethods.GET,
-        uri = s"$url/message?v=$version&q=${URLEncoder.encode(text, "UTF-8")}",
-        headers = List(authorization)))
-      entity <- Unmarshal(response.entity).to[Meaning]
-    } yield entity
-  }
-
-  import StatusCodes._
-
-  implicit def myRejectionHandler =
-    RejectionHandler.newBuilder().handle {
-      case MalformedRequestContentRejection(message, e) =>
-        logger.error(message)
-        extractRequest { request =>
-          logger.error(request._4.toString)
-          complete(BadRequest)
-        }
-      case e =>
-        logger.error(e.toString)
-        complete(BadRequest)
+  def processEvent(data: JsObject, event: JsValue, sender: String, user: User) = {
+    val f = event.asJsObject.fields
+    if (f.contains("optin")) {
+      logger.info("received authentication event")
+      receivedAuthentication(event.convertTo[AuthenticationEvent])
+    } else if (f.contains("message")) {
+      logger.info("received message:\n" + event.prettyPrint)
+      receivedMessage(data, event, user)
+    } else if (f.contains("delivery")) {
+      logger.info("received delivery confirmation")
+      receivedDeliveryConfirmation(event.convertTo[MessageDeliveredEvent])
+    } else if (f.contains("postback")) {
+      logger.info("received postback")
+      //sendTextMessage(sender, event.postback.get.payload)
+      converse(sender, Buy(sender, "iphone 6s plus"))
+    } else if (f.contains("read")) {
+      logger.info("received message read event")
+    } else if (f.contains("account_linking")) {
+      logger.info("received account linking event")
+      receivedAccountLink(event.convertTo[AccountLinkingEvent])
+    } else {
+      logger.error("webhook received unknown messaging event:\n" + event.prettyPrint)
     }
-      .result()
+  }
 
   val routes =
     path("webhook") {
       get {
-        parameters("hub.verify_token", "hub.challenge") { (token, challenge) =>
-          if (token == "dingdong") {
+        parameters("hub.verify_token", "hub.challenge") { (verifyToken, challenge) =>
+          if (verifyToken == "dingdong") {
             complete(challenge)
           } else {
             complete("Error, invalid token")
@@ -255,28 +246,19 @@ trait Service extends FbJsonSupport with WitJsonSupport {
                   messagingEvent.asJsObject.fields("messaging") match {
                     // Iterate over each messaging event
                     case JsArray(messaging) => messaging foreach { event =>
-                      val f = event.asJsObject.fields
-                      if (f.contains("optin")) {
-                        logger.info("received authentication event")
-                        receivedAuthentication(event.convertTo[AuthenticationEvent])
-                      } else if (f.contains("message")) {
-                        logger.info("received message:\n" + event.prettyPrint)
-                        receivedMessage(data, event)
-                      } else if (f.contains("delivery")) {
-                        logger.info("received delivery confirmation")
-                        receivedDeliveryConfirmation(event.convertTo[MessageDeliveredEvent])
-                      } else if (f.contains("postback")) {
-                        logger.info("received postback")
-                        //sendTextMessage(sender, event.postback.get.payload)
-                        val sender = event.extract[String]('sender / 'id)
-                        fsm ! Buy(sender, "iphone 6s plus")
-                      } else if (f.contains("read")) {
-                        logger.info("received message read event")
-                      } else if (f.contains("account_linking")) {
-                        logger.info("received account linking event")
-                        receivedAccountLink(event.convertTo[AccountLinkingEvent])
+                      val sender = event.extract[String]('sender / 'id)
+                      if (userService.hasUser(sender)) {
+                        val user = userService.getUser(sender).get
+                        processEvent(data, event, sender, user)
                       } else {
-                        logger.error("webhook received unknown messaging event:\n" + event.prettyPrint)
+                        getUserProfile(sender) map { resp =>
+                          val json = resp.parseJson
+                          logger.info("found profile:\n" + json.prettyPrint)
+                          val profile = json.convertTo[UserProfile]
+                          val user = User(sender, profile)
+                          userService.setUser(sender, user)
+                          processEvent(data, event, sender, user)
+                        }
                       }
                     }
                     case _ => logger.error("invalid content")
@@ -288,20 +270,49 @@ trait Service extends FbJsonSupport with WitJsonSupport {
           }
           // a 200 status code must be sent back within 20 seconds,
           // otherwise the request will timeout on the Facebook end
-          complete(StatusCodes.OK)
+          complete(OK)
         }
       }
     } ~
     path("authorize") {
       get {
-        parameters("redirect_uri", "account_linking_token") { (redirectURI, token) =>
+        logger.info("authorize get request")
+        parameters("redirect_uri", "account_linking_token") { (redirectURI, accountLinkingToken) =>
           logger.info("received account linking callback")
           // Authorization Code, per user, passed to the Account Linking callback
           val authCode = "1234567890"
           val successURI = s"$redirectURI&authorization_code=$authCode"
           val api = config.getString("api.host")
           complete {
-            html.login.render(s"$api/authenticate", redirectURI, successURI)
+            html.login.render(s"$api/authenticate", accountLinkingToken, redirectURI, successURI)
+          }
+        }
+      }
+    } ~
+    path("authenticate") {
+      post {
+        logger.info("authentication request posted")
+        // requests that don’t have issues are using HttpEntity.Strict with application/x-www-form-urlencoded
+        // see https://github.com/akka/akka/issues/18591
+        //formFields('username, 'password, 'redirectURI, 'successURI) { (username, password, redirectURI, successURI) =>
+        entity(as[FormData]) { form =>
+          val f = form.fields.toMap
+          // the following will throw an error if any field is missing
+          val username = f("username")
+          val password = f("password")
+          val sender = f("sender") // account_linking_token
+        val redirectURI = f("redirectURI")
+          val successURI = f("successURI")
+          userService.authenticate(username, password) match {
+            case Some(user) =>
+              logger.debug("login successful")
+              getSenderId(sender) map { psid =>
+                userService.setUser(psid.recipient, user)
+              }
+              redirect(successURI, Found)
+            case None =>
+              logger.debug("login failed")
+              redirect(redirectURI, Found)
           }
         }
       }

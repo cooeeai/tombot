@@ -1,7 +1,7 @@
-package googlemaps
+package apis.googlemaps
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import facebookmessenger.Address
+import apis.facebookmessenger.Address
 import spray.json.DefaultJsonProtocol
 
 /**

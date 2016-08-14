@@ -1,4 +1,4 @@
-package akkaguice
+package modules.akkaguice
 
 import akka.actor._
 import com.google.inject.Injector

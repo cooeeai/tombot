@@ -1,4 +1,4 @@
-package fsm
+package conversationengine
 
 import akka.actor.{Actor, ActorLogging, ActorSystem, FSM}
 import akka.http.scaladsl.Http
@@ -6,14 +6,14 @@ import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model.{HttpMethods, HttpRequest, RequestEntity}
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.pattern.after
-import akka.stream.ActorMaterializer
-import akkaguice.NamedActor
+import akka.stream.Materializer
+import modules.akkaguice.NamedActor
 import com.google.inject.Inject
 import com.typesafe.config.Config
-import facebookmessenger._
-import fsm.ConversationActor.{Data, State}
-import googlemaps.MapsJsonSupport
-import services.{AddressService, CatalogService, PaymentService}
+import apis.facebookmessenger._
+import conversationengine.ConversationActor.{Data, State}
+import apis.googlemaps.MapsJsonSupport
+import services.{AddressService, CatalogService, PaymentService, User}
 import spray.json._
 
 import scala.concurrent._
@@ -23,22 +23,20 @@ import scala.util.{Failure, Random, Success}
 /**
   * Created by markmo on 27/07/2016.
   */
-class ConversationActor @Inject()(
-                                   catalogService: CatalogService,
-                                   addressService: AddressService,
-                                   paymentService: PaymentService,
-                                   config: Config,
-                                   implicit val system: ActorSystem)
+class ConversationActor @Inject()(config: Config,
+                                  catalogService: CatalogService,
+                                  addressService: AddressService,
+                                  paymentService: PaymentService,
+                                  implicit val system: ActorSystem,
+                                  implicit val fm: Materializer)
   extends Actor
     with ActorLogging
-    with FbJsonSupport
+    with FacebookJsonSupport
     with MapsJsonSupport
     with FSM[State, Data] {
 
   import ConversationActor._
-
-  implicit val materializer = ActorMaterializer()
-  implicit val executionContext = system.dispatcher
+  import system.dispatcher
 
   implicit val timeout = 20.second
 
@@ -61,10 +59,6 @@ class ConversationActor @Inject()(
   startWith(Start, Uninitialized)
 
   when(Start) {
-    case Event(Greet(sender), _) =>
-      log.debug("received Greet event")
-      greet(sender)
-      stay
     case Event(Qualify(sender, productType), _) =>
       log.debug("received Buy event")
       if (isAuthenticated) {
@@ -80,20 +74,13 @@ class ConversationActor @Inject()(
         sendLoginMessage(sender)
         stay
       }
-    case Event(Respond(sender, _), _) =>
-      log.debug("received Respond event")
-      shrug(sender)
-      stay
-    case _ =>
-      log.error("invalid event")
+    case Event(Welcome(sender), _) =>
+      log.debug("received Authenticate event")
+      sendTextMessage(sender, "Welcome, login successful")
       stay
   }
 
   when(Qualifying) {
-    case Event(Greet(sender), _) =>
-      log.debug("received Greet event")
-      greet(sender)
-      stay
     case Event(Qualify(sender, productType), _) =>
       log.debug("received Qualify event")
       productType match {
@@ -109,16 +96,9 @@ class ConversationActor @Inject()(
         sendTextMessage(sender, "Sorry, I didn't understand that")
         stay
       }
-    case _ =>
-      log.error("invalid event")
-      stay
   }
 
   when(Buying) {
-    case Event(Greet(sender), _) =>
-      log.debug("received Greet event")
-      greet(sender)
-      stay
     case Event(Buy(sender, _), _) =>
       sendTextMessage(sender, "What address should I send the order to?")
       stay
@@ -137,6 +117,17 @@ class ConversationActor @Inject()(
         case Failure(e) => log.error(e.getMessage)
       }
       stay
+  }
+
+  whenUnhandled {
+    case Event(Greet(sender, user), _) =>
+      log.debug("received Greet event")
+      greet(sender, user)
+      stay
+    case Event(Respond(sender, _), _) =>
+      log.debug("received Respond event")
+      shrug(sender)
+      stay
     case _ =>
       log.error("invalid event")
       stay
@@ -144,8 +135,8 @@ class ConversationActor @Inject()(
 
   initialize()
 
-  def greet(sender: String) =
-    sendTextMessage(sender, greetings(random.nextInt(greetings.size)))
+  def greet(sender: String, user: User) =
+    sendTextMessage(sender, greetings(random.nextInt(greetings.size)) + " " + user.firstName + "!")
 
   def shrug(sender: String) =
     sendTextMessage(sender, "¯\\_(ツ)_/¯ " + shrugs(random.nextInt(shrugs.size)))
@@ -180,7 +171,7 @@ class ConversationActor @Inject()(
               templateType = "generic",
               elements = Element(
                 title = "Welcome to T-Corp",
-                subtitle = "Please login to use",
+                subtitle = "Please login so I can serve you better",
                 itemURL = "",
                 imageURL = s"$api/img/bot.png",
                 buttons = LoginButton(s"$api/authorize") :: Nil
@@ -273,10 +264,11 @@ object ConversationActor extends NamedActor {
   override final val name = "ConversationActor"
 
   // events
-  case class Greet(sender: String)
+  case class Greet(sender: String, user: User)
   case class Qualify(sender: String, productType: Option[String])
   case class Buy(sender: String, productType: String)
   case class Respond(sender: String, message: String)
+  case class Welcome(sender: String)
 
   sealed trait State
   case object Start extends State

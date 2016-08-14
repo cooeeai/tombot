@@ -1,4 +1,4 @@
-package witapi
+package apis.witapi
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import spray.json.DefaultJsonProtocol

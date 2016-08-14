@@ -2,7 +2,7 @@ package services
 
 import com.google.inject.Inject
 import com.typesafe.config.Config
-import facebookmessenger.ReceiptElement
+import apis.facebookmessenger.ReceiptElement
 
 /**
   * Created by markmo on 20/07/2016.
