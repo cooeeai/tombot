@@ -7,12 +7,12 @@ import akka.http.scaladsl.server.{MalformedRequestContentRejection, RejectionHan
 import akka.stream.ActorMaterializer
 import com.google.inject.Guice
 import com.typesafe.config.Config
+import controllers.{FacebookController, SkypeController}
 import modules.akkaguice.AkkaModule
 import modules.config.ConfigModule
 import modules.conversation.ConversationModule
 import modules.logging.LoggingModule
 import net.codingwell.scalaguice.InjectorExtensions._
-import services.{FacebookService, SkypeService}
 
 import scala.util.Properties
 
@@ -50,16 +50,16 @@ object Main extends App {
     }
       .result()
 
-  val facebookService = injector.instance[FacebookService]
-  val skypeService = injector.instance[SkypeService]
+  val facebookController = injector.instance[FacebookController]
+  val skypeController = injector.instance[SkypeController]
 
   val port = Properties.envOrElse("PORT", "8080").toInt
 
   val bindingFuture =
-    http.bindAndHandle(facebookService.routes ~ skypeService.routes,
+    http.bindAndHandle(facebookController.routes ~ skypeController.routes,
       config.getString("http.interface"), config.getInt("http.port"))
 
-  facebookService.setupWelcomeGreeting()
+  facebookController.setupWelcomeGreeting()
 
 //  println("Server online at http://localhost:8080/\nPress RETURN to stop...")
 //  StdIn.readLine() // let it run until user presses return

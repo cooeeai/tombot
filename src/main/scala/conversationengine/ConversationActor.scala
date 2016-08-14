@@ -1,19 +1,13 @@
 package conversationengine
 
 import akka.actor.{Actor, ActorLogging, ActorSystem, FSM}
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.marshalling.Marshal
-import akka.http.scaladsl.model.{HttpMethods, HttpRequest, RequestEntity}
-import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.pattern.after
 import akka.stream.Materializer
-import modules.akkaguice.NamedActor
-import com.google.inject.Inject
-import com.typesafe.config.Config
-import apis.facebookmessenger._
-import conversationengine.ConversationActor.{Data, State}
 import apis.googlemaps.MapsJsonSupport
-import services.{AddressService, CatalogService, PaymentService, User}
+import com.google.inject.Inject
+import conversationengine.ConversationActor.{Data, State}
+import modules.akkaguice.NamedActor
+import services._
 import spray.json._
 
 import scala.concurrent._
@@ -23,15 +17,13 @@ import scala.util.{Failure, Random, Success}
 /**
   * Created by markmo on 27/07/2016.
   */
-class ConversationActor @Inject()(config: Config,
-                                  catalogService: CatalogService,
+class ConversationActor @Inject()(facebookService: FacebookService,
+                                  skypeService: SkypeService,
                                   addressService: AddressService,
-                                  paymentService: PaymentService,
                                   implicit val system: ActorSystem,
                                   implicit val fm: Materializer)
   extends Actor
     with ActorLogging
-    with FacebookJsonSupport
     with MapsJsonSupport
     with FSM[State, Data] {
 
@@ -48,71 +40,86 @@ class ConversationActor @Inject()(config: Config,
 
   }
 
-  val http = Http()
+  var currentPlatform = "facebook"
 
-  def token = System.getenv("FB_PAGE_ACCESS_TOKEN")
-
-  val api = config.getString("api.host")
+  var mp: MessagingProvider = facebookService
 
   var isAuthenticated = false
+
+  def testPlatformChange(platform: String, sender: String) = {
+    if (currentPlatform != platform) {
+      val oldPlatform = currentPlatform
+      mp = if (platform == "facebook") facebookService else skypeService
+      currentPlatform = platform
+      mp.sendTextMessage(sender, s"Do you want to carry on our conversation from $oldPlatform?")
+      // TODO
+    }
+  }
 
   startWith(Start, Uninitialized)
 
   when(Start) {
-    case Event(Qualify(sender, productType), _) =>
+    case Event(Qualify(platform, sender, productType), _) =>
       log.debug("received Buy event")
+      testPlatformChange(platform, sender)
       if (isAuthenticated) {
         productType match {
           case Some(typ) =>
-            sendTextMessage(sender, s"What type of $typ did you have in mind?")
+            mp.sendTextMessage(sender, s"What type of $typ did you have in mind?")
             goto(Qualifying) using Offer
           case None =>
-            sendTextMessage(sender, "What did you want to buy?")
+            mp.sendTextMessage(sender, "What did you want to buy?")
             stay
         }
       } else {
-        sendLoginMessage(sender)
+        mp.sendLoginCard(sender)
         stay
       }
-    case Event(Welcome(sender), _) =>
+    case Event(Welcome(platform, sender), _) =>
       log.debug("received Authenticate event")
-      sendTextMessage(sender, "Welcome, login successful")
+      testPlatformChange(platform, sender)
+      mp.sendTextMessage(sender, "Welcome, login successful")
       stay
   }
 
   when(Qualifying) {
-    case Event(Qualify(sender, productType), _) =>
+    case Event(Qualify(platform, sender, productType), _) =>
       log.debug("received Qualify event")
+      testPlatformChange(platform, sender)
       productType match {
-        case Some(typ) => sendTextMessage(sender, s"What type of $typ did you have in mind?"); stay
-        case None => sendTextMessage(sender, "What did you want to buy?"); stay
+        case Some(typ) => mp.sendTextMessage(sender, s"What type of $typ did you have in mind?"); stay
+        case None => mp.sendTextMessage(sender, "What did you want to buy?"); stay
       }
-    case Event(Respond(sender, text), _) =>
+    case Event(Respond(platform, sender, text), _) =>
       log.debug("received Respond event")
+      testPlatformChange(platform, sender)
       if (text == "iphone") {
-        sendGenericMessage(sender)
+        mp.sendHeroCard(sender)
         goto(Buying)
       } else {
-        sendTextMessage(sender, "Sorry, I didn't understand that")
+        mp.sendTextMessage(sender, "Sorry, I didn't understand that")
         stay
       }
   }
 
   when(Buying) {
-    case Event(Buy(sender, _), _) =>
-      sendTextMessage(sender, "What address should I send the order to?")
+    case Event(Buy(platform, sender, _), _) =>
+      log.debug("received Buy event")
+      testPlatformChange(platform, sender)
+      mp.sendTextMessage(sender, "What address should I send the order to?")
       stay
-    case Event(Respond(sender, text), _) =>
+    case Event(Respond(platform, sender, text), _) =>
       log.debug("received Respond event")
       log.debug("looking up address: " + text)
+      testPlatformChange(platform, sender)
       lazy val f = addressService.getAddress(text)
       f withTimeout new TimeoutException("future timed out") onComplete {
         case Success(response) =>
           log.debug("received address lookup response:\n" + response.toJson.prettyPrint)
           if (response.results.nonEmpty) {
-            sendReceiptMessage(sender, response.results.head.getAddress)
+            mp.sendReceiptCard(sender, response.results.head.getAddress)
           } else {
-            sendTextMessage(sender, "Sorry, I could not interpret that")
+            mp.sendTextMessage(sender, "Sorry, I could not interpret that")
           }
         case Failure(e) => log.error(e.getMessage)
       }
@@ -120,12 +127,14 @@ class ConversationActor @Inject()(config: Config,
   }
 
   whenUnhandled {
-    case Event(Greet(sender, user), _) =>
+    case Event(Greet(platform, sender, user), _) =>
       log.debug("received Greet event")
+      testPlatformChange(platform, sender)
       greet(sender, user)
       stay
-    case Event(Respond(sender, _), _) =>
+    case Event(Respond(platform, sender, _), _) =>
       log.debug("received Respond event")
+      testPlatformChange(platform, sender)
       shrug(sender)
       stay
     case _ =>
@@ -136,126 +145,10 @@ class ConversationActor @Inject()(config: Config,
   initialize()
 
   def greet(sender: String, user: User) =
-    sendTextMessage(sender, greetings(random.nextInt(greetings.size)) + " " + user.firstName + "!")
+    mp.sendTextMessage(sender, greetings(random.nextInt(greetings.size)) + " " + user.firstName + "!")
 
   def shrug(sender: String) =
-    sendTextMessage(sender, "¯\\_(ツ)_/¯ " + shrugs(random.nextInt(shrugs.size)))
-
-  def sendTextMessage(sender: String, text: String): Unit = {
-    log.info("sending text message: [" + text + "] to sender: " + sender)
-    val messageData = JsObject("text" -> JsString(text))
-    val payload = JsObject(
-      "recipient" -> JsObject("id" -> JsString(sender)),
-      "message" -> messageData
-    )
-    log.debug("sending payload:\n" + payload.toJson.prettyPrint)
-    for {
-      request <- Marshal(payload).to[RequestEntity]
-      response <- http.singleRequest(HttpRequest(
-        method = HttpMethods.POST,
-        uri = s"https://graph.facebook.com/v2.6/me/messages?access_token=$token",
-        entity = request))
-      entity <- Unmarshal(response.entity).to[String]
-    } yield ()
-  }
-
-  def sendLoginMessage(sender: String): Unit = {
-    log.info("sending login message to sender: " + sender)
-    val payload =
-      GenericMessageTemplate(
-        Recipient(sender),
-        GenericMessage(
-          Attachment(
-            attachmentType = "template",
-            payload = AttachmentPayload(
-              templateType = "generic",
-              elements = Element(
-                title = "Welcome to T-Corp",
-                subtitle = "Please login so I can serve you better",
-                itemURL = "",
-                imageURL = s"$api/img/bot.png",
-                buttons = LoginButton(s"$api/authorize") :: Nil
-              ) :: Nil
-            )
-          )
-        )
-      )
-    log.debug("sending payload:\n" + payload.toJson.prettyPrint)
-    for {
-      request <- Marshal(payload).to[RequestEntity]
-      response <- http.singleRequest(HttpRequest(
-        method = HttpMethods.POST,
-        uri = s"https://graph.facebook.com/v2.6/me/messages?access_token=$token",
-        entity = request))
-      entity <- Unmarshal(response.entity).to[String]
-    } yield ()
-  }
-
-  def sendGenericMessage(sender: String): Unit = {
-    log.info("sending generic message to sender: " + sender)
-    val elements = catalogService.getElements
-    val payload =
-      GenericMessageTemplate(
-        Recipient(sender),
-        GenericMessage(
-          Attachment(
-            attachmentType = "template",
-            payload = AttachmentPayload(templateType = "generic", elements = elements)
-          )
-        )
-      )
-    log.debug("sending payload:\n" + payload.toJson.prettyPrint)
-    for {
-      request <- Marshal(payload).to[RequestEntity]
-      response <- http.singleRequest(HttpRequest(
-        method = HttpMethods.POST,
-        uri = s"https://graph.facebook.com/v2.6/me/messages?access_token=$token",
-        entity = request))
-      entity <- Unmarshal(response.entity).to[String]
-    } yield ()
-  }
-
-  def sendReceiptMessage(sender: String, address: Address): Unit = {
-    log.info("sending receipt message to sender: " + sender)
-    val elements = paymentService.getElements
-    val receiptId = "order" + Math.floor(Math.random() * 1000)
-    val payload =
-      ReceiptMessageTemplate(
-        Recipient(sender),
-        ReceiptMessage(
-          ReceiptAttachment(
-            attachmentType = "template",
-            payload = ReceiptPayload(
-              templateType = "receipt",
-              recipientName = "Peter Chang",
-              orderNumber = receiptId,
-              currency = "AUD",
-              paymentMethod = "Visa 1234",
-              orderURL = "",
-              timestamp = 1428444852L,
-              elements = elements,
-              address = address,
-              summary = Summary(
-                subtotal = BigDecimal("1047.00"),
-                shippingCost = BigDecimal("25.00"),
-                totalTax = BigDecimal("104.70"),
-                totalCost = BigDecimal("942.30")
-              ),
-              adjustments = List(Adjustment(name = "Coupon DAY1", amount = BigDecimal("-100.00")))
-            )
-          )
-        )
-      )
-    log.debug("sending payload:\n" + payload.toJson.prettyPrint)
-    for {
-      request <- Marshal(payload).to[RequestEntity]
-      response <- http.singleRequest(HttpRequest(
-        method = HttpMethods.POST,
-        uri = s"https://graph.facebook.com/v2.6/me/messages?access_token=$token",
-        entity = request))
-      entity <- Unmarshal(response.entity).to[String]
-    } yield ()
-  }
+    mp.sendTextMessage(sender, "¯\\_(ツ)_/¯ " + shrugs(random.nextInt(shrugs.size)))
 
 }
 
@@ -264,11 +157,11 @@ object ConversationActor extends NamedActor {
   override final val name = "ConversationActor"
 
   // events
-  case class Greet(sender: String, user: User)
-  case class Qualify(sender: String, productType: Option[String])
-  case class Buy(sender: String, productType: String)
-  case class Respond(sender: String, message: String)
-  case class Welcome(sender: String)
+  case class Greet(platform: String, sender: String, user: User)
+  case class Qualify(platform: String, sender: String, productType: Option[String])
+  case class Buy(platform: String, sender: String, productType: String)
+  case class Respond(platform: String, sender: String, message: String)
+  case class Welcome(platform: String, sender: String)
 
   sealed trait State
   case object Start extends State
