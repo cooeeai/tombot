@@ -39,11 +39,6 @@ class FacebookService @Inject()(config: Config,
 
     val payload = messageElement forSender sender withText text build()
 
-//    val messageData = JsObject("text" -> JsString(text))
-//    val payload = JsObject(
-//      "recipient" -> JsObject("id" -> JsString(sender)),
-//      "message" -> messageData
-//    )
     logger.debug("sending payload:\n" + payload.toJson.prettyPrint)
     for {
       request <- Marshal(payload).to[RequestEntity]
@@ -68,24 +63,6 @@ class FacebookService @Inject()(config: Config,
         build()
       )
 
-//    val payload =
-//      FacebookGenericMessageTemplate(
-//        FacebookRecipient(sender),
-//        FacebookGenericMessage(
-//          FacebookAttachment(
-//            attachmentType = "template",
-//            payload = FacebookGenericTemplate(
-//              elements = FacebookElement(
-//                title = "Welcome to T-Corp",
-//                subtitle = "Please login so I can serve you better",
-//                itemURL = "",
-//                imageURL = s"$api/img/bot.png",
-//                buttons = FacebookLoginButton(s"$api/authorize") :: Nil
-//              ) :: Nil
-//            )
-//          )
-//        )
-//      )
     logger.debug("sending payload:\n" + payload.toJson.prettyPrint)
     for {
       request <- Marshal(payload).to[RequestEntity]
@@ -106,16 +83,6 @@ class FacebookService @Inject()(config: Config,
         withElements elements
         build()
       )
-//    val payload =
-//      FacebookGenericMessageTemplate(
-//        FacebookRecipient(sender),
-//        FacebookGenericMessage(
-//          FacebookAttachment(
-//            attachmentType = "template",
-//            payload = FacebookGenericTemplate(elements)
-//          )
-//        )
-//      )
     logger.debug("sending payload:\n" + payload.toJson.prettyPrint)
     for {
       request <- Marshal(payload).to[RequestEntity]
@@ -145,32 +112,6 @@ class FacebookService @Inject()(config: Config,
         addAdjustment (name = "Coupon DAY1", amount = "-100.00")
         build()
       )
-//    val payload =
-//      FacebookGenericMessageTemplate(
-//        FacebookRecipient(sender),
-//        FacebookGenericMessage(
-//          FacebookAttachment(
-//            attachmentType = "template",
-//            payload = FacebookReceiptTemplate(
-//              recipientName = "Peter Chang",
-//              orderNumber = receiptId,
-//              currency = "AUD",
-//              paymentMethod = "Visa 1234",
-//              orderURL = "",
-//              timestamp = 1428444852L,
-//              elements = elements,
-//              address = address,
-//              summary = FacebookSummary(
-//                subtotal = BigDecimal("1047.00"),
-//                shippingCost = BigDecimal("25.00"),
-//                totalTax = BigDecimal("104.70"),
-//                totalCost = BigDecimal("942.30")
-//              ),
-//              adjustments = List(FacebookAdjustment(name = "Coupon DAY1", amount = BigDecimal("-100.00")))
-//            )
-//          )
-//        )
-//      )
     logger.debug("sending payload:\n" + payload.toJson.prettyPrint)
     for {
       request <- Marshal(payload).to[RequestEntity]
