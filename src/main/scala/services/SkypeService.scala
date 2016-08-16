@@ -8,7 +8,7 @@ import akka.http.scaladsl.model.headers.{Authorization, OAuth2BearerToken}
 import akka.http.scaladsl.model.{FormData, HttpMethods, HttpRequest, RequestEntity}
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.Materializer
-import apis.facebookmessenger.Address
+import apis.facebookmessenger.FacebookAddress
 import apis.skype._
 import com.google.inject.Inject
 import com.typesafe.config.Config
@@ -56,14 +56,12 @@ class SkypeService @Inject()(config: Config,
     logger.info("sending Skype signin request")
     val url = config.getString("microsoft.api.url")
     val authorization = Authorization(OAuth2BearerToken(token.get.accessToken))
-    val payload = SigninCard(
+    val payload = SkypeSigninCard(
       cardType = "message/card.signin",
-      attachments = SigninAttachment(
-        contentType = "application/vnd.microsoft.card.signin",
-        content = SigninAttachmentContent(
+      attachments = SkypeSigninAttachment(
+        SkypeSigninAttachmentContent(
           text = "You need to authorize me",
-          buttons = SkypeButton(
-            buttonType = "signin",
+          buttons = SkypeSigninButton(
             title = "Connect",
             value = s"$api/skypeauthorize?sender=$sender"
           ) :: Nil
@@ -82,7 +80,7 @@ class SkypeService @Inject()(config: Config,
 
   def sendHeroCard(sender: String): Unit = ???
 
-  def sendReceiptCard(sender: String, address: Address): Unit = ???
+  def sendReceiptCard(sender: String, address: FacebookAddress): Unit = ???
 
   def getMicrosoftToken: Future[MicrosoftToken] = {
     logger.info("getting MS token")

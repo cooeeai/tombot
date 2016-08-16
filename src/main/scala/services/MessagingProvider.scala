@@ -1,6 +1,6 @@
 package services
 
-import apis.facebookmessenger.Address
+import apis.facebookmessenger.FacebookAddress
 
 /**
   * Created by markmo on 14/08/2016.
@@ -13,6 +13,6 @@ trait MessagingProvider {
 
   def sendHeroCard(sender: String): Unit
 
-  def sendReceiptCard(sender: String, address: Address): Unit
+  def sendReceiptCard(sender: String, address: FacebookAddress): Unit
 
 }

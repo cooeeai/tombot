@@ -1,7 +1,7 @@
 package apis.googlemaps
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import apis.facebookmessenger.Address
+import apis.facebookmessenger.FacebookAddress
 import spray.json.DefaultJsonProtocol
 
 /**
@@ -28,7 +28,7 @@ case class MapsResults(addressComponents: List[AddressComponent], formattedAddre
     if (street1.isEmpty) {
       street1 = getComponent("street_number") + " " + getComponent("route")
     }
-    Address(
+    FacebookAddress(
       street1 = street1,
       street2 = "",
       city = getComponent("locality"),

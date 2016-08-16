@@ -30,7 +30,7 @@ class FacebookController @Inject()(config: Config,
   import conversationService._
   import StatusCodes._
 
-  def receivedAuthentication(event: AuthenticationEvent): Unit = {
+  def receivedAuthentication(event: FacebookAuthenticationEvent): Unit = {
     val sender = event.sender.id
     val recipient = event.recipient.id
     val timeOfAuth = event.timestamp
@@ -63,7 +63,7 @@ class FacebookController @Inject()(config: Config,
     } else if (messageAttachments.isDefined) {
       logger.info("received attachments")
     } else if (messageText.isDefined) {
-      val response = data.convertTo[Response]
+      val response = data.convertTo[FacebookResponse]
       val messagingEvents = response.entry.head.messaging
       for (event <- messagingEvents) {
         val sender = userService.getUserIdOrElse(event.sender.id)
@@ -87,7 +87,7 @@ class FacebookController @Inject()(config: Config,
     }
   }
 
-  def receivedDeliveryConfirmation(event: MessageDeliveredEvent): Unit = {
+  def receivedDeliveryConfirmation(event: FacebookMessageDeliveredEvent): Unit = {
     val sender = event.sender.id
     val recipient = event.recipient.id
     val delivery = event.delivery
@@ -101,7 +101,7 @@ class FacebookController @Inject()(config: Config,
     logger.info(s"All messages before $watermark were delivered")
   }
 
-  def receivedAccountLink(event: AccountLinkingEvent): Unit = {
+  def receivedAccountLink(event: FacebookAccountLinkingEvent): Unit = {
     val sender = event.sender.id
     val recipient = event.recipient.id
     val status = event.accountLinking.status
@@ -121,13 +121,13 @@ class FacebookController @Inject()(config: Config,
     val f = event.asJsObject.fields
     if (f.contains("optin")) {
       logger.info("received authentication event")
-      receivedAuthentication(event.convertTo[AuthenticationEvent])
+      receivedAuthentication(event.convertTo[FacebookAuthenticationEvent])
     } else if (f.contains("message")) {
       logger.info("received message:\n" + event.prettyPrint)
       receivedMessage(data, event, user)
     } else if (f.contains("delivery")) {
       logger.info("received delivery confirmation")
-      receivedDeliveryConfirmation(event.convertTo[MessageDeliveredEvent])
+      receivedDeliveryConfirmation(event.convertTo[FacebookMessageDeliveredEvent])
     } else if (f.contains("postback")) {
       logger.info("received postback")
       //facebookService.sendTextMessage(sender, event.postback.get.payload)
@@ -136,7 +136,7 @@ class FacebookController @Inject()(config: Config,
       logger.info("received message read event")
     } else if (f.contains("account_linking")) {
       logger.info("received account linking event")
-      receivedAccountLink(event.convertTo[AccountLinkingEvent])
+      receivedAccountLink(event.convertTo[FacebookAccountLinkingEvent])
     } else {
       logger.error("webhook received unknown messaging event:\n" + event.prettyPrint)
     }
@@ -177,7 +177,7 @@ class FacebookController @Inject()(config: Config,
                         facebookService.getUserProfile(sender) map { resp =>
                           val json = resp.parseJson
                           logger.info("found profile:\n" + json.prettyPrint)
-                          val profile = json.convertTo[UserProfile]
+                          val profile = json.convertTo[FacebookUserProfile]
                           val user = User(sender, profile)
                           userService.setUser(sender, user)
                           processEvent(data, event, sender, user)

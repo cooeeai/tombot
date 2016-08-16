@@ -1,6 +1,6 @@
 package services
 
-import apis.facebookmessenger.UserProfile
+import apis.facebookmessenger.FacebookUserProfile
 
 import scala.collection.mutable
 
@@ -36,7 +36,7 @@ case class User(id: String, firstName: String, lastName: String, picture: String
 
 object User {
 
-  def apply(id: String, profile: UserProfile): User =
+  def apply(id: String, profile: FacebookUserProfile): User =
     User(id, profile.firstName, profile.lastName, profile.picture, profile.locale, profile.timezone, profile.gender)
 
 }

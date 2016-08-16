@@ -2,165 +2,368 @@ package apis.facebookmessenger
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import spray.json._
+import spray.json.lenses.JsonLenses._
 
 /**
   * Created by markmo on 17/07/2016.
   */
-case class Sender(id: String)
+case class FacebookSender(id: String)
 
-case class Recipient(id: String)
+case class FacebookRecipient(id: String)
 
-case class Message(mid: String, seq: Int, text: String)
+case class FacebookMessage(mid: String, seq: Int, text: String)
 
-case class Postback(payload: String)
+case class FacebookPostback(payload: String)
 
-case class Messaging(sender: Sender,
-                     recipient: Recipient,
-                     timestamp: Long,
-                     message: Option[Message],
-                     postback: Option[Postback])
+case class FacebookMessaging(sender: FacebookSender,
+                             recipient: FacebookRecipient,
+                             timestamp: Long,
+                             message: Option[FacebookMessage],
+                             postback: Option[FacebookPostback])
 
-case class Entry(id: String, time: Long, messaging: List[Messaging])
+case class FacebookEntry(id: String, time: Long, messaging: List[FacebookMessaging])
 
-case class Response(obj: String, entry: List[Entry])
+case class FacebookResponse(obj: String, entry: List[FacebookEntry])
 
-sealed trait Button {
+sealed trait FacebookButton {
   val buttonType: String
 }
 
-case class LinkButton(title: String, url: String) extends Button {
+case class FacebookLinkButton(title: String, url: String) extends FacebookButton {
   override val buttonType = "web_url"
 }
 
-case class PostbackButton(title: String, payload: JsValue) extends Button {
+case class FacebookPostbackButton(title: String, payload: JsValue) extends FacebookButton {
   override val buttonType = "postback"
 }
 
-case class LoginButton(url: String) extends Button {
+case class FacebookLoginButton(url: String) extends FacebookButton {
   override val buttonType = "account_link"
 }
 
-case class Element(title: String, subtitle: String, itemURL: String, imageURL: String, buttons: List[Button])
+case class FacebookElement(title: String, subtitle: String, itemURL: String, imageURL: String, buttons: List[FacebookButton])
 
-case class AttachmentPayload(templateType: String, elements: List[Element])
+case class FacebookReceiptElement(title: String, subtitle: String, quantity: Int, price: BigDecimal, currency: String, imageURL: String)
 
-case class Attachment(attachmentType: String, payload: AttachmentPayload)
+case class FacebookAddress(street1: String, street2: String, city: String, postcode: String, state: String, country: String)
 
-case class GenericMessage(attachment: Attachment)
+case class FacebookSummary(subtotal: BigDecimal, shippingCost: BigDecimal, totalTax: BigDecimal, totalCost: BigDecimal)
 
-case class GenericMessageTemplate(recipient: Recipient, message: GenericMessage)
+case class FacebookAdjustment(name: String, amount: BigDecimal)
 
-case class Address(street1: String, street2: String, city: String, postcode: String, state: String, country: String)
+sealed trait FacebookTemplate {
+  val templateType: String
+}
 
-case class Summary(subtotal: BigDecimal, shippingCost: BigDecimal, totalTax: BigDecimal, totalCost: BigDecimal)
+case class FacebookGenericTemplate(elements: List[FacebookElement]) extends FacebookTemplate {
+  override val templateType = "generic"
+}
 
-case class Adjustment(name: String, amount: BigDecimal)
+case class FacebookReceiptTemplate(recipientName: String,
+                                   orderNumber: String,
+                                   currency: String,
+                                   paymentMethod: String,
+                                   orderURL: String,
+                                   timestamp: Long,
+                                   elements: List[FacebookReceiptElement],
+                                   address: FacebookAddress,
+                                   summary: FacebookSummary,
+                                   adjustments: List[FacebookAdjustment]) extends FacebookTemplate {
+  override val templateType = "receipt"
+}
 
-case class ReceiptElement(title: String, subtitle: String, quantity: Int, price: BigDecimal, currency: String, imageURL: String)
+case class FacebookAttachment(attachmentType: String, payload: FacebookTemplate)
 
-case class ReceiptPayload(templateType: String,
-                          recipientName: String,
-                          orderNumber: String,
-                          currency: String,
-                          paymentMethod: String,
-                          orderURL: String,
-                          timestamp: Long,
-                          elements: List[ReceiptElement],
-                          address: Address,
-                          summary: Summary,
-                          adjustments: List[Adjustment])
+case class FacebookGenericMessage(attachment: FacebookAttachment)
 
-case class ReceiptAttachment(attachmentType: String, payload: ReceiptPayload)
+case class FacebookGenericMessageTemplate(recipient: FacebookRecipient, message: FacebookGenericMessage)
 
-case class ReceiptMessage(attachment: ReceiptAttachment)
+case class FacebookUserProfile(firstName: String, lastName: String, picture: String, locale: String, timezone: Int, gender: String)
 
-case class ReceiptMessageTemplate(recipient: Recipient, message: ReceiptMessage)
+case class FacebookOptIn(ref: String)
 
-case class UserProfile(firstName: String, lastName: String, picture: String, locale: String, timezone: Int, gender: String)
+case class FacebookAuthenticationEvent(sender: FacebookSender, recipient: FacebookRecipient, timestamp: Long, optin: FacebookOptIn)
 
-case class Optin(ref: String)
+case class FacebookDelivery(mids: List[String], watermark: Long, seq: Int)
 
-case class AuthenticationEvent(sender: Sender, recipient: Recipient, timestamp: Long, optin: Optin)
+case class FacebookMessageDeliveredEvent(sender: FacebookSender, recipient: FacebookRecipient, delivery: FacebookDelivery)
 
-case class Delivery(mids: List[String], watermark: Long, seq: Int)
+case class FacebookAccountLinking(status: String, authorizationCode: Option[String])
 
-case class MessageDeliveredEvent(sender: Sender, recipient: Recipient, delivery: Delivery)
+case class FacebookAccountLinkingEvent(sender: FacebookSender, recipient: FacebookRecipient, timestamp: Long, accountLinking: FacebookAccountLinking)
 
-case class AccountLinking(status: String, authorizationCode: Option[String])
-
-case class AccountLinkingEvent(sender: Sender, recipient: Recipient, timestamp: Long, accountLinking: AccountLinking)
-
-case class UserPsid(id: String, recipient: String)
+case class FacebookUserPSID(id: String, recipient: String)
 
 trait FacebookJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
-  implicit val senderJsonFormat = jsonFormat1(Sender)
-  implicit val recipientJsonFormat = jsonFormat1(Recipient)
-  implicit val messageJsonFormat = jsonFormat3(Message)
-  implicit val postbackJsonFormat = jsonFormat1(Postback)
-  implicit val messagingJsonFormat = jsonFormat5(Messaging)
-  implicit val entryJsonFormat = jsonFormat3(Entry)
-  implicit val responseJsonFormat = jsonFormat(Response, "object", "entry")
-  implicit val elementJsonFormat = jsonFormat(Element, "title", "subtitle", "item_url", "image_url", "buttons")
-  implicit val payloadJsonFormat = jsonFormat(AttachmentPayload, "template_type", "elements")
-  implicit val attachmentJsonFormat = jsonFormat(Attachment, "type", "payload")
-  implicit val genericMessageJsonFormat = jsonFormat1(GenericMessage)
-  implicit val genericMessageTemplateJsonFormat = jsonFormat2(GenericMessageTemplate)
-  implicit val addressJsonFormat = jsonFormat(Address, "street_1", "street_2", "city", "postal_code", "state", "country")
-  implicit val summaryJsonFormat = jsonFormat(Summary, "subtotal", "shipping_cost", "total_tax", "total_cost")
-  implicit val adjustmentJsonFormat = jsonFormat2(Adjustment)
-  implicit val receiptElementJsonFormat = jsonFormat(ReceiptElement, "title", "subtitle", "quantity", "price", "currency", "image_url")
-  implicit val receiptPayloadJsonFormat = jsonFormat(ReceiptPayload, "template_type", "recipient_name", "order_number", "currency", "payment_method", "order_url", "timestamp", "elements", "address", "summary", "adjustments")
-  implicit val receiptAttachmentJsonFormat = jsonFormat(ReceiptAttachment, "type", "payload")
-  implicit val receiptMessageJsonFormat = jsonFormat1(ReceiptMessage)
-  implicit val receiptMessageTemplateJsonFormat = jsonFormat2(ReceiptMessageTemplate)
-  implicit val userProfileJsonFormat = jsonFormat(UserProfile, "first_name", "last_name", "profile_pic", "locale", "timezone", "gender")
-  implicit val optinJsonFormat = jsonFormat1(Optin)
-  implicit val authenticationEventJsonFormat = jsonFormat4(AuthenticationEvent)
-  implicit val deliveryJsonFormat = jsonFormat3(Delivery)
-  implicit val messageDeliveredEventJsonFormat = jsonFormat3(MessageDeliveredEvent)
-  implicit val accountLinkingJsonFormat = jsonFormat(AccountLinking, "status", "authorization_code")
-  implicit val accountLinkingEventJsonFormat = jsonFormat(AccountLinkingEvent, "sender", "recipient", "timestamp", "account_linking")
-  implicit val userPsidJsonFormat = jsonFormat2(UserPsid)
 
-  implicit object buttonJsonFormat extends RootJsonFormat[Button] {
+  implicit val facebookSenderJsonFormat = jsonFormat1(FacebookSender)
+  implicit val facebookRecipientJsonFormat = jsonFormat1(FacebookRecipient)
+  implicit val facebookMessageJsonFormat = jsonFormat3(FacebookMessage)
+  implicit val facebookPostbackJsonFormat = jsonFormat1(FacebookPostback)
+  implicit val facebookMessagingJsonFormat = jsonFormat5(FacebookMessaging)
+  implicit val facebookEntryJsonFormat = jsonFormat3(FacebookEntry)
+  implicit val facebookResponseJsonFormat = jsonFormat(FacebookResponse, "object", "entry")
 
-    def write(b: Button) = b match {
-      case l: LinkButton => JsObject(
+  implicit object buttonJsonFormat extends RootJsonFormat[FacebookButton] {
+
+    def write(b: FacebookButton) = b match {
+      case l: FacebookLinkButton => JsObject(
         "type" -> JsString(l.buttonType),
         "title" -> JsString(l.title),
         "url" -> JsString(l.url)
       )
-      case p: PostbackButton => JsObject(
+      case p: FacebookPostbackButton => JsObject(
         "type" -> JsString(p.buttonType),
         "title" -> JsString(p.title),
         "payload" -> p.payload
       )
-      case b: LoginButton => JsObject(
+      case b: FacebookLoginButton => JsObject(
         "type" -> JsString(b.buttonType),
         "url" -> JsString(b.url)
       )
     }
 
-    def read(value: JsValue) = {
-      value.asJsObject.getFields("type") match {
-        case Seq(JsString(buttonType)) if buttonType == "web_url" =>
-          value.asJsObject.getFields("title", "url") match {
-            case Seq(JsString(title), JsString(url)) => LinkButton(title, url)
-            case _ => throw DeserializationException("LinkButton expected")
-          }
-        case Seq(JsString(buttonType)) if buttonType == "postback" =>
-          value.asJsObject.getFields("title", "payload") match {
-            case Seq(JsString(title), payload: JsValue) => PostbackButton(title, payload)
-            case _ => throw DeserializationException("PostbackButton expected")
-          }
-        case Seq(JsString(buttonType)) if buttonType == "account_link" =>
-          value.asJsObject.getFields("url") match {
-            case Seq(JsString(url)) => LoginButton(url)
-            case _ => throw DeserializationException("LoginButton expected")
-          }
+    def read(value: JsValue) =
+      value.extract[String]('type) match {
+        case "web_url" =>
+          FacebookLinkButton(value.extract[String]('title), value.extract[String]('url))
+        case "postback" =>
+          FacebookPostbackButton(value.extract[String]('title), value.extract[JsValue]('payload))
+        case "account_link" =>
+          FacebookLoginButton(value.extract[String]('url))
         case _ => throw DeserializationException("Button expected")
       }
-    }
   }
+
+  implicit val facebookElementJsonFormat = jsonFormat(FacebookElement, "title", "subtitle", "item_url", "image_url", "buttons")
+  implicit val facebookReceiptElementJsonFormat = jsonFormat(FacebookReceiptElement, "title", "subtitle", "quantity", "price", "currency", "image_url")
+  implicit val facebookAddressJsonFormat = jsonFormat(FacebookAddress, "street_1", "street_2", "city", "postal_code", "state", "country")
+  implicit val facebookSummaryJsonFormat = jsonFormat(FacebookSummary, "subtotal", "shipping_cost", "total_tax", "total_cost")
+  implicit val facebookAdjustmentJsonFormat = jsonFormat2(FacebookAdjustment)
+  implicit val facebookUserProfileJsonFormat = jsonFormat(FacebookUserProfile, "first_name", "last_name", "profile_pic", "locale", "timezone", "gender")
+  implicit val facebookOptInJsonFormat = jsonFormat1(FacebookOptIn)
+  implicit val facebookAuthenticationEventJsonFormat = jsonFormat4(FacebookAuthenticationEvent)
+  implicit val facebookDeliveryJsonFormat = jsonFormat3(FacebookDelivery)
+  implicit val facebookMessageDeliveredEventJsonFormat = jsonFormat3(FacebookMessageDeliveredEvent)
+  implicit val facebookAccountLinkingJsonFormat = jsonFormat(FacebookAccountLinking, "status", "authorization_code")
+  implicit val facebookAccountLinkingEventJsonFormat = jsonFormat(FacebookAccountLinkingEvent, "sender", "recipient", "timestamp", "account_linking")
+  implicit val facebookUserPSIDJsonFormat = jsonFormat2(FacebookUserPSID)
+
+  implicit object facebookTemplateJsonFormat extends RootJsonFormat[FacebookTemplate] {
+
+    def write(t: FacebookTemplate) = t match {
+      case g: FacebookGenericTemplate => JsObject(
+        "template_type" -> JsString(g.templateType),
+        "elements" -> g.elements.toJson
+      )
+      case r: FacebookReceiptTemplate => JsObject(
+        "template_type" -> JsString(r.templateType),
+        "recipient_name" -> JsString(r.recipientName),
+        "order_number" -> JsString(r.orderNumber),
+        "currency" -> JsString(r.currency),
+        "payment_method" -> JsString(r.paymentMethod),
+        "order_url" -> JsString(r.orderURL),
+        "timestamp" -> JsNumber(r.timestamp),
+        "elements" -> r.elements.toJson,
+        "address" -> r.address.toJson,
+        "summary" -> r.summary.toJson,
+        "adjustments" -> r.adjustments.toJson
+      )
+    }
+
+    def read(value: JsValue) =
+      value.extract[String]('template_type) match {
+        case "generic" =>
+          FacebookGenericTemplate(value.extract[List[FacebookElement]]('elements))
+        case "receipt" =>
+          FacebookReceiptTemplate(
+            value.extract[String]('recipient_name),
+            value.extract[String]('order_number),
+            value.extract[String]('currency),
+            value.extract[String]('payment_method),
+            value.extract[String]('order_url),
+            value.extract[Long]('timestamp),
+            value.extract[List[FacebookReceiptElement]]('elements),
+            value.extract[FacebookAddress]('address),
+            value.extract[FacebookSummary]('summary),
+            value.extract[List[FacebookAdjustment]]('adjustments)
+          )
+        case _ => throw DeserializationException("FacebookTemplate expected")
+      }
+
+  }
+
+  implicit val facebookAttachmentJsonFormat = jsonFormat(FacebookAttachment, "type", "payload")
+  implicit val facebookGenericMessageJsonFormat = jsonFormat1(FacebookGenericMessage)
+  implicit val facebookGenericMessageTemplateJsonFormat = jsonFormat2(FacebookGenericMessageTemplate)
+
+}
+
+object Builder {
+
+  class GenericMessageTemplateBuilder(sender: Option[String],
+                                      title: Option[String],
+                                      subtitle: Option[String],
+                                      itemURL: Option[String],
+                                      imageURL: Option[String],
+                                      buttons: List[FacebookButton],
+                                      elements: List[FacebookElement]) {
+
+    def forSender(value: String) = new GenericMessageTemplateBuilder(Some(value), title, subtitle, itemURL, imageURL, buttons, elements)
+
+    def withTitle(value: String) = new GenericMessageTemplateBuilder(sender, Some(value), subtitle, itemURL, imageURL, buttons, elements)
+
+    def withSubtitle(value: String) = new GenericMessageTemplateBuilder(sender, title, Some(value), itemURL, imageURL, buttons, elements)
+
+    def withItemURL(value: String) = new GenericMessageTemplateBuilder(sender, title, subtitle, Some(value), imageURL, buttons, elements)
+
+    def withImageURL(value: String) = new GenericMessageTemplateBuilder(sender, title, subtitle, itemURL, Some(value), buttons, elements)
+
+    def addButton(button: FacebookButton) = new GenericMessageTemplateBuilder(sender, title, subtitle, itemURL, imageURL, buttons :+ button, elements)
+
+    def withElements(value: List[FacebookElement]) = new GenericMessageTemplateBuilder(sender, title, subtitle, itemURL, imageURL, buttons, value)
+
+    def build() =
+      if (elements.isEmpty) {
+        FacebookGenericMessageTemplate(
+          FacebookRecipient(sender.get),
+          FacebookGenericMessage(
+            FacebookAttachment(
+              attachmentType = "template",
+              payload = FacebookGenericTemplate(
+                elements = FacebookElement(
+                  title = title.get,
+                  subtitle = subtitle.getOrElse(""),
+                  itemURL = itemURL.getOrElse(""),
+                  imageURL = imageURL.getOrElse(""),
+                  buttons = buttons
+                ) :: Nil
+              )
+            )
+          )
+        )
+      } else {
+        FacebookGenericMessageTemplate(
+          FacebookRecipient(sender.get),
+          FacebookGenericMessage(
+            FacebookAttachment(
+              attachmentType = "template",
+              payload = FacebookGenericTemplate(elements)
+            )
+          )
+        )
+      }
+  }
+
+  def genericTemplate = new GenericMessageTemplateBuilder(None, None, None, None, None, Nil, Nil)
+
+  class ReceiptCardBuilder(sender: Option[String],
+                           recipientName: Option[String],
+                           orderNumber: Option[String],
+                           currency: Option[String],
+                           paymentMethod: Option[String],
+                           orderURL: Option[String],
+                           timestamp: Option[Long],
+                           elements: List[FacebookReceiptElement],
+                           address: Option[FacebookAddress],
+                           summary: Option[FacebookSummary],
+                           adjustments: List[FacebookAdjustment]) {
+
+    def forSender(value: String) = new ReceiptCardBuilder(Some(value), recipientName, orderNumber, currency, paymentMethod, orderURL, timestamp, elements, address, summary, adjustments)
+
+    def withReceiptName(value: String) = new ReceiptCardBuilder(sender, Some(value), orderNumber, currency, paymentMethod, orderURL, timestamp, elements, address, summary, adjustments)
+
+    def withOrderNumber(value: String) = new ReceiptCardBuilder(sender, recipientName, Some(value), currency, paymentMethod, orderURL, timestamp, elements, address, summary, adjustments)
+
+    def withCurrency(value: String) = new ReceiptCardBuilder(sender, recipientName, orderNumber, Some(value), paymentMethod, orderURL, timestamp, elements, address, summary, adjustments)
+
+    def withPaymentMethod(value: String) = new ReceiptCardBuilder(sender, recipientName, orderNumber, currency, Some(value), orderURL, timestamp, elements, address, summary, adjustments)
+
+    def withOrderURL(value: String) = new ReceiptCardBuilder(sender, recipientName, orderNumber, currency, paymentMethod, Some(value), timestamp, elements, address, summary, adjustments)
+
+    def withTimestamp(value: Long) = new ReceiptCardBuilder(sender, recipientName, orderNumber, currency, paymentMethod, orderURL, Some(value), elements, address, summary, adjustments)
+
+    def withElements(value: List[FacebookReceiptElement]) = new ReceiptCardBuilder(sender, recipientName, orderNumber, currency, paymentMethod, orderURL, timestamp, value, address, summary, adjustments)
+
+    def withAddress(value: FacebookAddress) = new ReceiptCardBuilder(sender, recipientName, orderNumber, currency, paymentMethod, orderURL, timestamp, elements, Some(value), summary, adjustments)
+
+    def withSummary(value: FacebookSummary) = new ReceiptCardBuilder(sender, recipientName, orderNumber, currency, paymentMethod, orderURL, timestamp, elements, address, Some(value), adjustments)
+
+    def withSummary(subtotal: String, shippingCost: String, totalTax: String, totalCost: String) = {
+      val s = summaryElement withSubtotal "1047.00" withShippingCost "25.00" withTotalTax "104.70" withTotalCost "942.30" build()
+      new ReceiptCardBuilder(sender, recipientName, orderNumber, currency, paymentMethod, orderURL, timestamp, elements, address, Some(s), adjustments)
+    }
+
+    def addAdjustment(adjustment: FacebookAdjustment) = new ReceiptCardBuilder(sender, recipientName, orderNumber, currency, paymentMethod, orderURL, timestamp, elements, address, summary, adjustments :+ adjustment)
+
+    def addAdjustment(name: String, amount: String) = {
+      val a = FacebookAdjustment(name, BigDecimal(amount))
+      new ReceiptCardBuilder(sender, recipientName, orderNumber, currency, paymentMethod, orderURL, timestamp, elements, address, summary, adjustments :+ a)
+    }
+
+    def build() =
+      FacebookGenericMessageTemplate(
+        FacebookRecipient(sender.get),
+        FacebookGenericMessage(
+          FacebookAttachment(
+            attachmentType = "template",
+            payload = FacebookReceiptTemplate(
+              recipientName = recipientName.getOrElse(""),
+              orderNumber = orderNumber.getOrElse(""),
+              currency = currency.getOrElse(""),
+              paymentMethod = paymentMethod.getOrElse(""),
+              orderURL = orderURL.getOrElse(""),
+              timestamp = timestamp.getOrElse(0L),
+              elements = elements,
+              address = address.get,
+              summary = summary.get,
+              adjustments = adjustments
+            )
+          )
+        )
+      )
+  }
+
+  def receiptCard = new ReceiptCardBuilder(None, None, None, None, None, None, None, Nil, None, None, Nil)
+
+  class SummaryBuilder(subtotal: Option[String],
+                       shippingCost: Option[String],
+                       totalTax: Option[String],
+                       totalCost: Option[String]) {
+
+    def withSubtotal(value: String) = new SummaryBuilder(Some(value), shippingCost, totalTax, totalCost)
+
+    def withShippingCost(value: String) = new SummaryBuilder(subtotal, Some(value), totalTax, totalCost)
+
+    def withTotalTax(value: String) = new SummaryBuilder(subtotal, shippingCost, Some(value), totalCost)
+
+    def withTotalCost(value: String) = new SummaryBuilder(subtotal, shippingCost, totalTax, Some(value))
+
+    def build() =
+      FacebookSummary(
+        subtotal = BigDecimal(subtotal.getOrElse("0")),
+        shippingCost = BigDecimal(shippingCost.getOrElse("0")),
+        totalTax = BigDecimal(totalTax.getOrElse("0")),
+        totalCost = BigDecimal(totalCost.getOrElse("0"))
+      )
+  }
+
+  def summaryElement = new SummaryBuilder(None, None, None, None)
+
+  class MessageBuilder(sender: Option[String], text: Option[String]) {
+
+    def forSender(value: String) = new MessageBuilder(sender, text)
+
+    def withText(value: String) = new MessageBuilder(sender, text)
+
+    def build() =
+      JsObject(
+        "recipient" -> JsObject("id" -> JsString(sender.get)),
+        "message" -> JsObject("text" -> JsString(text.get))
+      )
+
+  }
+
+  def messageElement = new MessageBuilder(None, None)
 
 }
