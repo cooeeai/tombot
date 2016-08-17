@@ -161,3 +161,47 @@ trait SkypeJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val microsoftTokenJsonFormat = jsonFormat(MicrosoftToken, "token_type", "expires_in", "ext_expires_in", "access_token")
 
 }
+
+object Builder {
+
+  class SigninCardBuilder(sender: Option[String], text: Option[String], buttonTitle: Option[String]) {
+
+    def forSender(value: String) = new SigninCardBuilder(Some(value), text, buttonTitle)
+
+    def withText(value: String) = new SigninCardBuilder(sender, Some(value), buttonTitle)
+
+    def withButtonTitle(value: String) = new SigninCardBuilder(sender, text, Some(value))
+
+    def build() =
+      SkypeSigninCard(
+        cardType = "message/card.signin",
+        attachments = SkypeSigninAttachment(
+          SkypeSigninAttachmentContent(
+            text = text.get,
+            buttons = SkypeSigninButton(
+              title = buttonTitle.get,
+              value = s"$api/skypeauthorize?sender=${sender.get}"
+            ) :: Nil
+          )
+        ) :: Nil
+      )
+
+  }
+
+  def loginCard() = new SigninCardBuilder(None, None, None)
+
+  class MessageBuilder(text: Option[String]) {
+
+    def withText(value: String) = new MessageBuilder(Some(value))
+
+    def build() =
+      SkypeBotMessage(
+        messageType = "message/text",
+        text = text.get,
+        attachments = None
+      )
+  }
+
+  def messageElement = new MessageBuilder(None)
+
+}

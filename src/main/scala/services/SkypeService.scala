@@ -34,14 +34,18 @@ class SkypeService @Inject()(config: Config,
 
   def sendTextMessage(conversationId: String, text: String): Unit = {
     logger.info(s"sending Skype message [$text] to conversation [$conversationId]")
+    import Builder._
     val url = config.getString("microsoft.api.url")
     //logger.debug("token:\n" + token.toJson.prettyPrint)
     val authorization = Authorization(OAuth2BearerToken(token.get.accessToken))
-    val payload = SkypeBotMessage(
-      messageType = "message/text",
-      text = text,
-      attachments = None
-    )
+
+    val payload = messageElement withText text build()
+
+//    val payload = SkypeBotMessage(
+//      messageType = "message/text",
+//      text = text,
+//      attachments = None
+//    )
     for {
       request <- Marshal(payload).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
@@ -54,20 +58,30 @@ class SkypeService @Inject()(config: Config,
 
   def sendLoginCard(sender: String, conversationId: String): Unit = {
     logger.info("sending Skype signin request")
+    import Builder._
     val url = config.getString("microsoft.api.url")
     val authorization = Authorization(OAuth2BearerToken(token.get.accessToken))
-    val payload = SkypeSigninCard(
-      cardType = "message/card.signin",
-      attachments = SkypeSigninAttachment(
-        SkypeSigninAttachmentContent(
-          text = "You need to authorize me",
-          buttons = SkypeSigninButton(
-            title = "Connect",
-            value = s"$api/skypeauthorize?sender=$sender"
-          ) :: Nil
-        )
-      ) :: Nil
-    )
+
+    val payload = (
+      loginCard
+        forSender sender
+        withText "You need to authorize me"
+        withButtonTitle "Connect"
+        build()
+      )
+
+//    val payload = SkypeSigninCard(
+//      cardType = "message/card.signin",
+//      attachments = SkypeSigninAttachment(
+//        SkypeSigninAttachmentContent(
+//          text = "You need to authorize me",
+//          buttons = SkypeSigninButton(
+//            title = "Connect",
+//            value = s"$api/skypeauthorize?sender=$sender"
+//          ) :: Nil
+//        )
+//      ) :: Nil
+//    )
     for {
       request <- Marshal(payload).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
