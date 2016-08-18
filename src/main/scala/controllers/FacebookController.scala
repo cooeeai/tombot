@@ -24,11 +24,12 @@ class FacebookController @Inject()(config: Config,
                                    conversationService: ConversationService,
                                    intentService: IntentService,
                                    facebookService: FacebookService,
-                                   userService: UserService)
+                                   userService: UserService,
+                                   rulesService: RulesService)
   extends FacebookJsonSupport with WitJsonSupport {
 
-  import conversationService._
   import StatusCodes._
+  import conversationService._
 
   def receivedAuthentication(event: FacebookAuthenticationEvent): Unit = {
     val sender = event.sender.id
@@ -71,20 +72,34 @@ class FacebookController @Inject()(config: Config,
           logger.info("event.message is defined")
           val text = event.message.get.text
           logger.debug("text: [" + text + "]")
-          intentService.getIntent(text) map { meaning =>
-            logger.debug("received meaning:\n" + meaning.toJson.prettyPrint)
-            // TODO
-            // how can we bypass this when not needed
-            val intent = meaning.getIntent
-            intent match {
-              case Some("buy") => converse(sender, Qualify("facebook", sender, meaning.getEntityValue("product_type")))
-              case Some("greet") => converse(sender, Greet("facebook", sender, user))
-              case Some("analyze") => converse(sender, Analyze("facebook", sender, text))
-              case _ => converse(sender, Analyze("facebook", sender, text))
-              //case _ => converse(sender, Respond("facebook", sender, text))
+          if (rulesService.isQuestion(text)) {
+            rulesService.getContent(text) match {
+              case Some(content) =>
+                logger.debug("found content")
+                facebookService.sendTextMessage(sender, content)
+              case None =>
+                parseIntent(sender, text, user)
             }
+          } else {
+            parseIntent(sender, text, user)
           }
         }
+      }
+    }
+  }
+
+  private def parseIntent(sender: String, text: String, user: User) = {
+    intentService.getIntent(text) map { meaning =>
+      logger.debug("received meaning:\n" + meaning.toJson.prettyPrint)
+      // TODO
+      // how can we bypass this when not needed
+      val intent = meaning.getIntent
+      intent match {
+        case Some("buy") => converse(sender, Qualify("facebook", sender, meaning.getEntityValue("product_type")))
+        case Some("greet") => converse(sender, Greet("facebook", sender, user))
+        case Some("analyze") => converse(sender, Analyze("facebook", sender, text))
+        case _ => converse(sender, Analyze("facebook", sender, text))
+        //case _ => converse(sender, Respond("facebook", sender, text))
       }
     }
   }
