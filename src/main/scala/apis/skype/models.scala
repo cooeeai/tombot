@@ -84,8 +84,6 @@ trait SkypeJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val skypeRecipientJsonFormat = jsonFormat2(SkypeRecipient)
   implicit val skypeConversationJsonFormat = jsonFormat3(SkypeConversation)
   implicit val skypeImageJsonFormat = jsonFormat1(SkypeImage)
-  implicit val skypeSigninButtonJsonFormat = jsonFormat2(SkypeSigninButton)
-  implicit val skypeLinkButtonJsonFormat = jsonFormat2(SkypeLinkButton)
 
   implicit object skypeButtonJsonFormat extends RootJsonFormat[SkypeButton] {
 
@@ -107,10 +105,35 @@ trait SkypeJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
 
   }
 
+  implicit object skypeSigninButtonJsonFormat extends RootJsonFormat[SkypeSigninButton] {
+
+    def write(b: SkypeSigninButton) =
+      JsObject(
+        "type" -> JsString(b.buttonType),
+        "title" -> JsString(b.title),
+        "value" -> JsString(b.value)
+      )
+
+    def read(value: JsValue) =
+      SkypeSigninButton(value.extract[String]('title), value.extract[String]('value))
+
+  }
+
+  implicit object skypeLinkButtonJsonFormat extends RootJsonFormat[SkypeLinkButton] {
+
+    def write(b: SkypeLinkButton) =
+      JsObject(
+        "type" -> JsString(b.buttonType),
+        "title" -> JsString(b.title),
+        "value" -> JsString(b.value)
+      )
+
+    def read(value: JsValue) = SkypeLinkButton(value.extract[String]('title), value.extract[String]('value))
+
+  }
+
   implicit val skypeSigninAttachmentContentJsonFormat = jsonFormat2(SkypeSigninAttachmentContent)
   implicit val skypeHeroAttachmentContentJsonFormat = jsonFormat4(SkypeHeroAttachmentContent)
-  implicit val skypeSigninAttachmentJsonFormat = jsonFormat1(SkypeSigninAttachment)
-  implicit val skypeHeroAttachmentJsonFormat = jsonFormat1(SkypeHeroAttachment)
 
   implicit object skypeAttachmentJsonFormat extends RootJsonFormat[SkypeAttachment] {
 
@@ -133,6 +156,32 @@ trait SkypeJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
           SkypeHeroAttachment(value.extract[SkypeHeroAttachmentContent]('content))
         case _ => throw DeserializationException("SkypeAttachment expected")
       }
+
+  }
+
+  implicit object skypeSigninAttachmentJsonFormat extends RootJsonFormat[SkypeSigninAttachment] {
+
+    def write(a: SkypeSigninAttachment) =
+      JsObject(
+        "contentType" -> JsString(a.contentType),
+        "content" -> a.content.toJson
+      )
+
+    def read(value: JsValue) =
+      SkypeSigninAttachment(value.extract[SkypeSigninAttachmentContent]('content))
+
+  }
+
+  implicit object skypeHeroAttachmentJsonFormat extends RootJsonFormat[SkypeHeroAttachment] {
+
+    def write(a: SkypeHeroAttachment) =
+      JsObject(
+        "contentType" -> JsString(a.contentType),
+        "content" -> a.content.toJson
+      )
+
+    def read(value: JsValue) =
+      SkypeHeroAttachment(value.extract[SkypeHeroAttachmentContent]('content))
 
   }
 
@@ -164,13 +213,15 @@ trait SkypeJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
 
 object Builder {
 
-  class SigninCardBuilder(sender: Option[String], text: Option[String], buttonTitle: Option[String]) {
+  class SigninCardBuilder(api: Option[String], sender: Option[String], text: Option[String], buttonTitle: Option[String]) {
 
-    def forSender(value: String) = new SigninCardBuilder(Some(value), text, buttonTitle)
+    def usingApi(value: String) = new SigninCardBuilder(Some(value), sender, text, buttonTitle)
 
-    def withText(value: String) = new SigninCardBuilder(sender, Some(value), buttonTitle)
+    def forSender(value: String) = new SigninCardBuilder(api, Some(value), text, buttonTitle)
 
-    def withButtonTitle(value: String) = new SigninCardBuilder(sender, text, Some(value))
+    def withText(value: String) = new SigninCardBuilder(api, sender, Some(value), buttonTitle)
+
+    def withButtonTitle(value: String) = new SigninCardBuilder(api, sender, text, Some(value))
 
     def build() =
       SkypeSigninCard(
@@ -180,7 +231,7 @@ object Builder {
             text = text.get,
             buttons = SkypeSigninButton(
               title = buttonTitle.get,
-              value = s"$api/skypeauthorize?sender=${sender.get}"
+              value = s"${api.get}/skypeauthorize?sender=${sender.get}"
             ) :: Nil
           )
         ) :: Nil
@@ -188,7 +239,7 @@ object Builder {
 
   }
 
-  def loginCard() = new SigninCardBuilder(None, None, None)
+  def loginCard() = new SigninCardBuilder(None, None, None, None)
 
   class MessageBuilder(text: Option[String]) {
 

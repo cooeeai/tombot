@@ -352,9 +352,9 @@ object Builder {
 
   class MessageBuilder(sender: Option[String], text: Option[String]) {
 
-    def forSender(value: String) = new MessageBuilder(sender, text)
+    def forSender(value: String) = new MessageBuilder(Some(value), text)
 
-    def withText(value: String) = new MessageBuilder(sender, text)
+    def withText(value: String) = new MessageBuilder(sender, Some(value))
 
     def build() =
       JsObject(

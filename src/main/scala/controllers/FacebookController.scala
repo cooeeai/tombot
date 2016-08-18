@@ -79,7 +79,9 @@ class FacebookController @Inject()(config: Config,
             intent match {
               case Some("buy") => converse(sender, Qualify("facebook", sender, meaning.getEntityValue("product_type")))
               case Some("greet") => converse(sender, Greet("facebook", sender, user))
-              case _ => converse(sender, Respond("facebook", sender, text))
+              case Some("analyze") => converse(sender, Analyze("facebook", sender, text))
+              case _ => converse(sender, Analyze("facebook", sender, text))
+              //case _ => converse(sender, Respond("facebook", sender, text))
             }
           }
         }

@@ -4,6 +4,7 @@ import akka.actor.{Actor, ActorLogging, ActorSystem, FSM}
 import akka.pattern.after
 import akka.stream.Materializer
 import apis.googlemaps.MapsJsonSupport
+import apis.googlenlp._
 import com.google.inject.Inject
 import conversationengine.ConversationActor.{Data, State}
 import modules.akkaguice.NamedActor
@@ -20,11 +21,13 @@ import scala.util.{Failure, Random, Success}
 class ConversationActor @Inject()(facebookService: FacebookService,
                                   skypeService: SkypeService,
                                   addressService: AddressService,
+                                  languageService: LanguageService,
                                   implicit val system: ActorSystem,
                                   implicit val fm: Materializer)
   extends Actor
     with ActorLogging
     with MapsJsonSupport
+    with GoogleJsonSupport
     with FSM[State, Data] {
 
   import ConversationActor._
@@ -40,18 +43,18 @@ class ConversationActor @Inject()(facebookService: FacebookService,
 
   }
 
-  var currentPlatform = "facebook"
+  var currentProvider = "facebook"
 
-  var mp: MessagingProvider = facebookService
+  var provider: MessagingProvider = facebookService
 
   var isAuthenticated = false
 
   def testPlatformChange(platform: String, sender: String) = {
-    if (currentPlatform != platform) {
-      val oldPlatform = currentPlatform
-      mp = if (platform == "facebook") facebookService else skypeService
-      currentPlatform = platform
-      mp.sendTextMessage(sender, s"Do you want to carry on our conversation from $oldPlatform?")
+    if (currentProvider != platform) {
+      val oldPlatform = currentProvider
+      provider = if (platform == "facebook") facebookService else skypeService
+      currentProvider = platform
+      provider.sendTextMessage(sender, s"Do you want to carry on our conversation from $oldPlatform?")
       // TODO
     }
   }
@@ -65,20 +68,20 @@ class ConversationActor @Inject()(facebookService: FacebookService,
       if (isAuthenticated) {
         productType match {
           case Some(typ) =>
-            mp.sendTextMessage(sender, s"What type of $typ did you have in mind?")
+            provider.sendTextMessage(sender, s"What type of $typ did you have in mind?")
             goto(Qualifying) using Offer
           case None =>
-            mp.sendTextMessage(sender, "What did you want to buy?")
+            provider.sendTextMessage(sender, "What did you want to buy?")
             stay
         }
       } else {
-        mp.sendLoginCard(sender)
+        provider.sendLoginCard(sender)
         stay
       }
     case Event(Welcome(platform, sender), _) =>
       log.debug("received Authenticate event")
       testPlatformChange(platform, sender)
-      mp.sendTextMessage(sender, "Welcome, login successful")
+      provider.sendTextMessage(sender, "Welcome, login successful")
       stay
   }
 
@@ -87,17 +90,17 @@ class ConversationActor @Inject()(facebookService: FacebookService,
       log.debug("received Qualify event")
       testPlatformChange(platform, sender)
       productType match {
-        case Some(typ) => mp.sendTextMessage(sender, s"What type of $typ did you have in mind?"); stay
-        case None => mp.sendTextMessage(sender, "What did you want to buy?"); stay
+        case Some(typ) => provider.sendTextMessage(sender, s"What type of $typ did you have in mind?"); stay
+        case None => provider.sendTextMessage(sender, "What did you want to buy?"); stay
       }
     case Event(Respond(platform, sender, text), _) =>
       log.debug("received Respond event")
       testPlatformChange(platform, sender)
       if (text == "iphone") {
-        mp.sendHeroCard(sender)
+        provider.sendHeroCard(sender)
         goto(Buying)
       } else {
-        mp.sendTextMessage(sender, "Sorry, I didn't understand that")
+        provider.sendTextMessage(sender, "Sorry, I didn't understand that")
         stay
       }
   }
@@ -106,7 +109,7 @@ class ConversationActor @Inject()(facebookService: FacebookService,
     case Event(Buy(platform, sender, _), _) =>
       log.debug("received Buy event")
       testPlatformChange(platform, sender)
-      mp.sendTextMessage(sender, "What address should I send the order to?")
+      provider.sendTextMessage(sender, "What address should I send the order to?")
       stay
     case Event(Respond(platform, sender, text), _) =>
       log.debug("received Respond event")
@@ -117,9 +120,9 @@ class ConversationActor @Inject()(facebookService: FacebookService,
         case Success(response) =>
           log.debug("received address lookup response:\n" + response.toJson.prettyPrint)
           if (response.results.nonEmpty) {
-            mp.sendReceiptCard(sender, response.results.head.getAddress)
+            provider.sendReceiptCard(sender, response.results.head.getAddress)
           } else {
-            mp.sendTextMessage(sender, "Sorry, I could not interpret that")
+            provider.sendTextMessage(sender, "Sorry, I could not interpret that")
           }
         case Failure(e) => log.error(e.getMessage)
       }
@@ -137,6 +140,27 @@ class ConversationActor @Inject()(facebookService: FacebookService,
       testPlatformChange(platform, sender)
       shrug(sender)
       stay
+    case Event(Analyze(platform, sender, text), _) =>
+      log.debug("received Analyze event")
+      testPlatformChange(platform, sender)
+      lazy val entitiesRequest = languageService.getEntities(text)
+      lazy val sentimentRequest = languageService.getSentiment(text)
+      val f1 = entitiesRequest withTimeout new TimeoutException("entities future timed out")
+      val f2 = sentimentRequest withTimeout new TimeoutException("sentiment future timed out")
+      val f3 = for {
+        entitiesResponse <- f1
+        sentimentResponse <- f2
+      } yield {
+        log.debug("received entities response:\n" + entitiesResponse.toJson.prettyPrint)
+        log.debug("received sentiment response:\n" + sentimentResponse.toJson.prettyPrint)
+        val message =
+          formatEntities(entitiesResponse.entities) + "\n\n" + formatSentiment(sentimentResponse.documentSentiment)
+        provider.sendTextMessage(sender, message)
+      }
+      f3 recover {
+        case e: Throwable => log.error(e.getMessage)
+      }
+      stay
     case _ =>
       log.error("invalid event")
       stay
@@ -145,10 +169,20 @@ class ConversationActor @Inject()(facebookService: FacebookService,
   initialize()
 
   def greet(sender: String, user: User) =
-    mp.sendTextMessage(sender, greetings(random.nextInt(greetings.size)) + " " + user.firstName + "!")
+    provider.sendTextMessage(sender, greetings(random.nextInt(greetings.size)) + " " + user.firstName + "!")
 
   def shrug(sender: String) =
-    mp.sendTextMessage(sender, "¯\\_(ツ)_/¯ " + shrugs(random.nextInt(shrugs.size)))
+    provider.sendTextMessage(sender, "¯\\_(ツ)_/¯ " + shrugs(random.nextInt(shrugs.size)))
+
+  def formatEntities(entities: List[GoogleEntity]) =
+    entities map { entity =>
+      //val salience = f"${entity.salience}%2.2f"
+      //s"${entity.name} (${entity.entityType}, $salience)"
+      s"${entity.name} (${entity.entityType})"
+    } mkString "\n\n"
+
+  def formatSentiment(sentiment: GoogleSentiment) =
+    f"Sentiment: ${sentiment.polarity}%2.2f"
 
 }
 
@@ -160,8 +194,9 @@ object ConversationActor extends NamedActor {
   case class Greet(platform: String, sender: String, user: User)
   case class Qualify(platform: String, sender: String, productType: Option[String])
   case class Buy(platform: String, sender: String, productType: String)
-  case class Respond(platform: String, sender: String, message: String)
+  case class Respond(platform: String, sender: String, text: String)
   case class Welcome(platform: String, sender: String)
+  case class Analyze(platform: String, sender: String, text: String)
 
   sealed trait State
   case object Start extends State
