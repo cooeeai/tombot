@@ -30,6 +30,10 @@ class SkypeService @Inject()(config: Config,
 
   val api = config.getString("api.host")
 
+  val clientId = System.getenv("MICROSOFT_CLIENT_ID")
+
+  val secret = System.getenv("MICROSOFT_API_SECRET")
+
   var token: Option[MicrosoftToken] = None
 
   def sendTextMessage(conversationId: String, text: String): Unit = {
@@ -83,8 +87,6 @@ class SkypeService @Inject()(config: Config,
   def getMicrosoftToken: Future[MicrosoftToken] = {
     logger.info("getting MS token")
     val url = config.getString("microsoft.api.auth_url")
-    val clientId = config.getString("microsoft.api.client_id")
-    val secret = config.getString("microsoft.api.secret")
     val data = FormData(Map(
       "client_id" -> clientId,
       "client_secret" -> secret,
