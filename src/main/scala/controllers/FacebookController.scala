@@ -25,7 +25,8 @@ class FacebookController @Inject()(config: Config,
                                    intentService: IntentService,
                                    facebookService: FacebookService,
                                    userService: UserService,
-                                   rulesService: RulesService)
+                                   rulesService: RulesService,
+                                   alchemyService: AlchemyService)
   extends FacebookJsonSupport with WitJsonSupport {
 
   import StatusCodes._
@@ -72,20 +73,30 @@ class FacebookController @Inject()(config: Config,
           logger.info("event.message is defined")
           val text = event.message.get.text
           logger.debug("text: [" + text + "]")
-          if (rulesService.isQuestion(text)) {
-            rulesService.getContent(text) match {
-              case Some(content) =>
-                logger.debug("found content")
-                facebookService.sendTextMessage(sender, content)
-              case None =>
-                parseIntent(sender, text, user)
-            }
+          if (text.startsWith("/alchemy")) {
+            facebookService.sendTextMessage(sender, formatKeywords(alchemyService.getKeywords(text.substring(8).trim)))
           } else {
-            parseIntent(sender, text, user)
+            if (rulesService.isQuestion(text)) {
+              rulesService.getContent(text) match {
+                case Some(content) =>
+                  logger.debug("found content")
+                  facebookService.sendTextMessage(sender, content)
+                case None =>
+                  parseIntent(sender, text, user)
+              }
+            } else {
+              parseIntent(sender, text, user)
+            }
           }
         }
       }
     }
+  }
+
+  private def formatKeywords(keywords: Map[String, Double]) = {
+    keywords map {
+      case (keyword, relevance) => f"$keyword ($relevance%2.2f)"
+    } mkString "\n"
   }
 
   private def parseIntent(sender: String, text: String, user: User) = {

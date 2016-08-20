@@ -6,7 +6,7 @@ version := "1.0"
 
 scalaVersion := "2.11.8"
 
-scalacOptions := Seq("-unchecked", "-feature", "-deprecation", "-encoding", "utf8")
+scalacOptions := Seq("-unchecked", "-feature", "-deprecation", "-encoding", "utf8", "-language:postfixOps")
 
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-http-experimental" % "2.4.8",
@@ -14,6 +14,7 @@ libraryDependencies ++= Seq(
   "net.virtual-void" %%  "json-lenses" % "0.6.1",
   "com.google.inject" % "guice" % "4.1.0",
   "net.codingwell" %% "scala-guice" % "4.0.1",
+  "com.ibm.watson.developer_cloud" % "java-sdk" % "3.3.0",
   "org.scala-lang.modules" % "scala-xml_2.11" % "1.0.4",
   "btomala" %% "akka-http-twirl" % "1.1.0" excludeAll
     ExclusionRule(organization = "com.typesafe.akka")
