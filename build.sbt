@@ -19,6 +19,8 @@ libraryDependencies ++= Seq(
     ExclusionRule(organization = "com.typesafe.akka")
 )
 
+unmanagedBase <<= baseDirectory { base => base / "libs" }
+
 Revolver.settings
 
 resolvers += "Bartek's repo at Bintray" at "https://dl.bintray.com/btomala/maven"

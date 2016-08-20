@@ -22,6 +22,8 @@ class ConversationActor @Inject()(facebookService: FacebookService,
                                   skypeService: SkypeService,
                                   addressService: AddressService,
                                   languageService: LanguageService,
+                                  humourService: HumourService,
+                                  smallTalkService: SmallTalkService,
                                   implicit val system: ActorSystem,
                                   implicit val fm: Materializer)
   extends Actor
@@ -135,31 +137,21 @@ class ConversationActor @Inject()(facebookService: FacebookService,
       testPlatformChange(platform, sender)
       greet(sender, user)
       stay
-    case Event(Respond(platform, sender, _), _) =>
+    case Event(Respond(platform, sender, text), _) =>
       log.debug("received Respond event")
       testPlatformChange(platform, sender)
-      shrug(sender)
+      val reply = smallTalkService.getSmallTalkResponse(sender, text)
+      if (reply == "Didn't get that!") {
+        analyze(sender, text)
+        //shrug(sender)
+      } else {
+        provider.sendTextMessage(sender, reply)
+      }
       stay
     case Event(Analyze(platform, sender, text), _) =>
       log.debug("received Analyze event")
       testPlatformChange(platform, sender)
-      lazy val entitiesRequest = languageService.getEntities(text)
-      lazy val sentimentRequest = languageService.getSentiment(text)
-      val f1 = entitiesRequest withTimeout new TimeoutException("entities future timed out")
-      val f2 = sentimentRequest withTimeout new TimeoutException("sentiment future timed out")
-      val f3 = for {
-        entitiesResponse <- f1
-        sentimentResponse <- f2
-      } yield {
-        log.debug("received entities response:\n" + entitiesResponse.toJson.prettyPrint)
-        log.debug("received sentiment response:\n" + sentimentResponse.toJson.prettyPrint)
-        val message =
-          formatEntities(entitiesResponse.entities) + "\n\n" + formatSentiment(sentimentResponse.documentSentiment)
-        provider.sendTextMessage(sender, message)
-      }
-      f3 recover {
-        case e: Throwable => log.error(e.getMessage)
-      }
+      analyze(sender, text)
       stay
     case _ =>
       log.error("invalid event")
@@ -168,21 +160,51 @@ class ConversationActor @Inject()(facebookService: FacebookService,
 
   initialize()
 
+  def analyze(sender: String, text: String) = {
+    lazy val entitiesRequest = languageService.getEntities(text)
+    lazy val sentimentRequest = languageService.getSentiment(text)
+    val f1 = entitiesRequest withTimeout new TimeoutException("entities future timed out")
+    val f2 = sentimentRequest withTimeout new TimeoutException("sentiment future timed out")
+    val f3 = for {
+      entitiesResponse <- f1
+      sentimentResponse <- f2
+    } yield {
+      log.debug("received entities response:\n" + entitiesResponse.toJson.prettyPrint)
+      log.debug("received sentiment response:\n" + sentimentResponse.toJson.prettyPrint)
+      val message =
+        "¯\\_(ツ)_/¯ Didn't get that, but I can understand that\n" +
+          formatEntities(entitiesResponse.entities) + "\n" + formatSentiment(sentimentResponse.documentSentiment)
+      provider.sendTextMessage(sender, message)
+    }
+    f3 recover {
+      case e: Throwable => log.error(e.getMessage)
+    }
+  }
+
   def greet(sender: String, user: User) =
     provider.sendTextMessage(sender, greetings(random.nextInt(greetings.size)) + " " + user.firstName + "!")
 
-  def shrug(sender: String) =
-    provider.sendTextMessage(sender, "¯\\_(ツ)_/¯ " + shrugs(random.nextInt(shrugs.size)))
+  def shrug(sender: String) = {
+    val joke = if (random.nextInt(10) < 3) "\nHow about a joke instead?\n" + humourService.getJoke else ""
+    provider.sendTextMessage(sender, "¯\\_(ツ)_/¯ " + shrugs(random.nextInt(shrugs.size)) + joke)
+  }
 
   def formatEntities(entities: List[GoogleEntity]) =
     entities map { entity =>
       //val salience = f"${entity.salience}%2.2f"
       //s"${entity.name} (${entity.entityType}, $salience)"
-      s"${entity.name} (${entity.entityType})"
-    } mkString "\n\n"
+      s"${entity.name} is a ${entity.entityType}"
+    } mkString "\n"
 
-  def formatSentiment(sentiment: GoogleSentiment) =
-    f"Sentiment: ${sentiment.polarity}%2.2f"
+  def formatSentiment(sentiment: GoogleSentiment) = {
+    //f"Sentiment: ${sentiment.polarity}%2.2f"
+    val s = sentiment.polarity match {
+      case x if x > 0 => "positive"
+      case x if x < 0 => "negative"
+      case _ => "neutral"
+    }
+    s"Sentiment is $s"
+  }
 
 }
 
