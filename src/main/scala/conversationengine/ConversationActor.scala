@@ -13,7 +13,7 @@ import spray.json._
 
 import scala.concurrent._
 import scala.concurrent.duration._
-import scala.util.{Failure, Random, Success}
+import scala.util.Random
 
 /**
   * Created by markmo on 27/07/2016.
@@ -82,6 +82,7 @@ class ConversationActor @Inject()(facebookService: FacebookService,
       }
     case Event(Welcome(platform, sender), _) =>
       log.debug("received Authenticate event")
+      isAuthenticated = true
       testPlatformChange(platform, sender)
       provider.sendTextMessage(sender, "Welcome, login successful")
       stay
@@ -117,18 +118,25 @@ class ConversationActor @Inject()(facebookService: FacebookService,
       log.debug("received Respond event")
       log.debug("looking up address: " + text)
       testPlatformChange(platform, sender)
+
+      // TODO wrap in a function
       lazy val f = addressService.getAddress(text)
-      f withTimeout new TimeoutException("future timed out") onComplete {
-        case Success(response) =>
-          log.debug("received address lookup response:\n" + response.toJson.prettyPrint)
-          if (response.results.nonEmpty) {
-            provider.sendReceiptCard(sender, response.results.head.getAddress)
-          } else {
-            provider.sendTextMessage(sender, "Sorry, I could not interpret that")
-          }
-        case Failure(e) => log.error(e.getMessage)
+      val f1 = f withTimeout new TimeoutException("future timed out")
+      val f2 = f1 map { response =>
+        log.debug("received address lookup response:\n" + response.toJson.prettyPrint)
+        if (response.results.nonEmpty) {
+          provider.sendReceiptCard(sender, response.results.head.getAddress)
+          goto(Start)
+        } else {
+          provider.sendTextMessage(sender, "Sorry, I could not interpret that")
+          stay
+        }
       }
-      stay
+      f2.failed map { e =>
+        log.error(e.getMessage)
+        stay
+      }
+      Await.result(f2, timeout)
   }
 
   whenUnhandled {
@@ -142,8 +150,8 @@ class ConversationActor @Inject()(facebookService: FacebookService,
       testPlatformChange(platform, sender)
       val reply = smallTalkService.getSmallTalkResponse(sender, text)
       if (reply == "Didn't get that!") {
-        analyze(sender, text)
-        //shrug(sender)
+        //analyze(sender, text)
+        shrug(sender)
       } else {
         provider.sendTextMessage(sender, reply)
       }

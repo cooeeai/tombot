@@ -74,7 +74,7 @@ class FacebookController @Inject()(config: Config,
           val text = event.message.get.text
           logger.debug("text: [" + text + "]")
           if (text.startsWith("/alchemy")) {
-            facebookService.sendTextMessage(sender, formatKeywords(alchemyService.getKeywords(text.substring(8).trim)))
+            facebookService.sendTextMessage(sender, "Keywords:\n" + formatKeywords(alchemyService.getKeywords(text.substring(8).trim)))
           } else {
             if (rulesService.isQuestion(text)) {
               rulesService.getContent(text) match {
