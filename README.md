@@ -17,6 +17,17 @@ Integrates the following services:
 
 ### Why Scala and Akka?
 
+* Type-safe integrations with messaging providers
+
+For example,
+
+    val a = event.convertTo[FacebookAccountLinkingEvent]
+
+    val sender = a.sender.id
+    val recipient = a.recipient.id
+    val status = a.accountLinking.status
+    val authCode = a.accountLinking.authorizationCode.get
+
 * Type-safe small DSLs
 
 For example, akka-http routes:
