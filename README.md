@@ -2,9 +2,14 @@
 
 A Bot for Facebook Messenger using Scala and Akka-HTTP.
 
-Includes Scala API for Facebook Messenger.
+Includes Scala APIs for
+* Facebook Messenger
+* Skype
+* Google NLP
+* Google Maps
+* Wit.ai
 
-Integrates the following services:
+Integrates the following services
 * Address Service using [Google Geocoding API](https://developers.google.com/maps/documentation/geocoding/start)
 * Alchemy Keywords Service from [IBM Bluemix](http://www.ibm.com/watson/developercloud/alchemy-language.html)
 * [Facebook Messenger API](https://developers.facebook.com/docs/messenger-platform)
