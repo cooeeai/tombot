@@ -41,6 +41,8 @@ For example, building response cards:
 
 * Actors using the FSM (finite state machine) DSL to implement conversational state
 
+For example,
+
     class ConversationActor extends Actor with FSM[State, Data] {
 
       startWith(Starting, Uninitialized)
