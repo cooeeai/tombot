@@ -61,9 +61,9 @@ class ConversationActor @Inject()(facebookService: FacebookService,
     }
   }
 
-  startWith(Start, Uninitialized)
+  startWith(Starting, Uninitialized)
 
-  when(Start) {
+  when(Starting) {
     case Event(Qualify(platform, sender, productType), _) =>
       log.debug("received Buy event")
       testPlatformChange(platform, sender)
@@ -93,9 +93,10 @@ class ConversationActor @Inject()(facebookService: FacebookService,
       log.debug("received Qualify event")
       testPlatformChange(platform, sender)
       productType match {
-        case Some(typ) => provider.sendTextMessage(sender, s"What type of $typ did you have in mind?"); stay
-        case None => provider.sendTextMessage(sender, "What did you want to buy?"); stay
+        case Some(typ) => provider.sendTextMessage(sender, s"What type of $typ did you have in mind?")
+        case None => provider.sendTextMessage(sender, "What did you want to buy?")
       }
+      stay
     case Event(Respond(platform, sender, text), _) =>
       log.debug("received Respond event")
       testPlatformChange(platform, sender)
@@ -126,7 +127,7 @@ class ConversationActor @Inject()(facebookService: FacebookService,
         log.debug("received address lookup response:\n" + response.toJson.prettyPrint)
         if (response.results.nonEmpty) {
           provider.sendReceiptCard(sender, response.results.head.getAddress)
-          goto(Start)
+          goto(Starting)
         } else {
           provider.sendTextMessage(sender, "Sorry, I could not interpret that")
           stay
@@ -229,7 +230,7 @@ object ConversationActor extends NamedActor {
   case class Analyze(platform: String, sender: String, text: String)
 
   sealed trait State
-  case object Start extends State
+  case object Starting extends State
   case object Greeted extends State
   case object Qualifying extends State
   case object Buying extends State

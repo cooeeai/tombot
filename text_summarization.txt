@@ -1,0 +1,45 @@
+sudo dscl . -create /Groups/docker
+
+sudo dscl . -create /Groups/docker RealName "Docker"
+
+dscl . -list /Groups PrimaryGroupID
+
+sudo dscl . -create /Groups/docker gid 400
+
+sudo dscl . -create /Groups/docker GroupMembership markmo
+
+#docker run -it -p 8888:8888 gcr.io/tensorflow/tensorflow:latest-devel
+
+docker run -it -p 8888:8888 gcr.io/tensorflow/tensorflow:latest-devel /bin/bash
+
+sudo apt-get update
+
+sudo apt-get install software-properties-common
+
+# requires enter
+sudo add-apt-repository ppa:webupd8team/java
+
+sudo apt-get update
+
+# GUI acceptance
+sudo apt-get install oracle-java8-installer
+
+echo "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
+
+curl https://storage.googleapis.com/bazel-apt/doc/apt-key.pub.gpg | sudo apt-key add -
+
+sudo apt-get update && sudo apt-get install bazel
+
+# following unnecessary if using docker image with source
+
+cd ~
+
+mkdir src
+
+cd src
+
+sudo apt-get install git
+
+git clone https://github.com/tensorflow/tensorflow.git
+
+cd ~

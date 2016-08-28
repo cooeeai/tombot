@@ -1,0 +1,23 @@
+//search for Test-Bot-1623754057915183
+
+hello
+
+how are you
+
+tell me a joke
+
+tell me something i dont know
+
+/alchemy Google, headquartered in Mountain View, unveiled the new Android phone at the Consumer Electronic Show.  Sundar Pichai said in his keynote that users love their new Android phones.
+
+i want to buy a phone
+
+//im interested in a phone (demo wit.ai)
+
+iphone
+
+//buy
+
+150 lonsdale st melbourne 3000
+
+//show receipt

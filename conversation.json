@@ -1,0 +1,61 @@
+{
+  "intent": "buy",
+  "entities": [
+    {
+      "type": "productType",
+      "name": "mobile"
+    }
+  ],
+  "states": ["starting", "qualifying", "buying"],
+  "conversation": {
+    "states": [
+      {
+        "name": "start",
+        "cases": [
+          {
+            "event": "enquiry",
+            "respond": "What type of {productType} did you have in mind?",
+            "goto": "qualifying"
+          }
+        ]
+      },
+      {
+        "name": "qualifying",
+        "cases": [
+          {
+            "event": "response",
+            "action": "showProducts"
+          }
+        ]
+      },
+      {
+        "name": "buying",
+        "cases": [
+          {
+            "event": "buy",
+            "action": "formFlow"
+          }
+        ]
+      }
+    ],
+    "unhandled": [
+      {
+        "event": "greet",
+        "action": "greet"
+      },
+      {
+        "event": "respond"
+      },
+      {
+        "event": "default"
+      }
+    ]
+  },
+  "fallback": {
+    "action": "shrug"
+  },
+  "defaults": {
+    "goto": "stay",
+    "action": "shrug"
+  }
+}

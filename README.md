@@ -4,9 +4,6 @@ A Bot for Facebook Messenger using Scala and Akka-HTTP.
 
 Includes Scala API for Facebook Messenger.
 
-Simple test at this stage. Will echo any message, except when `/buy` slash command is used, which will return a
-"Call To Action" (CTA) bubble showing product details and option to buy.
-
 Integrates the following services:
 * Address Service using [Google Geocoding API](https://developers.google.com/maps/documentation/geocoding/start)
 * Alchemy Keywords Service from [IBM Bluemix](http://www.ibm.com/watson/developercloud/alchemy-language.html)
@@ -18,24 +15,75 @@ Integrates the following services:
 * Small-talk API from [Houndify](https://www.houndify.com/)
 * Rules Service
 
+### Why Scala and Akka?
+
+* Type-safe small DSLs
+
+For example, akka-http routes:
+
+    path("authorize") {
+      get {
+        parameters("redirect_uri", "account_linking_token") { (redirectURI, accountLinkingToken) =>
+          ...
+      }
+    }
+
+For example, building response cards:
+
+    val payload = (
+      loginCard
+        usingApi api
+        forSender sender
+        withText "You need to authorize me"
+        withButtonTitle "Connect"
+        build()
+      )
+
+* Actors using the FSM (finite state machine) DSL to implement conversational state
+
+    class ConversationActor extends Actor with FSM[State, Data] {
+
+      startWith(Starting, Uninitialized)
+
+      when(Qualifying) {
+
+        case Event(Greet(sender, user), _) =>
+          greet(sender, user)
+          stay
+
+        case Event(Respond(sender, text), _) =>
+          provider.sendHeroCard(sender)
+          goto(Buying)
+      }
+
+    }
+
+    object ConversationActor extends NamedActor {
+
+      // events
+      case class Greet(sender: String, user: User)
+      case class Respond(sender: String, text: String)
+
+      sealed trait State
+      case object Starting extends State
+      case object Qualifying extends State
+      case object Buying extends State
+
+    }
+
+* Performance and scalability
+* Libraries to support large-scale system design
+
+For example, dependency injection using Google Guice
+
+    class FacebookController @Inject()(config: Config,
+                                       logger: LoggingAdapter,
+                                       intentService: IntentService) {}
+
+* Functional programming to simplify concurrent system design
 
 [![Deploy to Heroku](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
 
-<table width="100%" style="border: none; margin-top: 20px;">
-    <tr>
-        <td style="border: none;">
-            <img src="assets/echo.png" title="Echo action" width="231" height="300">
-            <br>
-            Echo action
-        </td>
-        <td style="border: none;">
-            <img src="assets/buy.png" title="Echo action" width="231" height="300">
-            <br>
-            Buy action
-        </td>
-    </tr>
-</table>
-
-<img src="assets/thread.png" title="Echo action" width="368" height="500">
+<img src="assets/messenger_session.jpg" title="Echo action" width="600" height="805">
 
 Message thread
