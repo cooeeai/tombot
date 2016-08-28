@@ -1,6 +1,6 @@
 # tombot
 
-A Bot for Facebook Messenger using Scala and Akka-HTTP.
+A Bot Framework using Scala and akka-http.
 
 Includes Scala APIs for
 * Facebook Messenger
