@@ -16,6 +16,10 @@ libraryDependencies ++= Seq(
   "net.codingwell" %% "scala-guice" % "4.0.1",
   "com.ibm.watson.developer_cloud" % "java-sdk" % "3.3.0",
   "org.scala-lang.modules" % "scala-xml_2.11" % "1.0.4",
+  "commons-codec" % "commons-codec" % "1.3",
+  "org.apache.httpcomponents" % "httpclient" % "4.0.1",
+  "org.apache.httpcomponents" % "httpcore" % "4.0.1",
+  "commons-logging" % "commons-logging" % "1.2",
   "btomala" %% "akka-http-twirl" % "1.1.0" excludeAll
     ExclusionRule(organization = "com.typesafe.akka")
 )

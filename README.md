@@ -18,6 +18,7 @@ Integrates the following services
 * [Google NLP API](https://cloud.google.com/natural-language/docs/)
 * [Skype API](https://docs.botframework.com/en-us/skype/getting-started)
 * Small-talk API from [Houndify](https://www.houndify.com/)
+* [Wolfram Alpha Knowledge API](http://www.wolframalpha.com/widgets/)
 * Rules Service
 
 ### Why Scala and Akka?
