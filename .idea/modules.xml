@@ -4,6 +4,8 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/myProject.iml" filepath="$PROJECT_DIR$/.idea/modules/myProject.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/myProject-build.iml" filepath="$PROJECT_DIR$/.idea/modules/myProject-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/scala-slack-bot-core.iml" filepath="$PROJECT_DIR$/.idea/modules/scala-slack-bot-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/scala-slack-bot-core-build.iml" filepath="$PROJECT_DIR$/.idea/modules/scala-slack-bot-core-build.iml" />
     </modules>
   </component>
 </project>

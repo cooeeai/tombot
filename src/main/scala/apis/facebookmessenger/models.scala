@@ -94,6 +94,12 @@ case class FacebookAccountLinkingEvent(sender: FacebookSender, recipient: Facebo
 
 case class FacebookUserPSID(id: String, recipient: String)
 
+case class FacebookQuickReply(contentType: String, title: String, payload: String)
+
+case class FacebookQuickReplyMessage(text: String, quickReplies: List[FacebookQuickReply])
+
+case class FacebookQuickReplyTemplate(recipient: FacebookRecipient, message: FacebookQuickReplyMessage)
+
 trait FacebookJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
 
   implicit val facebookSenderJsonFormat = jsonFormat1(FacebookSender)
@@ -196,6 +202,9 @@ trait FacebookJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val facebookAttachmentJsonFormat = jsonFormat(FacebookAttachment, "type", "payload")
   implicit val facebookGenericMessageJsonFormat = jsonFormat1(FacebookGenericMessage)
   implicit val facebookGenericMessageTemplateJsonFormat = jsonFormat2(FacebookGenericMessageTemplate)
+  implicit val facebookQuickReplyJsonFormat = jsonFormat(FacebookQuickReply, "content_type", "title", "payload")
+  implicit val facebookQuickReplyMessageJsonFormat = jsonFormat(FacebookQuickReplyMessage, "text", "quick_replies")
+  implicit val facebookQuickReplyTemplateJsonFormat = jsonFormat2(FacebookQuickReplyTemplate)
 
 }
 
@@ -365,5 +374,29 @@ object Builder {
   }
 
   def messageElement = new MessageBuilder(None, None)
+
+  class QuickReplyBuilder(sender: Option[String], text: Option[String]) {
+
+    def forSender(value: String) = new QuickReplyBuilder(Some(value), text)
+
+    def withText(value: String) = new QuickReplyBuilder(sender, Some(value))
+
+    def build() =
+      FacebookQuickReplyTemplate(FacebookRecipient(sender.get), FacebookQuickReplyMessage(
+        text = text.get,
+        quickReplies = FacebookQuickReply(
+          contentType = "text",
+          title = "Yes",
+          payload = ""
+        ) :: FacebookQuickReply(
+          contentType = "text",
+          title = "No",
+          payload = ""
+        ) :: Nil
+      ))
+
+  }
+
+  def quickReply = new QuickReplyBuilder(None, None)
 
 }

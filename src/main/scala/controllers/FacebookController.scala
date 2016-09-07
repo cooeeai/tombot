@@ -55,13 +55,22 @@ class FacebookController @Inject()(config: Config,
   def receivedMessage(data: JsObject, event: JsValue, user: User): Unit = {
     val message = event.extract[JsObject]('message)
     val isEcho = message.extract[Boolean](optionalField("is_echo")).getOrElse(false)
-    val quickReply = message.extract[Boolean](optionalField("quick_reply")).getOrElse(false)
+    val quickReply = message.extract[JsObject](optionalField("quick_reply")).getOrElse(JsObject())
+    val payload = quickReply.extract[String](optionalField("payload")).getOrElse("none")
     val messageText = message.extract[String](optionalField("text"))
     val messageAttachments = message.extract[JsArray](optionalField("attachments"))
     if (isEcho) {
       logger.info("received echo message")
-    } else if (quickReply) {
+    } else if (payload != "none") {
       logger.info("received quick reply")
+      val response = data.convertTo[FacebookResponse]
+      val messagingEvents = response.entry.head.messaging
+      val event = messagingEvents.head
+      val text = event.message.get.text
+      if (text != "No") {
+        val sender = userService.getUserIdOrElse(event.sender.id)
+        converse(sender, Respond("facebook", sender, "Visa 1234"))
+      }
     } else if (messageAttachments.isDefined) {
       logger.info("received attachments")
     } else if (messageText.isDefined) {
@@ -109,6 +118,7 @@ class FacebookController @Inject()(config: Config,
         case Some("buy") => converse(sender, Qualify("facebook", sender, meaning.getEntityValue("product_type")))
         case Some("greet") => converse(sender, Greet("facebook", sender, user))
         case Some("analyze") => converse(sender, Analyze("facebook", sender, text))
+        case Some("bill-enquiry") => converse(sender, BillEnquiry("facebook", sender))
         //case _ => converse(sender, Analyze("facebook", sender, text))
         case _ => converse(sender, Respond("facebook", sender, text))
       }
@@ -136,6 +146,8 @@ class FacebookController @Inject()(config: Config,
     val authCode = event.accountLinking.authorizationCode.get
 
     converse(sender, Welcome("facebook", sender))
+    facebookService.sendTextMessage(sender, "Welcome, login successful")
+    converse(sender, PostAuth(sender))
 
     logger.info(
       s"""

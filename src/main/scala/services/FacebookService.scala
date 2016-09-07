@@ -56,9 +56,9 @@ class FacebookService @Inject()(config: Config,
     val payload = (
       genericTemplate
         forSender sender
-        withTitle "Welcome to T-Corp"
-        withSubtitle "Please login so I can serve you better"
-        withImageURL s"$api/img/bot.png"
+        withTitle "Welcome to Telstra"
+        withSubtitle "Please login so I can access that information for you"
+        withImageURL s"$api/img/telstra_logo_128.png"
         addButton FacebookLoginButton(s"$api/authorize")
         build()
       )
@@ -101,7 +101,7 @@ class FacebookService @Inject()(config: Config,
     val payload = (
       receiptCard
         forSender sender
-        withReceiptName "Peter Chang"
+        withReceiptName "Mark Moloney"
         withOrderNumber receiptId
         withCurrency "AUD"
         withPaymentMethod "Visa 1234"
@@ -110,6 +110,25 @@ class FacebookService @Inject()(config: Config,
         withAddress address
         withSummary (subtotal = "1047.00", shippingCost = "25.00", totalTax = "104.70", totalCost = "942.30")
         addAdjustment (name = "Coupon DAY1", amount = "-100.00")
+        build()
+      )
+    logger.debug("sending payload:\n" + payload.toJson.prettyPrint)
+    for {
+      request <- Marshal(payload).to[RequestEntity]
+      response <- http.singleRequest(HttpRequest(
+        method = HttpMethods.POST,
+        uri = s"https://graph.facebook.com/v2.6/me/messages?access_token=$accessToken",
+        entity = request))
+    } yield ()
+  }
+
+  def sendQuickReply(sender: String, text: String): Unit = {
+    logger.info("sending quick reply to sender: " + sender)
+    import Builder._
+    val payload = (
+      quickReply
+        forSender sender
+        withText text
         build()
       )
     logger.debug("sending payload:\n" + payload.toJson.prettyPrint)

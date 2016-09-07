@@ -15,4 +15,6 @@ trait MessagingProvider {
 
   def sendReceiptCard(sender: String, address: FacebookAddress): Unit
 
+  def sendQuickReply(sender: String, text: String): Unit
+
 }

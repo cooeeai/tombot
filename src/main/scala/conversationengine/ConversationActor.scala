@@ -51,6 +51,12 @@ class ConversationActor @Inject()(facebookService: FacebookService,
 
   var isAuthenticated = false
 
+  var postAuthAction: () => this.State = () => stay
+
+  var isAddressVerified = false
+
+  var isPaymentVerified = false
+
   def testPlatformChange(platform: String, sender: String) = {
     if (currentProvider != platform) {
       val oldPlatform = currentProvider
@@ -77,15 +83,21 @@ class ConversationActor @Inject()(facebookService: FacebookService,
             stay
         }
       } else {
+        productType match {
+          case Some(typ) =>
+            postAuthAction = () => {
+              provider.sendTextMessage(sender, s"What type of $typ did you have in mind?")
+              goto(Qualifying) using Offer
+            }
+          case None =>
+            postAuthAction = () => {
+              provider.sendTextMessage(sender, "What did you want to buy?")
+              stay
+            }
+        }
         provider.sendLoginCard(sender)
         stay
       }
-    case Event(Welcome(platform, sender), _) =>
-      log.debug("received Authenticate event")
-      isAuthenticated = true
-      testPlatformChange(platform, sender)
-      provider.sendTextMessage(sender, "Welcome, login successful")
-      stay
   }
 
   when(Qualifying) {
@@ -113,31 +125,38 @@ class ConversationActor @Inject()(facebookService: FacebookService,
     case Event(Buy(platform, sender, _), _) =>
       log.debug("received Buy event")
       testPlatformChange(platform, sender)
-      provider.sendTextMessage(sender, "What address should I send the order to?")
+      provider.sendQuickReply(sender, "Shall I use the card ending in 1234?")
       stay
     case Event(Respond(platform, sender, text), _) =>
       log.debug("received Respond event")
-      log.debug("looking up address: " + text)
       testPlatformChange(platform, sender)
 
-      // TODO wrap in a function
-      lazy val f = addressService.getAddress(text)
-      val f1 = f withTimeout new TimeoutException("future timed out")
-      val f2 = f1 map { response =>
-        log.debug("received address lookup response:\n" + response.toJson.prettyPrint)
-        if (response.results.nonEmpty) {
-          provider.sendReceiptCard(sender, response.results.head.getAddress)
-          goto(Starting)
-        } else {
-          provider.sendTextMessage(sender, "Sorry, I could not interpret that")
+      if (isPaymentVerified) {
+        log.debug("looking up address: " + text)
+        // TODO wrap in a function
+        lazy val f = addressService.getAddress(text)
+        val f1 = f withTimeout new TimeoutException("future timed out")
+        val f2 = f1 map { response =>
+          log.debug("received address lookup response:\n" + response.toJson.prettyPrint)
+          if (response.results.nonEmpty) {
+            isAddressVerified = true
+            provider.sendReceiptCard(sender, response.results.head.getAddress)
+            goto(Starting)
+          } else {
+            provider.sendTextMessage(sender, "Sorry, I could not interpret that")
+            stay
+          }
+        }
+        f2.failed map { e =>
+          log.error(e.getMessage)
           stay
         }
-      }
-      f2.failed map { e =>
-        log.error(e.getMessage)
+        Await.result(f2, timeout)
+      } else {
+        isPaymentVerified = true
+        provider.sendTextMessage(sender, "What address should I send the order to?")
         stay
       }
-      Await.result(f2, timeout)
   }
 
   whenUnhandled {
@@ -161,6 +180,28 @@ class ConversationActor @Inject()(facebookService: FacebookService,
       log.debug("received Analyze event")
       testPlatformChange(platform, sender)
       analyze(sender, text)
+      stay
+    case Event(BillEnquiry(platform, sender), _) =>
+      log.debug("received BillEnquiry event")
+      testPlatformChange(platform, sender)
+      if (isAuthenticated) {
+        provider.sendQuickReply(sender, "Your current balance is $41.25. Would you like to pay it now?")
+      } else {
+        postAuthAction = () => {
+          provider.sendQuickReply(sender, "Your current balance is $41.25. Would you like to pay it now?")
+          stay
+        }
+        provider.sendLoginCard(sender)
+      }
+      stay
+    case Event(PostAuth(sender), _) =>
+      log.debug("received PostAuth event")
+      postAuthAction()
+    case Event(Welcome(platform, sender), _) =>
+      log.debug("received Authenticate event")
+      isAuthenticated = true
+      testPlatformChange(platform, sender)
+      //provider.sendTextMessage(sender, "Welcome, login successful")
       stay
     case _ =>
       log.error("invalid event")
@@ -195,7 +236,7 @@ class ConversationActor @Inject()(facebookService: FacebookService,
 
   def shrug(sender: String) = {
     val joke = if (random.nextInt(10) < 3) "\nHow about a joke instead?\n" + humourService.getJoke else ""
-    provider.sendTextMessage(sender, "¯\\_(ツ)_/¯ " + shrugs(random.nextInt(shrugs.size)) + joke)
+    provider.sendTextMessage(sender, "¯\\_(ツ)_/¯ " + shrugs(random.nextInt(shrugs.size)))// + joke)
   }
 
   def formatEntities(entities: List[GoogleEntity]) =
@@ -228,6 +269,8 @@ object ConversationActor extends NamedActor {
   case class Respond(platform: String, sender: String, text: String)
   case class Welcome(platform: String, sender: String)
   case class Analyze(platform: String, sender: String, text: String)
+  case class BillEnquiry(platform: String, sender: String)
+  case class PostAuth(sender: String)
 
   sealed trait State
   case object Starting extends State

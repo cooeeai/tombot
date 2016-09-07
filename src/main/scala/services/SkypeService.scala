@@ -84,6 +84,8 @@ class SkypeService @Inject()(config: Config,
 
   def sendReceiptCard(sender: String, address: FacebookAddress): Unit = ???
 
+  def sendQuickReply(sender: String, text: String): Unit = ???
+
   def getMicrosoftToken: Future[MicrosoftToken] = {
     logger.info("getting MS token")
     val url = config.getString("microsoft.api.auth_url")

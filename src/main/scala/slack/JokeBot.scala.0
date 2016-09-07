@@ -1,0 +1,28 @@
+package slack
+
+import io.scalac.slack.MessageEventBus
+import io.scalac.slack.bots.AbstractBot
+import io.scalac.slack.common.{BaseMessage, Command, OutboundMessage}
+
+/**
+  * Created by markmo on 1/09/2016.
+  */
+class JokeBot(override val bus: MessageEventBus) extends AbstractBot {
+
+  override def help(channel: String): OutboundMessage =
+    OutboundMessage(channel, s"$name will tell jokes. Usage: tell joke")
+
+  override def act: Receive = {
+    case Command("tell joke", _, message) =>
+      //logger.info("telling joke")
+      //val joke = Await.result(humourService.getJoke, 5.seconds)
+      val joke = "Did you hear about the guy whose whole left side was cut off? He's all right now."
+      publish(OutboundMessage(message.channel, joke))
+
+    case BaseMessage(text, channel, user, _, _) =>
+      val joke = "Did you hear about the guy whose whole left side was cut off? He's all right now."
+      publish(OutboundMessage(channel, joke))
+
+  }
+
+}

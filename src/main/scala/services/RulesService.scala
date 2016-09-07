@@ -29,7 +29,7 @@ class RulesService @Inject()(logger: LoggingAdapter) {
   private def clean(text: String) = text.trim.replaceAll("\\n", " ")
 
   private def questionRule =
-    defineRule startsWith "what|where|how|why|which|can|does|who|will|compare" caseInsensitive() build()
+    defineRule startsWith "what|where|how|why|which|can|does|who|will|compare|help" caseInsensitive() build()
 
   def isQuestion(text: String) = questionRule execute text
 
@@ -64,7 +64,13 @@ object RulesService {
 
   def defineRule = new RulesBuilder(List(Nil), false)
 
+  val helpText = "I can help you find and buy a phone"
+
   def content: List[(RulesExecutor, String)] = List(
+
+    (defineRule contains "help" build(), helpText),
+
+    (defineRule contains "what" and() contains "know" build(), helpText),
 
     (defineRule startsWith "what"
       and() contains "bot|virtual agent"
