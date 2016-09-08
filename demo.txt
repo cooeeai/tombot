@@ -21,3 +21,22 @@ iphone
 150 lonsdale st melbourne 3000
 
 //show receipt
+
+
+This is a sample Bot on Facebook's Messenger Platform.
+
+It demonstrates a simple flow to answer a support request, and then to enable a sales transaction.
+
+The first thing to do is search for my Test Bot.
+
+Test-Bot-1623754057915183
+
+Once found, I can start interacting with it using natural language texts.
+
+The conversation will be available across all devices on which Messenger is installed, including the Facebook web page, and mobile apps.
+
+Most people start in a very human way.
+
+Bots can be trained to engage in a little chit chat, but should try to navigate the user back to the narrow domain in which it is knowledgeable.
+
+There is much to be learned about effective Bot design from a user experience perspective. Best practices are evolving. The ability to perform "test and learn" or A/B Testing is an important capability to continually refine the best approach.
