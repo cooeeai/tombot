@@ -285,6 +285,11 @@ class FacebookController @Inject()(config: Config,
         getFromResource(s"images/$filename")
       }
     } ~
+    pathPrefix("vid") {
+      path(Segment) { filename =>
+        getFromResource(s"videos/$filename")
+      }
+    } ~
     path("") {
       logger.info("default path")
       complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>Welcome to Tombot</h1>"))

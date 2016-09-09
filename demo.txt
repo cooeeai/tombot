@@ -31,7 +31,7 @@ The first thing to do is search for my Test Bot.
 
 Test-Bot-1623754057915183
 
-Once found, I can start interacting with it using natural language texts.
+Once found, I can start interacting with it using natural language texting.
 
 The conversation will be available across all devices on which Messenger is installed, including the Facebook web page, and mobile apps.
 
@@ -39,4 +39,48 @@ Most people start in a very human way.
 
 Bots can be trained to engage in a little chit chat, but should try to navigate the user back to the narrow domain in which it is knowledgeable.
 
-There is much to be learned about effective Bot design from a user experience perspective. Best practices are evolving. The ability to perform "test and learn" or A/B Testing is an important capability to continually refine the best approach.
+There is much to be learned about effective Bot design from a user experience perspective. Best practices are evolving. The ability to perform A/B Testing, or "test and learn", is an important capability to continually refine the best approach.
+
+Lets start with a simple request.
+
+Some actions require us to authenticate who the user is. With Facebook, we have a number of options to authenticate and then link the Facebook ID to a Telstra Account.
+
+In this example, I use a simple Login Form.
+
+We can't see the login form, since it is opening in a separate secure window, which is managed on our servers for security.
+
+With Facebook, we can use a variety of user interface widgets, in addition to natural language text, such as cards, buttons, images, and video, to provide engagign content or cut down on the number of keystrokes where a button click will suffice.
+
+The natural language processing engine behind this should be able to handle variations in how a request might be posed. Otherwise, it would be a much larger manual task to document the possible keyword combinations and rules to capture all these variations.
+
+In some cases, the engine won't understand the question where it has not been sufficiently trained.
+
+Therefore, an important function is to continuously capture requests, which the engine has failed to understand. Then, offline, enable a human curator to train the engine to handle these new messages.
+
+In this example, I'm using a natural language engine provided by Facebook.
+
+Statements not understood appear in an inbox. So for for example, with the last question "How much do i owe", I can highlight owe and indicate that the intent here was a billing enquiry.
+
+Now the engine has recognised the new way of asking the question and responded with an appropriate answer.
+
+Now we make a request leading into a purchase or cross-sell flow.
+
+With Facebook, we can bring in rich content, so rather than having to link the user to external content, we can bring the product catalog inside the messaging app.
+
+If we stay within the flow, and same interface, we are more likely to keep the customer through to purchase.
+
+I'm going to click buy, and because I previously logged in, the Bot already knows a lot about me.
+
+So rather than getting me to fill in a form or ask a lot of questions that should already be known from my account or history, the Bot can simply confirm some of these details.
+
+Since I'll be responding to questions in plain language, the Bot must validate the information and convert it into a structured format to send to internal system.
+
+In this example, I'm using the Google Maps service to validate and format my address.
+
+In an actual implementation, we would confirm the order details before submitting the order.
+
+Once the order has been submitted, we can provide a receipt, still within the messaging app, in a clear and easy to read format.
+
+This has been a simple example demonstrating the possibilities of integrating with Facebook's Messenger platform.
+
+One of the interesting opportunities is rather than expecting users to come to our website or to download our mobile app, we can take our products and services to the customer, engaging on their terms, within apps they already use on a regular basis.
