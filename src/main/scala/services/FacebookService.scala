@@ -10,6 +10,7 @@ import akka.stream.Materializer
 import apis.facebookmessenger._
 import com.google.inject.Inject
 import com.typesafe.config.Config
+import memory.Slot
 import spray.json._
 
 import scala.concurrent.Future
@@ -93,15 +94,23 @@ class FacebookService @Inject()(config: Config,
     } yield ()
   }
 
-  def sendReceiptCard(sender: String, address: FacebookAddress): Unit = {
+  def sendReceiptCard(sender: String, slot: Slot): Unit = {
     logger.info("sending receipt message to sender: " + sender)
     import Builder._
     val elements = paymentService.getElements
     val receiptId = "order" + Math.floor(Math.random() * 1000)
+    val address = FacebookAddress(
+      street1 = slot.getString("street1"),
+      street2 = "",
+      city = slot.getString("city"),
+      postcode = slot.getString("postcode"),
+      state = slot.getString("state"),
+      country = slot.getString("country")
+    )
     val payload = (
       receiptCard
         forSender sender
-        withReceiptName "Mark Moloney"
+        withReceiptName slot.getString("cardholdersName")
         withOrderNumber receiptId
         withCurrency "AUD"
         withPaymentMethod "Visa 1234"
@@ -188,5 +197,11 @@ class FacebookService @Inject()(config: Config,
         entity = request))
     } yield ()
   }
+
+}
+
+object FacebookService extends NamedService {
+
+  override final val name = "Facebook"
 
 }

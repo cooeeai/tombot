@@ -1,6 +1,8 @@
 package services
 
-import apis.facebookmessenger.FacebookAddress
+import memory.Slot
+
+import scala.concurrent.Future
 
 /**
   * Created by markmo on 14/08/2016.
@@ -13,8 +15,10 @@ trait MessagingProvider {
 
   def sendHeroCard(sender: String): Unit
 
-  def sendReceiptCard(sender: String, address: FacebookAddress): Unit
+  def sendReceiptCard(sender: String, slot: Slot): Unit
 
   def sendQuickReply(sender: String, text: String): Unit
+
+  def getUserProfile(sender: String): Future[String]
 
 }

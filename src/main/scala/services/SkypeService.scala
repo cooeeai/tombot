@@ -8,10 +8,10 @@ import akka.http.scaladsl.model.headers.{Authorization, OAuth2BearerToken}
 import akka.http.scaladsl.model.{FormData, HttpMethods, HttpRequest, RequestEntity}
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.Materializer
-import apis.facebookmessenger.FacebookAddress
 import apis.skype._
 import com.google.inject.Inject
 import com.typesafe.config.Config
+import memory.Slot
 
 import scala.concurrent.Future
 
@@ -82,9 +82,11 @@ class SkypeService @Inject()(config: Config,
 
   def sendHeroCard(sender: String): Unit = ???
 
-  def sendReceiptCard(sender: String, address: FacebookAddress): Unit = ???
+  def sendReceiptCard(sender: String, slot: Slot): Unit = ???
 
   def sendQuickReply(sender: String, text: String): Unit = ???
+
+  def getUserProfile(sender: String): Future[String] = ???
 
   def getMicrosoftToken: Future[MicrosoftToken] = {
     logger.info("getting MS token")
@@ -103,5 +105,11 @@ class SkypeService @Inject()(config: Config,
       entity <- Unmarshal(response.entity).to[MicrosoftToken]
     } yield entity
   }
+
+}
+
+object SkypeService extends NamedService {
+
+  override final val name = "SkypeService"
 
 }

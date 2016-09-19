@@ -7,7 +7,7 @@ import akka.http.scaladsl.server.{MalformedRequestContentRejection, RejectionHan
 import akka.stream.ActorMaterializer
 import com.google.inject.Guice
 import com.typesafe.config.Config
-import controllers.{FacebookController, SkypeController}
+import controllers.{SparkController, FacebookController, SkypeController}
 import modules.akkaguice.AkkaModule
 import modules.config.ConfigModule
 import modules.conversation.ConversationModule
@@ -52,11 +52,12 @@ object Main extends App {
 
   val facebookController = injector.instance[FacebookController]
   val skypeController = injector.instance[SkypeController]
+  val sparkController = injector.instance[SparkController]
 
   val port = Properties.envOrElse("PORT", "8080").toInt
 
   val bindingFuture =
-    http.bindAndHandle(facebookController.routes ~ skypeController.routes,
+    http.bindAndHandle(facebookController.routes ~ skypeController.routes ~ sparkController.routes,
       config.getString("http.interface"), config.getInt("http.port"))
 
   facebookController.setupWelcomeGreeting()

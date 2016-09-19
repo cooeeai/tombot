@@ -45,7 +45,9 @@ case class FacebookElement(title: String, subtitle: String, itemURL: String, ima
 
 case class FacebookReceiptElement(title: String, subtitle: String, quantity: Int, price: BigDecimal, currency: String, imageURL: String)
 
-case class FacebookAddress(street1: String, street2: String, city: String, postcode: String, state: String, country: String)
+case class FacebookAddress(street1: String, street2: String, city: String, postcode: String, state: String, country: String) {
+  override def toString = street1 + ", " + street2 + ", " + city + ", " + state + " " + postcode
+}
 
 case class FacebookSummary(subtotal: BigDecimal, shippingCost: BigDecimal, totalTax: BigDecimal, totalCost: BigDecimal)
 

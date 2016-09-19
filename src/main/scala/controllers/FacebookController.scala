@@ -8,6 +8,7 @@ import akkahttptwirl.TwirlSupport._
 import apis.facebookmessenger._
 import apis.witapi.WitJsonSupport
 import com.google.inject.Inject
+import com.google.inject.name.Named
 import com.typesafe.config.Config
 import conversationengine.ConversationActor._
 import services._
@@ -23,7 +24,7 @@ class FacebookController @Inject()(config: Config,
                                    logger: LoggingAdapter,
                                    conversationService: ConversationService,
                                    intentService: IntentService,
-                                   facebookService: FacebookService,
+                                   @Named(FacebookService.name) provider: MessagingProvider,
                                    userService: UserService,
                                    rulesService: RulesService,
                                    alchemyService: AlchemyService)
@@ -31,6 +32,7 @@ class FacebookController @Inject()(config: Config,
 
   import StatusCodes._
   import conversationService._
+  import Platforms._
 
   def receivedAuthentication(event: FacebookAuthenticationEvent): Unit = {
     val sender = event.sender.id
@@ -49,7 +51,7 @@ class FacebookController @Inject()(config: Config,
          |with pass-through param '$passThroughParam' at time $timeOfAuth
        """.stripMargin)
 
-    facebookService.sendTextMessage(sender, "Authentication successful")
+    provider.sendTextMessage(sender, "Authentication successful")
   }
 
   def receivedMessage(data: JsObject, event: JsValue, user: User): Unit = {
@@ -59,20 +61,27 @@ class FacebookController @Inject()(config: Config,
     val payload = quickReply.extract[String](optionalField("payload")).getOrElse("none")
     val messageText = message.extract[String](optionalField("text"))
     val messageAttachments = message.extract[JsArray](optionalField("attachments"))
+
     if (isEcho) {
       logger.info("received echo message")
+
     } else if (payload != "none") {
       logger.info("received quick reply")
       val response = data.convertTo[FacebookResponse]
       val messagingEvents = response.entry.head.messaging
       val event = messagingEvents.head
       val text = event.message.get.text
-      if (text != "No") {
-        val sender = userService.getUserIdOrElse(event.sender.id)
-        converse(sender, Respond("facebook", sender, "Visa 1234"))
-      }
+//      if (text != "No") {
+//        val sender = userService.getUserIdOrElse(event.sender.id)
+//        converse(sender, Respond(Facebook, sender, "Visa 1234"))
+//      }
+      val sender = userService.getUserIdOrElse(event.sender.id)
+      converse(sender, Respond(Facebook, sender, text))
+
     } else if (messageAttachments.isDefined) {
       logger.info("received attachments")
+      // TODO
+
     } else if (messageText.isDefined) {
       val response = data.convertTo[FacebookResponse]
       val messagingEvents = response.entry.head.messaging
@@ -80,50 +89,50 @@ class FacebookController @Inject()(config: Config,
         val sender = userService.getUserIdOrElse(event.sender.id)
         if (event.message.isDefined) {
           logger.info("event.message is defined")
+
           val text = event.message.get.text
           logger.debug("text: [" + text + "]")
-          if (text.startsWith("/alchemy")) {
-            facebookService.sendTextMessage(sender, "Keywords:\n" + formatKeywords(alchemyService.getKeywords(text.substring(8).trim)))
-          } else {
-            if (rulesService.isQuestion(text)) {
-              rulesService.getContent(text) match {
-                case Some(content) =>
-                  logger.debug("found content")
-                  facebookService.sendTextMessage(sender, content)
-                case None =>
-                  parseIntent(sender, text, user)
-              }
-            } else {
-              parseIntent(sender, text, user)
-            }
-          }
+
+//          if (text.startsWith("/alchemy")) {
+//            facebookService.sendTextMessage(sender, "Keywords:\n" + formatKeywords(alchemyService.getKeywords(text.substring(8).trim)))
+//          } else if (rulesService.isQuestion(text)) {
+//            rulesService.getContent(text) match {
+//              case Some(content) =>
+//                logger.debug("found content")
+//                facebookService.sendTextMessage(sender, content)
+//              case None =>
+//                //parseIntent(sender, text, user)
+//                converse(sender, Respond(Facebook, sender, text))
+//            }
+//          } else {
+            //parseIntent(sender, text, user)
+            converse(sender, Respond(Facebook, sender, text))
+//          }
         }
       }
     }
   }
 
-  private def formatKeywords(keywords: Map[String, Double]) = {
-    keywords map {
-      case (keyword, relevance) => f"$keyword ($relevance%2.2f)"
-    } mkString "\n"
-  }
+//  private def formatKeywords(keywords: Map[String, Double]) = {
+//    keywords map {
+//      case (keyword, relevance) => f"$keyword ($relevance%2.2f)"
+//    } mkString "\n"
+//  }
 
-  private def parseIntent(sender: String, text: String, user: User) = {
-    intentService.getIntent(text) map { meaning =>
-      logger.debug("received meaning:\n" + meaning.toJson.prettyPrint)
-      // TODO
-      // how can we bypass this when not needed
-      val intent = meaning.getIntent
-      intent match {
-        case Some("buy") => converse(sender, Qualify("facebook", sender, meaning.getEntityValue("product_type")))
-        case Some("greet") => converse(sender, Greet("facebook", sender, user))
-        case Some("analyze") => converse(sender, Analyze("facebook", sender, text))
-        case Some("bill-enquiry") => converse(sender, BillEnquiry("facebook", sender))
-        //case _ => converse(sender, Analyze("facebook", sender, text))
-        case _ => converse(sender, Respond("facebook", sender, text))
-      }
-    }
-  }
+//  private def parseIntent(sender: String, text: String, user: User) = {
+//    intentService.getIntent(text) map { meaning =>
+//      logger.debug("received meaning:\n" + meaning.toJson.prettyPrint)
+//      val intent = meaning.getIntent
+//      intent match {
+//        case Some("buy") => converse(sender, Qualify(Facebook, sender, meaning.getEntityValue("product_type"), text))
+//        case Some("greet") => converse(sender, Greet(Facebook, sender, user, text))
+//        case Some("analyze") => converse(sender, Analyze(Facebook, sender, text))
+//        case Some("bill-enquiry") => converse(sender, BillEnquiry(Facebook, sender, text))
+//        //case _ => converse(sender, Analyze(Facebook, sender, text))
+//        case _ => converse(sender, Respond(Facebook, sender, text))
+//      }
+//    }
+//  }
 
   def receivedDeliveryConfirmation(event: FacebookMessageDeliveredEvent): Unit = {
     val sender = event.sender.id
@@ -145,8 +154,12 @@ class FacebookController @Inject()(config: Config,
     val status = event.accountLinking.status
     val authCode = event.accountLinking.authorizationCode.get
 
-    converse(sender, Welcome("facebook", sender))
-    facebookService.sendTextMessage(sender, "Welcome, login successful")
+    converse(sender, Welcome(Facebook, sender))
+
+    // TODO
+    // implement a queue using message echoes to advance the queue
+    // facebook doesn't guarantee message order - https://developers.facebook.com/bugs/565416400306038
+    //facebookService.sendTextMessage(sender, "Welcome, login successful")
     converse(sender, PostAuth(sender))
 
     logger.info(
@@ -157,7 +170,7 @@ class FacebookController @Inject()(config: Config,
     )
   }
 
-  def processEvent(data: JsObject, event: JsValue, sender: String, user: User) = {
+  def processEvent(data: JsObject, event: JsValue, sender: String, user: User, text: String) = {
     val f = event.asJsObject.fields
     if (f.contains("optin")) {
       logger.info("received authentication event")
@@ -171,7 +184,8 @@ class FacebookController @Inject()(config: Config,
     } else if (f.contains("postback")) {
       logger.info("received postback")
       //facebookService.sendTextMessage(sender, event.postback.get.payload)
-      converse(sender, Buy("facebook", sender, "iphone 6s plus"))
+      // TODO
+      converse(sender, Buy(Facebook, sender, "iphone 6s plus", text))
     } else if (f.contains("read")) {
       logger.info("received message read event")
     } else if (f.contains("account_linking")) {
@@ -182,7 +196,7 @@ class FacebookController @Inject()(config: Config,
     }
   }
 
-  def setupWelcomeGreeting(): Unit = facebookService.setupWelcomeGreeting()
+  def setupWelcomeGreeting(): Unit = provider.asInstanceOf[FacebookService].setupWelcomeGreeting()
 
   val routes =
     path("webhook") {
@@ -210,17 +224,20 @@ class FacebookController @Inject()(config: Config,
                     // Iterate over each messaging event
                     case JsArray(messaging) => messaging foreach { event =>
                       val sender = event.extract[String]('sender / 'id)
+                      val message = event.extract[JsObject]('message)
+                      val messageText = message.extract[String](optionalField("text"))
+                      val text = messageText.getOrElse("")
                       if (userService.hasUser(sender)) {
                         val user = userService.getUser(sender).get
-                        processEvent(data, event, sender, user)
+                        processEvent(data, event, sender, user, text)
                       } else {
-                        facebookService.getUserProfile(sender) map { resp =>
+                        provider.getUserProfile(sender) map { resp =>
                           val json = resp.parseJson
                           logger.info("found profile:\n" + json.prettyPrint)
                           val profile = json.convertTo[FacebookUserProfile]
                           val user = User(sender, profile)
                           userService.setUser(sender, user)
-                          processEvent(data, event, sender, user)
+                          processEvent(data, event, sender, user, text)
                         }
                       }
                     }
@@ -269,7 +286,7 @@ class FacebookController @Inject()(config: Config,
           userService.authenticate(username, password) match {
             case Some(user) =>
               logger.debug("login successful")
-              facebookService.getSenderId(sender) map { psid =>
+              provider.asInstanceOf[FacebookService].getSenderId(sender) map { psid =>
                 userService.setUser(psid.recipient, user)
               }
               redirect(successURI, Found)

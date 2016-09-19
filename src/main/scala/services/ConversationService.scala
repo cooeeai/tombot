@@ -3,10 +3,10 @@ package services
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.util.Timeout
-import modules.akkaguice.GuiceAkkaExtension
 import com.google.inject.Inject
 import com.typesafe.config.Config
-import conversationengine.ConversationActor
+import conversationengine.ConciergeActor
+import modules.akkaguice.GuiceAkkaExtension
 
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
@@ -20,7 +20,7 @@ class ConversationService @Inject()(config: Config,
 
   import system.dispatcher
 
-  implicit val timeout: Timeout = 5.seconds
+  implicit val timeout: Timeout = 5 seconds
 
   def converse(sender: String, message: Any) = {
     logger.debug(s"looking up actor for user/" + sender)
@@ -31,7 +31,7 @@ class ConversationService @Inject()(config: Config,
       case Failure(ex) =>
         logger.debug(ex.getMessage)
         logger.debug("creating new actor")
-        val actor = system.actorOf(GuiceAkkaExtension(system).props(ConversationActor.name), sender)
+        val actor = system.actorOf(GuiceAkkaExtension(system).props(ConciergeActor.name), sender)
         actor ! message
     }
   }

@@ -49,9 +49,11 @@ In this example, I use a simple Login Form.
 
 We can't see the login form, since it is opening in a separate secure window, which is managed on our servers for security.
 
-With Facebook, we can use a variety of user interface widgets, in addition to natural language text, such as cards, buttons, images, and video, to provide engagign content or cut down on the number of keystrokes where a button click will suffice.
+With Facebook, we can use a variety of user interface widgets, in addition to natural language text, such as cards, buttons, images, and video, to provide engaging content or cut down on the number of keystrokes where a button click will suffice.
 
 The natural language processing engine behind this should be able to handle variations in how a request might be posed. Otherwise, it would be a much larger manual task to document the possible keyword combinations and rules to capture all these variations.
+
+how much to pay
 
 In some cases, the engine won't understand the question where it has not been sufficiently trained.
 
@@ -59,7 +61,7 @@ Therefore, an important function is to continuously capture requests, which the 
 
 In this example, I'm using a natural language engine provided by Facebook.
 
-Statements not understood appear in an inbox. So for for example, with the last question "How much do i owe", I can highlight owe and indicate that the intent here was a billing enquiry.
+Statements not understood appear in an inbox. So for example, with the last question "current amount?", I can highlight owe and indicate that the intent here was a billing enquiry.
 
 Now the engine has recognised the new way of asking the question and responded with an appropriate answer.
 
@@ -84,3 +86,18 @@ Once the order has been submitted, we can provide a receipt, still within the me
 This has been a simple example demonstrating the possibilities of integrating with Facebook's Messenger platform.
 
 One of the interesting opportunities is rather than expecting users to come to our website or to download our mobile app, we can take our products and services to the customer, engaging on their terms, within apps they already use on a regular basis.
+
+
+Banking Use Case
+
+Intents
+
+Current Balance
+
+Spending pattern by timeframe
+
+Alerts - spending over a set limit
+
+Payment reminders, e.g. I noticed that this bill has been paid by this date for the last few months,
+
+Email me current account summary
