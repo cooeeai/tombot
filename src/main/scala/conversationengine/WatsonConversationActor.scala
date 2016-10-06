@@ -6,8 +6,7 @@ import java.util.{Map => JMap}
 import akka.actor.{Actor, ActorLogging}
 import com.google.inject.Inject
 import com.typesafe.config.Config
-import conversationengine.ConciergeActor.Fallback
-import conversationengine.ConversationActor.{Exchange, TextLike}
+import conversationengine.events._
 import modules.akkaguice.NamedActor
 import services.{FacebookService, WatsonConversationService}
 

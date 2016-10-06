@@ -8,9 +8,8 @@ import apis.googlenlp._
 import com.google.inject.Inject
 import com.typesafe.config.Config
 import controllers.Platforms
-import conversationengine.ConciergeActor.{FillForm, Fallback}
 import conversationengine.ConversationActor.{Data, State}
-import memory.Slot
+import conversationengine.events._
 import modules.akkaguice.NamedActor
 import services._
 import spray.json._
@@ -41,14 +40,7 @@ class ConversationActor @Inject()(config: Config,
   import ConversationActor._
   import Platforms._
   import system.dispatcher
-
-  implicit val timeout = 20 second
-
-  implicit class FutureExtensions[T](f: Future[T]) {
-    def withTimeout(timeout: => Throwable)(implicit duration: FiniteDuration, system: ActorSystem): Future[T] = {
-      Future firstCompletedOf Seq(f, after(duration, system.scheduler)(Future.failed(timeout)))
-    }
-  }
+  import utils.LangUtils._
 
   val maxFailCount = config.getInt("max.fail.count")
 
@@ -68,83 +60,50 @@ class ConversationActor @Inject()(config: Config,
 
   val history = mutable.ListBuffer[Exchange]()
 
-  def testPlatformChange(platform: Platforms.Value, sender: String) = {
-    if (currentProvider != platform) {
-      val oldPlatform = currentProvider
-      provider = if (platform == Facebook) facebookService else skypeService
-      currentProvider = platform
-      provider.sendTextMessage(sender, s"Do you want to carry on our conversation from $oldPlatform?")
-      // TODO
-    }
-  }
-
-  startWith(Starting, Uninitialized)
-
-  when(Starting) {
-
-    case Event(Qualify(platform, sender, productType, text), _) =>
-      log.debug("received Buy event")
-      testPlatformChange(platform, sender)
-      if (isAuthenticated) {
-        productType match {
-          case Some(typ) =>
-            val message = s"What type of $typ did you have in mind?"
-            history append Exchange(Some(text), message)
-            provider.sendTextMessage(sender, message)
-            goto(Qualifying) using Offer
-          case None =>
-            val message = "What did you want to buy?"
-            history append Exchange(Some(text), message)
-            provider.sendTextMessage(sender, message)
-            stay
-        }
-      } else {
-        productType match {
-          case Some(typ) =>
-            postAuthAction = () => {
-              val message = s"What type of $typ did you have in mind?"
-              history append Exchange(Some(text), message)
-              provider.sendTextMessage(sender, message)
-              goto(Qualifying) using Offer
-            }
-          case None =>
-            postAuthAction = () => {
-              val message = "What did you want to buy?"
-              history append Exchange(Some(text), message)
-              provider.sendTextMessage(sender, message)
-              stay
-            }
-        }
-        history append Exchange(None, "login")
-        provider.sendLoginCard(sender)
-        stay
-      }
-  }
+  startWith(Qualifying, Uninitialized)
 
   when(Qualifying) {
 
     case Event(Qualify(platform, sender, productType, text), _) =>
-      log.debug("received Qualify event")
+      log.debug(s"$name received Qualify event")
       testPlatformChange(platform, sender)
       productType match {
+
         case Some(typ) =>
-          val message = s"What type of $typ did you have in mind?"
-          history append Exchange(Some(text), message)
-          provider.sendTextMessage(sender, message)
+          postAuthAction = () => {
+            context.parent ! Deactivate
+            val message = s"What type of $typ did you have in mind?"
+            history append Exchange(Some(text), message)
+            provider.sendTextMessage(sender, message)
+            goto(Qualifying)
+          }
+
         case None =>
-          val message = "What did you want to buy?"
-          history append Exchange(Some(text), message)
-          provider.sendTextMessage(sender, message)
+          postAuthAction = () => {
+            val message = "What did you want to buy?"
+            history append Exchange(Some(text), message)
+            provider.sendTextMessage(sender, message)
+            stay
+          }
+
       }
-      stay
+      if (isAuthenticated) {
+        postAuthAction()
+      } else {
+        history append Exchange(None, "login")
+        provider.sendLoginCard(sender)
+        stay
+      }
 
     case Event(Respond(platform, sender, text), _) =>
-      log.debug("received Respond event")
+      log.debug(s"$name received Respond event")
       testPlatformChange(platform, sender)
+
       if (text == "iphone") {
         history append Exchange(Some(text), "showing product")
         provider.sendHeroCard(sender)
         goto(Buying)
+
       } else {
         val message = "Sorry, I didn't understand that"
         history append Exchange(Some(text), message)
@@ -156,7 +115,7 @@ class ConversationActor @Inject()(config: Config,
   when(Buying) {
 
     case Event(Buy(platform, sender, _, text), _) =>
-      log.debug("received Buy event")
+      log.debug(s"$name received Buy event")
       testPlatformChange(platform, sender)
       context.parent ! FillForm(sender, "purchase")
 //      val message = "Shall I use the card ending in 1234?"
@@ -166,7 +125,7 @@ class ConversationActor @Inject()(config: Config,
 
     case Event(FormDone(sender, slot), _) =>
       provider.sendReceiptCard(sender, slot)
-      goto(Starting)
+      goto(Qualifying)
 
 //    case Event(Respond(platform, sender, text), _) =>
 //      log.debug("received Respond event")
@@ -266,8 +225,8 @@ class ConversationActor @Inject()(config: Config,
       //provider.sendTextMessage(sender, "Welcome, login successful")
       stay
 
-    case _ =>
-      log.error("invalid event")
+    case ev =>
+      log.error(s"invalid event [${ev.toString}] while in state [${this.stateName}]")
       stay
   }
 
@@ -332,39 +291,31 @@ class ConversationActor @Inject()(config: Config,
     s"Sentiment is $s"
   }
 
+  def testPlatformChange(platform: Platforms.Value, sender: String) = {
+    if (currentProvider != platform) {
+      val oldPlatform = currentProvider
+      provider = if (platform == Facebook) facebookService else skypeService
+      currentProvider = platform
+      provider.sendTextMessage(sender, s"Do you want to carry on our conversation from $oldPlatform?")
+      // TODO
+    }
+  }
+
 }
 
 object ConversationActor extends NamedActor {
 
   override final val name = "ConversationActor"
 
-  // events
-  trait TextLike {
-    val sender: String
-    val text: String
-  }
-
-  case class Greet(platform: Platforms.Value, sender: String, user: User, text: String) extends TextLike
-  case class Qualify(platform: Platforms.Value, sender: String, productType: Option[String], text: String) extends TextLike
-  case class Buy(platform: Platforms.Value, sender: String, productType: String, text: String) extends TextLike
-  case class Respond(platform: Platforms.Value, sender: String, text: String) extends TextLike
-  case class Welcome(platform: Platforms.Value, sender: String)
-  case class Analyze(platform: Platforms.Value, sender: String, text: String) extends TextLike
-  case class BillEnquiry(platform: Platforms.Value, sender: String, text: String) extends TextLike
-  case class PostAuth(sender: String)
-  case class FormDone(sender: String, slot: Slot)
-
   sealed trait State
-  case object Starting extends State
-  case object Greeted extends State
+
   case object Qualifying extends State
+
   case object Buying extends State
 
   sealed trait Data
-  case object Uninitialized extends Data
-  case object Offer extends Data
 
-  case class Exchange(userSaid: Option[String], botSaid: String)
+  case object Uninitialized extends Data
 
   val random = new Random
 

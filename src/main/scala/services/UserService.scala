@@ -1,5 +1,7 @@
 package services
 
+import javax.inject._
+
 import apis.facebookmessenger.FacebookUserProfile
 
 import scala.collection.mutable
@@ -7,6 +9,7 @@ import scala.collection.mutable
 /**
   * Created by markmo on 8/08/2016.
   */
+@Singleton
 class UserService {
 
   val users = mutable.Map[String, User]()
@@ -32,7 +35,11 @@ class UserService {
 
 }
 
-case class User(id: String, firstName: String, lastName: String, picture: String, locale: String, timezone: Int, gender: String)
+case class User(id: String, firstName: String, lastName: String, picture: String, locale: String, timezone: Int, gender: String) {
+
+  override def toString: String = s"$firstName $lastName ($id)"
+
+}
 
 object User {
 

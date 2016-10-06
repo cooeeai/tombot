@@ -16,13 +16,14 @@ import scala.util.{Failure, Success}
   */
 class ConversationService @Inject()(config: Config,
                                     logger: LoggingAdapter,
-                                    system: ActorSystem) {
+                                    system: ActorSystem)
+  extends Conversation {
 
   import system.dispatcher
 
   implicit val timeout: Timeout = 5 seconds
 
-  def converse(sender: String, message: Any) = {
+  def converse(sender: String, message: Any): Unit = {
     logger.debug(s"looking up actor for user/" + sender)
     system.actorSelection("user/" + sender).resolveOne().onComplete {
       case Success(actor) =>

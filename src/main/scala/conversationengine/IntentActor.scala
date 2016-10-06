@@ -1,11 +1,13 @@
 package conversationengine
 
-import akka.actor.{Actor, ActorLogging}
+import akka.actor.{Actor, ActorLogging, ActorSystem, FSM}
+import akka.stream.Materializer
 import apis.witapi.WitJsonSupport
 import com.google.inject.Inject
-import conversationengine.ConversationActor._
+import conversationengine.IntentActor.{Data, State}
+import conversationengine.events._
 import modules.akkaguice.{GuiceAkkaExtension, NamedActor}
-import services.{UserService, IntentService}
+import services.{IntentService, UserService}
 import spray.json._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -13,49 +15,114 @@ import scala.concurrent.ExecutionContext.Implicits.global
 /**
   * Created by markmo on 18/09/2016.
   */
-class IntentActor @Inject()(intentService: IntentService, userService: UserService)
-  extends Actor with ActorLogging with WitJsonSupport {
+class IntentActor @Inject()(intentService: IntentService,
+                            userService: UserService,
+                            implicit val system: ActorSystem,
+                            implicit val fm: Materializer)
+  extends Actor
+    with ActorLogging
+    with WitJsonSupport
+    with FSM[State, Data] {
 
+  import IntentActor._
   import controllers.Platforms._
 
-  val a = context.actorOf(GuiceAkkaExtension(context.system).props(ConversationActor.name))
+  val child = context.actorOf(GuiceAkkaExtension(context.system).props(ConversationActor.name))
 
-  override def receive = {
-    case ev: TextLike =>
-      log.debug("received TextLike event")
+  startWith(Active, Uninitialized)
+
+  when(Active) {
+
+    case Event(ev: TextLike, _) =>
+      log.debug(s"$name received TextLike event")
       val sender = ev.sender
       val text = ev.text
 
       intentService.getIntent(text) map { meaning =>
         log.debug("received meaning:\n" + meaning.toJson.prettyPrint)
         val intent = meaning.getIntent
+        log.debug("intent: " + intent.getOrElse("None"))
 
         intent match {
 
           case Some("buy") =>
-            a ! Qualify(Facebook, sender, meaning.getEntityValue("product_type"), text)
+            log.debug("responding to [buy] intent")
+            child ! Qualify(Facebook, sender, meaning.getEntityValue("product_type"), text)
 
           case Some("greet") =>
-            val user = userService.getUser(sender).get
-            a ! Greet(Facebook, sender, user, text)
+            log.debug("responding to [greet] intent")
+            log.debug(s"looking up user with id [$sender]")
+            userService.getUser(sender) match {
+
+              case Some(user) =>
+                log.debug("user: " + user)
+                child ! Greet(Facebook, sender, user, text)
+
+              case None =>
+                log.warning("user not found")
+
+            }
 
           case Some("analyze") =>
-            a ! Analyze(Facebook, sender, text)
+            log.debug("responding to [analyze] intent")
+            child ! Analyze(Facebook, sender, text)
 
           case Some("bill-enquiry") =>
-            a ! BillEnquiry(Facebook, sender, text)
+            log.debug("responding to [bill-enquiry] intent")
+            child ! BillEnquiry(Facebook, sender, text)
 
           case _ =>
-            a ! Respond(Facebook, sender, text)
+            log.debug("responding to [unknown] intent")
+            child ! Respond(Facebook, sender, text)
 
         }
       }
+      stay
+
+    case Event(Deactivate, _) =>
+      log.debug(s"$name received Deactivate event")
+      goto(Inactive)
+
   }
+
+  when(Inactive) {
+
+    case Event(Activate, _) =>
+      log.debug(s"$name received Activate event")
+      goto(Active)
+
+  }
+
+  whenUnhandled {
+
+    case Event(ev: FillForm, _) =>
+      log.debug(s"$name received FillForm event")
+      context.parent ! ev
+      stay
+
+    case Event(ev, _) =>
+      log.debug(s"$name received event")
+      child ! ev
+      stay
+
+  }
+
+  initialize()
 
 }
 
 object IntentActor extends NamedActor {
 
   override final val name = "IntentActor"
+
+  sealed trait State
+
+  case object Active extends State
+
+  case object Inactive extends State
+
+  sealed trait Data
+
+  case object Uninitialized extends Data
 
 }

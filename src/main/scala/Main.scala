@@ -3,8 +3,9 @@ import akka.event.LoggingAdapter
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.{MalformedRequestContentRejection, RejectionHandler}
+import akka.http.scaladsl.server.{Route, MalformedRequestContentRejection, RejectionHandler}
 import akka.stream.ActorMaterializer
+import akka.stream.scaladsl.{Sink, Source}
 import com.google.inject.Guice
 import com.typesafe.config.Config
 import controllers.{SparkController, FacebookController, SkypeController}
@@ -55,6 +56,17 @@ object Main extends App {
   val sparkController = injector.instance[SparkController]
 
   val port = Properties.envOrElse("PORT", "8080").toInt
+
+//  val proxy = Route { context =>
+//    val request = context.request
+//    println("Opening connection to " + request.uri.authority.host.address)
+//    val flow = Http(system).outgoingConnection(request.uri.authority.host.address(), 80)
+//    val handler = Source.single(context.request)
+//      .via(flow)
+//      .runWith(Sink.head)
+//      .flatMap(context.complete(_))
+//    handler
+//  }
 
   val bindingFuture =
     http.bindAndHandle(facebookController.routes ~ skypeController.routes ~ sparkController.routes,

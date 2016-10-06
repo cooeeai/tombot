@@ -3,7 +3,7 @@ package conversationengine
 import akka.actor.{Actor, ActorLogging}
 import apis.ciscospark.SparkWebhookResponseData
 import com.google.inject.Inject
-import conversationengine.ConversationActor.TextLike
+import conversationengine.events._
 import modules.akkaguice.NamedActor
 import services.{FacebookService, SparkService}
 

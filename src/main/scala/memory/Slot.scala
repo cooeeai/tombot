@@ -1,13 +1,20 @@
 package memory
 
+import javax.script.ScriptEngineManager
+
 import com.typesafe.config.{ConfigFactory, ConfigObject, ConfigValue}
+import jdk.nashorn.api.scripting.JSObject
 
 import scala.collection.JavaConversions._
 
 /**
   * Created by markmo on 30/07/2016.
   */
-case class Slot(dataType: String, key: String, question: Option[String], children: Option[List[Slot]], value: Option[Any]) {
+case class Slot(key: String,
+                question: Option[String] = None,
+                children: Option[List[Slot]] = None,
+                value: Option[Any] = None,
+                parseFn: Option[(String) => Map[String, Any]] = None) {
 
   def nextQuestion: Option[(String, String)] =
     if (value.isEmpty) {
@@ -43,16 +50,34 @@ case class Slot(dataType: String, key: String, question: Option[String], childre
       None
     }
 
+  def fillSlotNext(key: String, value: Any): Slot = fillSlot(key, value).get
+
   def fillSlot(key: String, value: Any): Option[Slot] =
     if (this.key == key) {
-      Some(Slot(dataType, key, question, children, Some(value)))
+      if (children.isDefined && parseFn.isDefined) {
+//        val engine = new ScriptEngineManager().getEngineByMimeType("text/javascript")
+//        val fn = engine.eval(parseFn).asInstanceOf[JSObject]
+//        val result = fn.call(null, value)
+        val result = parseFn.get(value.toString)
+        val slots = children.get flatMap { child =>
+          val k = child.key
+          if (result.contains(k)) {
+            child.fillSlot(k, result(k))
+          } else {
+            Some(child)
+          }
+        }
+        Some(Slot(key, question, Some(slots.toList), Some(value)))
+      } else {
+        Some(Slot(key, question, children, Some(value)))
+      }
     } else if (children.isDefined) {
       val slots = children.get flatMap {
         _.fillSlot(key, value)
       }
-      Some(Slot(dataType, this.key, question, Some(slots), this.value))
+      Some(Slot(this.key, question, Some(slots), this.value))
     } else {
-      None
+      Some(Slot(this.key, question, children, this.value))
     }
 
   def getValue(key: String): Option[Any] =
@@ -80,7 +105,7 @@ case class Slot(dataType: String, key: String, question: Option[String], childre
 
     def k(v: String) = q(v) + ": "
 
-    var j = k(key) + s + k("type") + q(dataType)
+    var j = k(key) + s
     if (value.nonEmpty) {
       j += n + k("value") + q(value.get.toString)
     }
@@ -95,6 +120,7 @@ case class Slot(dataType: String, key: String, question: Option[String], childre
 
 }
 
+/*
 object Slot {
 
   def create(key: String): Slot = {
@@ -130,4 +156,4 @@ object Slot {
     loop(key, root)
   }
 
-}
+}*/

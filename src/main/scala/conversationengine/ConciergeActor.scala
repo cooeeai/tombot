@@ -11,9 +11,8 @@ import com.google.inject.name.Named
 import com.typesafe.config.Config
 import conversationengine.AgentConversationActor.{SparkMessageEvent, SparkRoomLeftEvent, SparkWrappedEvent}
 import conversationengine.ConciergeActor.{Data, State}
-import conversationengine.ConversationActor.{Exchange, Respond, TextLike}
-import conversationengine.FormActor.NextQuestion
-import modules.akkaguice.GuiceAkkaExtension
+import conversationengine.events._
+import modules.akkaguice.{GuiceAkkaExtension, NamedActor}
 import services._
 
 import scala.collection.mutable
@@ -31,11 +30,17 @@ class ConciergeActor @Inject()(config: Config,
                                rulesService: RulesService,
                                implicit val system: ActorSystem,
                                implicit val fm: Materializer)
-  extends Actor with ActorLogging with FSM[State, Data] {
+  extends Actor
+    with ActorLogging
+    with FSM[State, Data] {
 
   import ConciergeActor._
-  import rulesService._
   import controllers.Platforms._
+  import rulesService._
+
+  val agentName = "Mark"
+
+  val tempMemberships = mutable.Map[String, SparkTempMembership]()
 
   implicit val timeout = 20 second
 
@@ -60,16 +65,12 @@ class ConciergeActor @Inject()(config: Config,
   // agent conversation actor
   val agent = context.actorOf(GuiceAkkaExtension(context.system).props(AgentConversationActor.name))
 
-  val agentName = "Mark"
-
-  val tempMemberships = mutable.Map[String, SparkTempMembership]()
-
   startWith(UsingBot, Uninitialized)
 
   when(UsingBot) {
 
     case Event(ev: TextLike, _) =>
-      log.debug("received TextLike event")
+      log.debug(s"$name received TextLike event")
       val sender = ev.sender
       val text = ev.text
 
@@ -80,14 +81,15 @@ class ConciergeActor @Inject()(config: Config,
 
       } else if (isQuestion(text)) {
         // hears question
+        log.debug("text is interpreted as a question")
         getContent(text) match {
 
           case Some(content) =>
-            log.debug("found content")
+            log.debug(s"found content in response to question [$content]")
             provider.sendTextMessage(sender, content)
 
           case None =>
-            // no content found
+            log.debug("no content")
             bot ! Respond(Facebook, sender, text)
 
         }
@@ -118,30 +120,38 @@ class ConciergeActor @Inject()(config: Config,
       goto(UsingHuman)
 
     case Event(FillForm(sender, goal), _) =>
-      log.debug("received FillForm event")
+      log.debug(s"$name received FillForm event")
       form ! NextQuestion(sender)
+      goto(FillingForm)
+
+    case Event(ev, _) =>
+      log.debug(s"$name received event")
+      bot ! ev
+      stay
+  }
+
+  when(FillingForm) {
+
+    case Event(ev: TextLike, _) =>
+      log.debug(s"$name received TextLike event")
+      form ! ev
       stay
 
     case Event(EndFillForm(sender), _) =>
-      log.debug("received EndFillForm event")
-      // TODO
-      stay
+      log.debug(s"$name received EndFillForm event")
+      goto(UsingBot)
 
-    case Event(ev, _) =>
-      log.debug("received event")
-      bot ! ev
-      stay
   }
 
   when(UsingHuman) {
 
     case Event(ev: SparkMessageEvent, _) =>
-      log.debug("received spark message event")
+      log.debug(s"$name received spark message event")
       agent ! ev
       stay
 
     case Event(SparkRoomLeftEvent(sender), _) =>
-      log.debug("received room left event")
+      log.debug(s"$name received room left event")
       provider.sendTextMessage(sender, s"$agentName (Human) is leaving the conversation")
       val tempMembership = tempMemberships(sender)
       sparkService.deleteWebhook(tempMembership.leaveRoomWebhookId)
@@ -150,12 +160,14 @@ class ConciergeActor @Inject()(config: Config,
       goto(UsingBot)
 
     case Event(ev: TextLike, _) =>
-      log.debug("received facebook event")
+      log.debug(s"$name received facebook event")
       val tempMembership = tempMemberships(ev.sender)
       agent ! SparkWrappedEvent(tempMembership.roomId, tempMembership.personId, ev)
       stay
+
   }
 
+  initialize()
 
   private def formatKeywords(keywords: Map[String, Double]) = {
     keywords map {
@@ -165,19 +177,20 @@ class ConciergeActor @Inject()(config: Config,
 
 }
 
-object ConciergeActor extends modules.akkaguice.NamedActor {
+object ConciergeActor extends NamedActor {
 
   override final val name = "ConciergeActor"
 
-  case class Fallback(sender: String, history: List[Exchange])
-  case class FillForm(sender: String, goal: String)
-  case class EndFillForm(sender: String)
-
   sealed trait State
+
   case object UsingBot extends State
+
+  case object FillingForm extends State
+
   case object UsingHuman extends State
 
   sealed trait Data
+
   case object Uninitialized extends Data
 
 }
