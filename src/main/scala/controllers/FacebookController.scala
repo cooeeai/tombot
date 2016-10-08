@@ -88,7 +88,11 @@ class FacebookController @Inject()(config: Config,
 
           val text = event.message.get.text
           logger.debug("text: [" + text + "]")
-          converse(sender, Respond(Facebook, sender, text))
+          if (text startsWith "/reset") {
+            converse(sender, Reset)
+          } else {
+            converse(sender, Respond(Facebook, sender, text))
+          }
         }
       }
     }

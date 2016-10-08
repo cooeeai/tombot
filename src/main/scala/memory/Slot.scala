@@ -1,11 +1,6 @@
 package memory
 
-import javax.script.ScriptEngineManager
-
-import com.typesafe.config.{ConfigFactory, ConfigObject, ConfigValue}
-import jdk.nashorn.api.scripting.JSObject
-
-import scala.collection.JavaConversions._
+import humanize.Humanize._
 
 /**
   * Created by markmo on 30/07/2016.
@@ -14,103 +9,203 @@ case class Slot(key: String,
                 question: Option[String] = None,
                 children: Option[List[Slot]] = None,
                 value: Option[Any] = None,
-                parseFn: Option[(String) => Map[String, Any]] = None) {
+                validateFn: Option[String => Boolean] = None,
+                invalidMessage: Option[String] = None,
+                parseFn: Option[String => Map[String, Any]] = None,
+                confirm: Option[String] = None,
+                confirmed: Boolean = false,
+                caption: Option[String] = None) {
 
-  def nextQuestion: Option[(String, String)] =
-    if (value.isEmpty) {
-      if (children.isDefined) {
-        val qs = children.get.map(_.nextQuestion)
+  val invalidMessageDefault = "Invalid format. Please try again."
 
-        if (qs.forall(_.isEmpty)) {
-          // if all child slots have been filled then this parent slot is done
-          None
+  def nextQuestion: Option[Question] = {
 
-        } else if (question.isDefined && qs.forall(_.isDefined)) {
-          // if all child slots have questions (and therefore need to be filled),
-          // and a question is defined at the parent slot (and therefore a
-          // composite response can be given), then ask the next question from
-          // this slot
-          Some((key, question.get))
+    def loop(slot: Slot): (Boolean, Option[Question]) = {
+      val Slot(key, question, children, value, _, _, _, confirm, confirmed, _) = slot
+      if (value.isEmpty) {
+        if (children.isDefined) {
+          val qs = children.get.map(child => loop(child))
+          if (qs.forall(!_._1)) {
+            // if all child slots have been filled then this parent slot is done
+            if (confirm.isDefined && !confirmed) {
+              (true, Some(Question(key, confirm.get + "\n" + slot.printValue, confirmation = true)))
+            } else {
+              (false, None)
+            }
 
+          } else if (question.isDefined && qs.forall(_._1)) {
+            // if all child slots have questions (and therefore need to be filled),
+            // and a question is defined at the parent slot (and therefore a
+            // composite response can be given), then ask the next question from
+            // this slot
+            (true, Some(Question(key, question.get, confirmation = false)))
+
+          } else {
+            // if a composite response is not possible, or some, but not all,
+            // child slots have already been answered, then ask the next question
+            // from the first unanswered child slot
+            qs.find(_._1).get
+          }
         } else {
-          // if a composite response is not possible, or some, but not all,
-          // child slots have already been answered, then ask the next question
-          // from the first unanswered child slot
-          qs.find(_.isDefined).get
+          if (question.isDefined) {
+            // if no child slots then ask this question if defined
+            (true, Some(Question(key, question.get, confirmation = false)))
+          } else {
+            if (confirm.isDefined && !confirmed) {
+              (true, Some(Question(key, confirm.get + "\n" + slot.printValue, confirmation = true)))
+            } else {
+              (true, None)
+            }
+          }
         }
       } else {
-        if (question.isDefined) {
-          // if no child slots then ask this question if defined
-          Some((key, question.get))
+        if (confirm.isDefined && !confirmed) {
+          (true, Some(Question(key, confirm.get + "\n" + slot.printValue, confirmation = true)))
         } else {
-          None
+          (false, None)
         }
       }
+    }
+
+    loop(this)._2
+  }
+
+  def printValue: String =
+    if (children.isDefined) {
+      children.get.map(_.printValue).mkString("\n")
+    } else if (value.isDefined) {
+      val label = caption.getOrElse(titleize(decamelize(key)))
+      s"$label: ${value.get.toString}"
+    } else {
+      ""
+    }
+
+  def fillSlot(key: String, value: Any): (Option[SlotError], Slot) =
+    if (this.key == key) {
+      if (validateFn.isDefined && !validateFn.get(value.toString)) {
+        val message = invalidMessage.getOrElse(invalidMessageDefault)
+        (Some(SlotError(key, message)), this)
+      } else {
+        if (children.isDefined && parseFn.isDefined) {
+          //val engine = new ScriptEngineManager().getEngineByMimeType("text/javascript")
+          //val fn = engine.eval(parseFn).asInstanceOf[JSObject]
+          //val result = fn.call(null, value)
+          val result = parseFn.get(value.toString)
+          val slots = children.get map { child =>
+            val k = child.key
+            if (result.contains(k)) {
+              child.fillSlot(k, result(k))
+            } else {
+              (None, child)
+            }
+          }
+          val error = slots.map(_._1).find(_.isDefined)
+          if (error.isDefined) {
+            (error.get, this)
+          } else {
+            (None, Slot(key, question, Some(slots.map(_._2)), Some(value), validateFn, invalidMessage, parseFn, confirm, confirmed, caption))
+          }
+        } else {
+          (None, Slot(key, question, children, Some(value), validateFn, invalidMessage, parseFn, confirm, confirmed, caption))
+        }
+      }
+    } else if (children.isDefined) {
+      val slots = children.get.map(_.fillSlot(key, value))
+      val error = slots.map(_._1).find(_.isDefined)
+      if (error.isDefined) {
+        (error.get, this)
+      } else {
+        (None, Slot(this.key, question, Some(slots.map(_._2)), this.value, validateFn, invalidMessage, parseFn, confirm, confirmed, caption))
+      }
+    } else {
+      (None, this)
+    }
+
+  def confirmSlot(key: String): Slot =
+    if (this.key == key) {
+      Slot(key, question, children, value, validateFn, invalidMessage, parseFn, confirm, confirmed = true, caption)
+    } else if (children.isDefined) {
+      val slots = children.get.map(_.confirmSlot(key))
+      Slot(this.key, question, Some(slots), value, validateFn, invalidMessage, parseFn, confirm, confirmed, caption)
+    } else {
+      this
+    }
+
+  def findSlot(key: String): Option[Slot] =
+    if (this.key == key) {
+      Some(this)
+    } else if (children.isDefined) {
+      children.get.find(_.findSlot(key).isDefined)
     } else {
       None
     }
 
-  def fillSlotNext(key: String, value: Any): Slot = fillSlot(key, value).get
-
-  def fillSlot(key: String, value: Any): Option[Slot] =
-    if (this.key == key) {
-      if (children.isDefined && parseFn.isDefined) {
-//        val engine = new ScriptEngineManager().getEngineByMimeType("text/javascript")
-//        val fn = engine.eval(parseFn).asInstanceOf[JSObject]
-//        val result = fn.call(null, value)
-        val result = parseFn.get(value.toString)
-        val slots = children.get flatMap { child =>
-          val k = child.key
-          if (result.contains(k)) {
-            child.fillSlot(k, result(k))
-          } else {
-            Some(child)
-          }
-        }
-        Some(Slot(key, question, Some(slots.toList), Some(value)))
-      } else {
-        Some(Slot(key, question, children, Some(value)))
-      }
-    } else if (children.isDefined) {
-      val slots = children.get flatMap {
-        _.fillSlot(key, value)
-      }
-      Some(Slot(this.key, question, Some(slots), this.value))
+  def empty(): Slot =
+    if (children.isDefined) {
+      val slots = children.get.map(_.empty())
+      Slot(this.key, question, Some(slots), None, validateFn, invalidMessage, parseFn, confirm, confirmed, caption)
     } else {
-      Some(Slot(this.key, question, children, this.value))
+      Slot(this.key, question, children, None, validateFn, invalidMessage, parseFn, confirm, confirmed, caption)
+    }
+
+  def emptySlot(key: String): Slot =
+    if (this.key == key) {
+      empty()
+    } else if (children.isDefined) {
+      val slots = children.get.map(_.emptySlot(key))
+      Slot(this.key, question, Some(slots), value, validateFn, invalidMessage, parseFn, confirm, confirmed, caption)
+    } else {
+      this
     }
 
   def getValue(key: String): Option[Any] =
     if (this.key == key) {
       value
     } else if (children.isDefined) {
-      children.get.map(_.getValue(key)).head
+      children.get.map(_.getValue(key)).find(_.isDefined) match {
+        case Some(x) => x
+        case None => None
+      }
     } else {
       None
     }
 
-  def getString(key: String): String =
-    getValue(key).get.toString
+  def getString(key: String): String = getValue(key).get.toString
 
-  override def toString = toJson(1)
+  override def toString: String = toJson(1)
 
   def toJson(level: Int = 1): String = {
     val i = "  "
     val t = i * level
     val b = "\n"
-    val s = "{" + b + t
-    val n = "," + b + t
+    val s = "{"
+    var n = b + t
+    val n1 = "," + b + t
 
     def q(v: String) = "\"" + v + "\""
 
     def k(v: String) = q(v) + ": "
 
     var j = k(key) + s
-    if (value.nonEmpty) {
-      j += n + k("value") + q(value.get.toString)
-    }
     if (question.nonEmpty) {
       j += n + k("question") + q(question.get)
+      n = n1
+    }
+    if (value.nonEmpty) {
+      j += n + k("value") + q(value.get.toString)
+      n = n1
+    }
+    if (invalidMessage.nonEmpty) {
+      j += n + k("invalidMessage") + q(invalidMessage.get.toString)
+      n = n1
+    }
+    if (confirm.nonEmpty) {
+      j += n + k("confirm") + q(confirm.get.toString)
+      n = n1
+    }
+    if (caption.nonEmpty) {
+      j += n + k("caption") + q(caption.get.toString)
+      n = n1
     }
     if (children.nonEmpty) {
       j += n + children.get.map(_.toJson(level + 1)).mkString(n)
@@ -119,6 +214,20 @@ case class Slot(key: String,
   }
 
 }
+
+case class SlotError(key: String, message: String)
+
+case class SlotContainer(slot: Slot, errors: List[SlotError] = Nil) {
+
+  def fillSlot(key: String, value: Any): SlotContainer =
+    slot.fillSlot(key, value) match {
+      case (Some(e), s) => SlotContainer(s, e :: errors)
+      case (None, s) => SlotContainer(s, errors)
+    }
+
+}
+
+case class Question(slotKey: String, question: String, confirmation: Boolean)
 
 /*
 object Slot {

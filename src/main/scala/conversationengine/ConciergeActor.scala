@@ -128,6 +128,7 @@ class ConciergeActor @Inject()(config: Config,
       log.debug(s"$name received event")
       bot ! ev
       stay
+
   }
 
   when(FillingForm) {
@@ -137,8 +138,9 @@ class ConciergeActor @Inject()(config: Config,
       form ! ev
       stay
 
-    case Event(EndFillForm(sender), _) =>
+    case Event(ev: EndFillForm, _) =>
       log.debug(s"$name received EndFillForm event")
+      bot ! ev
       goto(UsingBot)
 
   }
@@ -163,6 +165,20 @@ class ConciergeActor @Inject()(config: Config,
       log.debug(s"$name received facebook event")
       val tempMembership = tempMemberships(ev.sender)
       agent ! SparkWrappedEvent(tempMembership.roomId, tempMembership.personId, ev)
+      stay
+
+  }
+
+  whenUnhandled {
+
+    case Event(Reset, _) =>
+      log.debug(s"$name received Reset event")
+      form ! Reset
+      bot ! Reset
+      goto(UsingBot)
+
+    case Event(ev, _) =>
+      log.error(s"$name received invalid event [${ev.toString}] while in state [${this.stateName}]")
       stay
 
   }

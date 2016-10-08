@@ -32,18 +32,18 @@ object events {
 
   case class PostAuth(sender: String)
 
-  case class FormDone(sender: String, slot: Slot)
-
   case class Fallback(sender: String, history: List[Exchange])
 
   case class FillForm(sender: String, goal: String)
 
-  case class EndFillForm(sender: String)
+  case class EndFillForm(sender: String, slot: Slot)
 
   case class NextQuestion(sender: String)
 
   object Activate
 
   object Deactivate
+
+  object Reset
 
 }

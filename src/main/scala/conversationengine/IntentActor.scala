@@ -95,13 +95,18 @@ class IntentActor @Inject()(intentService: IntentService,
 
   whenUnhandled {
 
+    case Event(Reset, _) =>
+      log.debug(s"$name received Reset event")
+      child ! Reset
+      goto(Active)
+
     case Event(ev: FillForm, _) =>
       log.debug(s"$name received FillForm event")
       context.parent ! ev
       stay
 
     case Event(ev, _) =>
-      log.debug(s"$name received event")
+      log.error(s"$name received event")
       child ! ev
       stay
 

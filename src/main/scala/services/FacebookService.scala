@@ -110,7 +110,7 @@ class FacebookService @Inject()(config: Config,
     val payload = (
       receiptCard
         forSender sender
-        withReceiptName slot.getString("cardholdersName")
+        withReceiptName slot.getString("cardholderName")
         withOrderNumber receiptId
         withCurrency "AUD"
         withPaymentMethod "Visa 1234"

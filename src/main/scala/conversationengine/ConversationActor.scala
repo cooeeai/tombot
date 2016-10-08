@@ -40,7 +40,14 @@ class ConversationActor @Inject()(config: Config,
   import ConversationActor._
   import Platforms._
   import system.dispatcher
-  import utils.LangUtils._
+
+  implicit val timeout = 20 second
+
+  implicit class FutureExtensions[T](f: Future[T]) {
+    def withTimeout(timeout: => Throwable)(implicit duration: FiniteDuration, system: ActorSystem): Future[T] = {
+      Future firstCompletedOf Seq(f, after(duration, system.scheduler)(Future.failed(timeout)))
+    }
+  }
 
   val maxFailCount = config.getInt("max.fail.count")
 
@@ -51,10 +58,6 @@ class ConversationActor @Inject()(config: Config,
   var isAuthenticated = false
 
   var postAuthAction: () => this.State = () => stay
-
-  var isAddressVerified = false
-
-  var isPaymentVerified = false
 
   var failCount = 0
 
@@ -123,7 +126,8 @@ class ConversationActor @Inject()(config: Config,
 //      provider.sendQuickReply(sender, message)
       stay
 
-    case Event(FormDone(sender, slot), _) =>
+    case Event(EndFillForm(sender, slot), _) =>
+      log.debug(s"$name received EndFillForm event")
       provider.sendReceiptCard(sender, slot)
       goto(Qualifying)
 
@@ -169,14 +173,22 @@ class ConversationActor @Inject()(config: Config,
 
   whenUnhandled {
 
+    case Event(Reset, _) =>
+      log.debug(s"$name received Reset event")
+      isAuthenticated = false
+      postAuthAction = () => stay
+      failCount = 0
+      history.clear()
+      goto(Qualifying)
+
     case Event(Greet(platform, sender, user, text), _) =>
-      log.debug("received Greet event")
+      log.debug(s"$name received Greet event")
       testPlatformChange(platform, sender)
       greet(sender, user, text)
       stay
 
     case Event(Respond(platform, sender, text), _) =>
-      log.debug("received Respond event")
+      log.debug(s"$name received Respond event")
       testPlatformChange(platform, sender)
       val reply = smallTalkService.getSmallTalkResponse(sender, text)
       if (reply == "Didn't get that!") {
@@ -189,13 +201,13 @@ class ConversationActor @Inject()(config: Config,
       stay
 
     case Event(Analyze(platform, sender, text), _) =>
-      log.debug("received Analyze event")
+      log.debug(s"$name received Analyze event")
       testPlatformChange(platform, sender)
       analyze(sender, text)
       stay
 
     case Event(BillEnquiry(platform, sender, text), _) =>
-      log.debug("received BillEnquiry event")
+      log.debug(s"$name received BillEnquiry event")
       testPlatformChange(platform, sender)
       if (isAuthenticated) {
         val message = "Your current balance is $41.25. Would you like to pay it now?"
@@ -214,7 +226,7 @@ class ConversationActor @Inject()(config: Config,
       stay
 
     case Event(PostAuth(sender), _) =>
-      log.debug("received PostAuth event")
+      log.debug(s"$name received PostAuth event")
       postAuthAction()
 
     case Event(Welcome(platform, sender), _) =>
@@ -225,8 +237,8 @@ class ConversationActor @Inject()(config: Config,
       //provider.sendTextMessage(sender, "Welcome, login successful")
       stay
 
-    case ev =>
-      log.error(s"invalid event [${ev.toString}] while in state [${this.stateName}]")
+    case Event(ev, _) =>
+      log.error(s"$name received invalid event [${ev.toString}] while in state [${this.stateName}]")
       stay
   }
 

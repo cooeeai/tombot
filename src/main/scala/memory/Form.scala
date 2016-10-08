@@ -1,22 +1,39 @@
 package memory
 
+import akka.actor.ActorSystem
+import akka.pattern.after
 import akka.event.LoggingAdapter
+import akka.stream.Materializer
+import apis.googlemaps.MapsJsonSupport
+import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.google.inject.Inject
 import services.AddressService
 import spray.json._
 
 import scala.concurrent._
+import scala.concurrent.duration._
 
 /**
   * Created by markmo on 6/10/2016.
   */
 class Form @Inject()(logger: LoggingAdapter,
-                     addressService: AddressService) {
+                     addressService: AddressService,
+                     implicit val system: ActorSystem,
+                     implicit val fm: Materializer)
+  extends MapsJsonSupport {
 
-  import utils.LangUtils._
+  import system.dispatcher
 
-  val data =
-    Slot(
+  implicit val timeout = 20 second
+
+  implicit class FutureExtensions[T](f: Future[T]) {
+    def withTimeout(timeout: => Throwable)(implicit duration: FiniteDuration, system: ActorSystem): Future[T] = {
+      Future firstCompletedOf Seq(f, after(duration, system.scheduler)(Future.failed(timeout)))
+    }
+  }
+
+  val data = Map(
+    "purchase" -> Slot(
       "purchase",
       children = Some(List(
         Slot(
@@ -34,7 +51,7 @@ class Form @Inject()(logger: LoggingAdapter,
           ),
           parseFn = Some((value) => {
             val re = """(\S+)\s+(.*)""".r
-            value match {
+            value.trim match {
               case re(firstName, lastName) =>
                 Map(
                   "firstName" -> firstName,
@@ -46,7 +63,17 @@ class Form @Inject()(logger: LoggingAdapter,
         ),
         Slot(
           "phone",
-          Some("What is your phone number?")
+          Some("What is your phone number?"),
+          validateFn = Some((value) => {
+            val phoneUtil = PhoneNumberUtil.getInstance()
+            try {
+              val auNumberProto = phoneUtil.parse(value, "AU")
+              phoneUtil.isValidNumber(auNumberProto)
+            } catch {
+              case e: NumberFormatException => false
+            }
+          }),
+          invalidMessage = Some("Invalid format. Please try again.")
         ),
         Slot(
           "paymentMethod",
@@ -57,7 +84,8 @@ class Form @Inject()(logger: LoggingAdapter,
             ),
             Slot(
               "cardNumber",
-              Some("What is the card number?")
+              Some("What is the card number?"),
+              caption = Some("Card number ending in")
             ),
             Slot(
               "securityCode",
@@ -69,9 +97,21 @@ class Form @Inject()(logger: LoggingAdapter,
               children = Some(List(
                 Slot("expiryMonth"),
                 Slot("expiryYear")
-              ))
+              )),
+              parseFn = Some((value) => {
+                val re = """(\d+{1,2})/(\d+{2})""".r
+                value.trim match {
+                  case re(month, year) =>
+                    Map(
+                      "expiryMonth" -> month,
+                      "expiryYear" -> year
+                    )
+                  case _ => Map()
+                }
+              })
             )
-          ))
+          )),
+          confirm = Some("Are the following payment details correct?")
         ),
         Slot(
           "address",
@@ -101,7 +141,7 @@ class Form @Inject()(logger: LoggingAdapter,
           parseFn = Some((value) => {
             lazy val f = addressService.getAddress(value)
             val f1 = f withTimeout new TimeoutException("future timed out")
-            val f2 = f1 map { response =>
+            val f2: Future[Map[String, Any]] = f1 map { response =>
               logger.debug("received address lookup response:\n" + response.toJson.prettyPrint)
               if (response.results.nonEmpty) {
                 val address = response.results.head.getAddress
@@ -129,5 +169,6 @@ class Form @Inject()(logger: LoggingAdapter,
         )
       ))
     )
+  )
 
 }

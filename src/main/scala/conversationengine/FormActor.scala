@@ -3,7 +3,7 @@ package conversationengine
 import akka.actor.{Actor, ActorLogging}
 import com.google.inject.Inject
 import conversationengine.events._
-import memory.Form
+import memory._
 import modules.akkaguice.NamedActor
 import services.FacebookService
 
@@ -14,22 +14,34 @@ class FormActor @Inject()(facebookService: FacebookService, form: Form) extends 
 
   import FormActor._
 
-  var currentSlotKey: Option[String] = None
+  var currentKey: Option[String] = None
 
-  var slot = form.data
-    .fillSlotNext("city", "Melbourne")
-    .fillSlotNext("state", "VIC")
-    .fillSlotNext("postcode", "3000")
-    .fillSlotNext("country", "Australia")
-    .fillSlotNext("cardholderName", "Mark Moloney")
-    .fillSlotNext("cardNumber", "1234")
-    .fillSlotNext("securityCode", "1234")
-    .fillSlotNext("expiryMonth", "01")
-    .fillSlotNext("expiryYear", "19")
+  var confirming = false
 
-  //log.debug("slot:\n" + slot.toString)
+  val originalSlot = SlotContainer(form.data("purchase"))
+    .fillSlot("name", "Mark Moloney")
+    .fillSlot("phone", "0395551535")
+    .fillSlot("cardholderName", "Mark Moloney")
+    .fillSlot("cardNumber", "**** **** 1234")
+    .fillSlot("securityCode", "1234")
+    .fillSlot("expiryMonth", "01")
+    .fillSlot("expiryYear", "19")
+//    .fillSlot("city", "Melbourne")
+//    .fillSlot("state", "VIC")
+//    .fillSlot("postcode", "3000")
+//    .fillSlot("country", "Australia")
+    .slot
+
+  var slot = originalSlot
+
+  log.debug("slot:\n" + slot.toString)
 
   override def receive = {
+
+    case Reset =>
+      currentKey = None
+      confirming = false
+      slot = originalSlot
 
     case NextQuestion(sender) =>
       log.debug(s"$name received NextQuestion event")
@@ -39,25 +51,52 @@ class FormActor @Inject()(facebookService: FacebookService, form: Form) extends 
       log.debug(s"$name received TextLike event")
       val sender = ev.sender
       val text = ev.text
-      if (currentSlotKey.isDefined) {
-        val key = currentSlotKey.get
-        log.debug(s"filling slot [$key] with [$text]")
-        slot = slot.fillSlot(key, text).get
+      if (currentKey.isDefined) {
+        val key = currentKey.get
+        val (maybeError, s) = updateSlot(key, text)
+        if (maybeError.isDefined) {
+          facebookService.sendTextMessage(sender, maybeError.get.message)
+        } else {
+          slot = s
+          nextQuestion(sender)
+        }
+      } else {
+        nextQuestion(sender)
       }
-      nextQuestion(sender)
 
   }
+
+  private def updateSlot(key: String, value: String): (Option[SlotError], Slot) =
+    if (confirming) {
+      confirming = false
+      if (value.toLowerCase == "no") {
+        log.debug(s"emptying slot [$key]")
+        (None, slot.emptySlot(key))
+      } else {
+        log.debug(s"confirming contents of slot [$key]")
+        (None, slot.confirmSlot(key))
+      }
+    } else {
+      log.debug(s"filling slot [$key] with [$value]")
+      slot.fillSlot(key, value)
+    }
 
   private def nextQuestion(sender: String) =
     slot.nextQuestion match {
 
-      case Some((key, question)) =>
-        currentSlotKey = Some(key)
+      case Some(Question(key, question, false)) =>
+        currentKey = Some(key)
         facebookService.sendTextMessage(sender, question)
+
+      case Some(Question(key, question, true)) =>
+        currentKey = Some(key)
+        confirming = true
+        facebookService.sendQuickReply(sender, question)
 
       case None =>
         log.debug("No next question")
-        context.parent ! EndFillForm(sender)
+        log.debug("slot:\n" + slot.toString)
+        context.parent ! EndFillForm(sender, slot)
 
     }
 

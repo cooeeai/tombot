@@ -32,6 +32,7 @@ libraryDependencies ++= Seq(
 //  "prismatic" % "plumbing" % "0.3.3",
   "wit" % "duckling" % "0.4.13",
   "com.github.mfornos" % "humanize-slim" % "1.2.2",
+  "com.googlecode.libphonenumber" % "libphonenumber" % "7.7.2",
   "btomala" %% "akka-http-twirl" % "1.1.0" excludeAll
     ExclusionRule(organization = "com.typesafe.akka")
 )
