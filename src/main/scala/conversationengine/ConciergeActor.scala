@@ -35,7 +35,7 @@ class ConciergeActor @Inject()(config: Config,
     with FSM[State, Data] {
 
   import ConciergeActor._
-  import controllers.Platforms._
+  import controllers.Platform._
   import rulesService._
 
   val agentName = "Mark"

@@ -6,10 +6,10 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{HttpMethods, HttpRequest}
 import akka.http.scaladsl.unmarshalling.Unmarshal
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
+import apis.googlemaps.{MapsJsonSupport, MapsResponse}
 import com.google.inject.Inject
 import com.typesafe.config.Config
-import apis.googlemaps.{MapsJsonSupport, MapsResponse}
 
 import scala.concurrent.Future
 
@@ -17,12 +17,11 @@ import scala.concurrent.Future
   * Created by markmo on 30/07/2016.
   */
 class AddressService @Inject()(config: Config,
-                               implicit val system: ActorSystem)
+                               implicit val system: ActorSystem,
+                               implicit val fm: Materializer)
   extends MapsJsonSupport {
 
   import system.dispatcher
-
-  implicit val materializer = ActorMaterializer()
 
   val url = config.getString("maps.api.url")
 

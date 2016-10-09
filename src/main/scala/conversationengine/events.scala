@@ -1,6 +1,6 @@
 package conversationengine
 
-import controllers.Platforms
+import controllers.Platform
 import memory.Slot
 import services.User
 
@@ -16,19 +16,19 @@ object events {
     val text: String
   }
 
-  case class Greet(platform: Platforms.Value, sender: String, user: User, text: String) extends TextLike
+  case class Greet(platform: Platform.Value, sender: String, user: User, text: String) extends TextLike
 
-  case class Qualify(platform: Platforms.Value, sender: String, productType: Option[String], text: String) extends TextLike
+  case class Qualify(platform: Platform.Value, sender: String, productType: Option[String], text: String) extends TextLike
 
-  case class Buy(platform: Platforms.Value, sender: String, productType: String, text: String)
+  case class Buy(platform: Platform.Value, sender: String, productType: String, text: String)
 
-  case class Respond(platform: Platforms.Value, sender: String, text: String) extends TextLike
+  case class Respond(platform: Platform.Value, sender: String, text: String) extends TextLike
 
-  case class Welcome(platform: Platforms.Value, sender: String)
+  case class Welcome(platform: Platform.Value, sender: String)
 
-  case class Analyze(platform: Platforms.Value, sender: String, text: String) extends TextLike
+  case class Analyze(platform: Platform.Value, sender: String, text: String) extends TextLike
 
-  case class BillEnquiry(platform: Platforms.Value, sender: String, text: String) extends TextLike
+  case class BillEnquiry(platform: Platform.Value, sender: String, text: String) extends TextLike
 
   case class PostAuth(sender: String)
 

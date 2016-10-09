@@ -30,7 +30,7 @@ class FacebookController @Inject()(config: Config,
                                    alchemyService: AlchemyService)
   extends FacebookJsonSupport with WitJsonSupport {
 
-  import Platforms._
+  import Platform._
   import StatusCodes._
   import conversationService._
 

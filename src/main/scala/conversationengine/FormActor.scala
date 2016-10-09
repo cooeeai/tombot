@@ -5,12 +5,15 @@ import com.google.inject.Inject
 import conversationengine.events._
 import memory._
 import modules.akkaguice.NamedActor
-import services.FacebookService
+import services.{FacebookService, SlotContainer, SlotService}
 
 /**
   * Created by markmo on 14/09/2016.
   */
-class FormActor @Inject()(facebookService: FacebookService, form: Form) extends Actor with ActorLogging {
+class FormActor @Inject()(facebookService: FacebookService,
+                          slotService: SlotService,
+                          form: Form)
+  extends Actor with ActorLogging {
 
   import FormActor._
 
@@ -18,18 +21,14 @@ class FormActor @Inject()(facebookService: FacebookService, form: Form) extends 
 
   var confirming = false
 
-  val originalSlot = SlotContainer(form.data("purchase"))
-    .fillSlot("name", "Mark Moloney")
+  val originalSlot = SlotContainer(slotService, form.data("purchase"))
+//    .fillSlot("name", "Mark Moloney")
     .fillSlot("phone", "0395551535")
     .fillSlot("cardholderName", "Mark Moloney")
     .fillSlot("cardNumber", "**** **** 1234")
     .fillSlot("securityCode", "1234")
     .fillSlot("expiryMonth", "01")
     .fillSlot("expiryYear", "19")
-//    .fillSlot("city", "Melbourne")
-//    .fillSlot("state", "VIC")
-//    .fillSlot("postcode", "3000")
-//    .fillSlot("country", "Australia")
     .slot
 
   var slot = originalSlot
@@ -78,7 +77,7 @@ class FormActor @Inject()(facebookService: FacebookService, form: Form) extends 
       }
     } else {
       log.debug(s"filling slot [$key] with [$value]")
-      slot.fillSlot(key, value)
+      slotService.fillSlot(slot, key, value)
     }
 
   private def nextQuestion(sender: String) =

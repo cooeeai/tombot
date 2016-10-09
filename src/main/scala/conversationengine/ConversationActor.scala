@@ -7,7 +7,7 @@ import apis.googlemaps.MapsJsonSupport
 import apis.googlenlp._
 import com.google.inject.Inject
 import com.typesafe.config.Config
-import controllers.Platforms
+import controllers.Platform
 import conversationengine.ConversationActor.{Data, State}
 import conversationengine.events._
 import modules.akkaguice.NamedActor
@@ -38,7 +38,7 @@ class ConversationActor @Inject()(config: Config,
     with FSM[State, Data] {
 
   import ConversationActor._
-  import Platforms._
+  import Platform._
   import system.dispatcher
 
   implicit val timeout = 20 second
@@ -303,7 +303,7 @@ class ConversationActor @Inject()(config: Config,
     s"Sentiment is $s"
   }
 
-  def testPlatformChange(platform: Platforms.Value, sender: String) = {
+  def testPlatformChange(platform: Platform.Value, sender: String) = {
     if (currentProvider != platform) {
       val oldPlatform = currentProvider
       provider = if (platform == Facebook) facebookService else skypeService

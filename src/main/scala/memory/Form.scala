@@ -1,36 +1,19 @@
 package memory
 
-import akka.actor.ActorSystem
-import akka.pattern.after
 import akka.event.LoggingAdapter
-import akka.stream.Materializer
 import apis.googlemaps.MapsJsonSupport
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.google.inject.Inject
-import services.AddressService
-import spray.json._
-
-import scala.concurrent._
-import scala.concurrent.duration._
+import com.typesafe.config.Config
 
 /**
   * Created by markmo on 6/10/2016.
   */
-class Form @Inject()(logger: LoggingAdapter,
-                     addressService: AddressService,
-                     implicit val system: ActorSystem,
-                     implicit val fm: Materializer)
+class Form @Inject()(config: Config,
+                     logger: LoggingAdapter)
   extends MapsJsonSupport {
 
-  import system.dispatcher
-
-  implicit val timeout = 20 second
-
-  implicit class FutureExtensions[T](f: Future[T]) {
-    def withTimeout(timeout: => Throwable)(implicit duration: FiniteDuration, system: ActorSystem): Future[T] = {
-      Future firstCompletedOf Seq(f, after(duration, system.scheduler)(Future.failed(timeout)))
-    }
-  }
+  val addressApi = config.getString("address.api.url")
 
   val data = Map(
     "purchase" -> Slot(
@@ -49,7 +32,19 @@ class Form @Inject()(logger: LoggingAdapter,
               Some("What is your last name?")
             ))
           ),
-          parseFn = Some((value) => {
+          parseExpr = Some(
+            """
+              |function (value) {
+              |  var re = /(\S+)\s+(.*)/;
+              |  var match = re.exec(value);
+              |  return {
+              |    firstName: match[1],
+              |    lastName: match[2]
+              |  };
+              |}
+            """.stripMargin)
+          /*
+          parseFn = Some(value => {
             val re = """(\S+)\s+(.*)""".r
             value.trim match {
               case re(firstName, lastName) =>
@@ -59,12 +54,12 @@ class Form @Inject()(logger: LoggingAdapter,
                 )
               case _ => Map()
             }
-          })
+          })*/
         ),
         Slot(
           "phone",
           Some("What is your phone number?"),
-          validateFn = Some((value) => {
+          validateFn = Some(value => {
             val phoneUtil = PhoneNumberUtil.getInstance()
             try {
               val auNumberProto = phoneUtil.parse(value, "AU")
@@ -98,7 +93,19 @@ class Form @Inject()(logger: LoggingAdapter,
                 Slot("expiryMonth"),
                 Slot("expiryYear")
               )),
-              parseFn = Some((value) => {
+              parseExpr = Some(
+                """
+                  |function (value) {
+                  |  var re = /(\d+{1,2})/(\d+{2})/;
+                  |  var match = re.exec(value);
+                  |  return {
+                  |    expiryMonth: match[1],
+                  |    expiryYear: match[2]
+                  |  };
+                  |}
+                """.stripMargin)
+              /*
+              parseFn = Some(value => {
                 val re = """(\d+{1,2})/(\d+{2})""".r
                 value.trim match {
                   case re(month, year) =>
@@ -108,7 +115,7 @@ class Form @Inject()(logger: LoggingAdapter,
                     )
                   case _ => Map()
                 }
-              })
+              })*/
             )
           )),
           confirm = Some("Are the following payment details correct?")
@@ -138,6 +145,20 @@ class Form @Inject()(logger: LoggingAdapter,
               Some("What is your country?")
             )
           )),
+          parseApi = Some(addressApi),
+          parseExpr = Some(
+            """
+              |function (value) {
+              |  return {
+              |    street1: value.street_1,
+              |    city: value.city,
+              |    state: value.state,
+              |    postcode: value.postal_code,
+              |    country: value.country
+              |  };
+              |}
+            """.stripMargin)
+          /*
           parseFn = Some((value) => {
             lazy val f = addressService.getAddress(value)
             val f1 = f withTimeout new TimeoutException("future timed out")
@@ -161,7 +182,7 @@ class Form @Inject()(logger: LoggingAdapter,
               Map()
             }
             Await.result(f2, timeout)
-          })
+          })*/
         ),
         Slot(
           "coupon",

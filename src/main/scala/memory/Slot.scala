@@ -9,19 +9,19 @@ case class Slot(key: String,
                 question: Option[String] = None,
                 children: Option[List[Slot]] = None,
                 value: Option[Any] = None,
-                validateFn: Option[String => Boolean] = None,
+                validateFn: Option[(String) => Boolean] = None,
                 invalidMessage: Option[String] = None,
-                parseFn: Option[String => Map[String, Any]] = None,
+                parseApi: Option[String] = None,
+                parseExpr: Option[String] = None,
+                parseFn: Option[(String) => Map[String, Any]] = None,
                 confirm: Option[String] = None,
                 confirmed: Boolean = false,
                 caption: Option[String] = None) {
 
-  val invalidMessageDefault = "Invalid format. Please try again."
-
   def nextQuestion: Option[Question] = {
 
     def loop(slot: Slot): (Boolean, Option[Question]) = {
-      val Slot(key, question, children, value, _, _, _, confirm, confirmed, _) = slot
+      val Slot(key, question, children, value, _, _, _, _, _, confirm, confirmed, _) = slot
       if (value.isEmpty) {
         if (children.isDefined) {
           val qs = children.get.map(child => loop(child))
@@ -80,53 +80,12 @@ case class Slot(key: String,
       ""
     }
 
-  def fillSlot(key: String, value: Any): (Option[SlotError], Slot) =
-    if (this.key == key) {
-      if (validateFn.isDefined && !validateFn.get(value.toString)) {
-        val message = invalidMessage.getOrElse(invalidMessageDefault)
-        (Some(SlotError(key, message)), this)
-      } else {
-        if (children.isDefined && parseFn.isDefined) {
-          //val engine = new ScriptEngineManager().getEngineByMimeType("text/javascript")
-          //val fn = engine.eval(parseFn).asInstanceOf[JSObject]
-          //val result = fn.call(null, value)
-          val result = parseFn.get(value.toString)
-          val slots = children.get map { child =>
-            val k = child.key
-            if (result.contains(k)) {
-              child.fillSlot(k, result(k))
-            } else {
-              (None, child)
-            }
-          }
-          val error = slots.map(_._1).find(_.isDefined)
-          if (error.isDefined) {
-            (error.get, this)
-          } else {
-            (None, Slot(key, question, Some(slots.map(_._2)), Some(value), validateFn, invalidMessage, parseFn, confirm, confirmed, caption))
-          }
-        } else {
-          (None, Slot(key, question, children, Some(value), validateFn, invalidMessage, parseFn, confirm, confirmed, caption))
-        }
-      }
-    } else if (children.isDefined) {
-      val slots = children.get.map(_.fillSlot(key, value))
-      val error = slots.map(_._1).find(_.isDefined)
-      if (error.isDefined) {
-        (error.get, this)
-      } else {
-        (None, Slot(this.key, question, Some(slots.map(_._2)), this.value, validateFn, invalidMessage, parseFn, confirm, confirmed, caption))
-      }
-    } else {
-      (None, this)
-    }
-
   def confirmSlot(key: String): Slot =
     if (this.key == key) {
-      Slot(key, question, children, value, validateFn, invalidMessage, parseFn, confirm, confirmed = true, caption)
+      Slot(key, question, children, value, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed = true, caption)
     } else if (children.isDefined) {
       val slots = children.get.map(_.confirmSlot(key))
-      Slot(this.key, question, Some(slots), value, validateFn, invalidMessage, parseFn, confirm, confirmed, caption)
+      Slot(this.key, question, Some(slots), value, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed, caption)
     } else {
       this
     }
@@ -143,9 +102,9 @@ case class Slot(key: String,
   def empty(): Slot =
     if (children.isDefined) {
       val slots = children.get.map(_.empty())
-      Slot(this.key, question, Some(slots), None, validateFn, invalidMessage, parseFn, confirm, confirmed, caption)
+      Slot(this.key, question, Some(slots), None, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed, caption)
     } else {
-      Slot(this.key, question, children, None, validateFn, invalidMessage, parseFn, confirm, confirmed, caption)
+      Slot(this.key, question, children, None, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed, caption)
     }
 
   def emptySlot(key: String): Slot =
@@ -153,7 +112,7 @@ case class Slot(key: String,
       empty()
     } else if (children.isDefined) {
       val slots = children.get.map(_.emptySlot(key))
-      Slot(this.key, question, Some(slots), value, validateFn, invalidMessage, parseFn, confirm, confirmed, caption)
+      Slot(this.key, question, Some(slots), value, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed, caption)
     } else {
       this
     }
@@ -171,8 +130,6 @@ case class Slot(key: String,
     }
 
   def getString(key: String): String = getValue(key).get.toString
-
-  override def toString: String = toJson(1)
 
   def toJson(level: Int = 1): String = {
     val i = "  "
@@ -207,27 +164,23 @@ case class Slot(key: String,
       j += n + k("caption") + q(caption.get.toString)
       n = n1
     }
+    if (parseApi.nonEmpty) {
+      j += n + k("parseApi") + q(parseApi.get.toString)
+      n = n1
+    }
     if (children.nonEmpty) {
       j += n + children.get.map(_.toJson(level + 1)).mkString(n)
     }
     j + b + (i * (level - 1)) + "}"
   }
 
-}
-
-case class SlotError(key: String, message: String)
-
-case class SlotContainer(slot: Slot, errors: List[SlotError] = Nil) {
-
-  def fillSlot(key: String, value: Any): SlotContainer =
-    slot.fillSlot(key, value) match {
-      case (Some(e), s) => SlotContainer(s, e :: errors)
-      case (None, s) => SlotContainer(s, errors)
-    }
+  override def toString: String = toJson(1)
 
 }
 
 case class Question(slotKey: String, question: String, confirmation: Boolean)
+
+case class SlotError(key: String, message: String)
 
 /*
 object Slot {

@@ -25,7 +25,7 @@ class IntentActor @Inject()(intentService: IntentService,
     with FSM[State, Data] {
 
   import IntentActor._
-  import controllers.Platforms._
+  import controllers.Platform._
 
   val child = context.actorOf(GuiceAkkaExtension(context.system).props(ConversationActor.name))
 

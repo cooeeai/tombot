@@ -8,7 +8,7 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Sink, Source}
 import com.google.inject.Guice
 import com.typesafe.config.Config
-import controllers.{SparkController, FacebookController, SkypeController}
+import controllers.{ValidationController, SparkController, FacebookController, SkypeController}
 import modules.akkaguice.AkkaModule
 import modules.config.ConfigModule
 import modules.conversation.ConversationModule
@@ -54,6 +54,7 @@ object Main extends App {
   val facebookController = injector.instance[FacebookController]
   val skypeController = injector.instance[SkypeController]
   val sparkController = injector.instance[SparkController]
+  val addressController = injector.instance[ValidationController]
 
   val port = Properties.envOrElse("PORT", "8080").toInt
 
@@ -69,7 +70,11 @@ object Main extends App {
 //  }
 
   val bindingFuture =
-    http.bindAndHandle(facebookController.routes ~ skypeController.routes ~ sparkController.routes,
+    http.bindAndHandle(
+      facebookController.routes ~
+        skypeController.routes ~
+        sparkController.routes ~
+        addressController.routes,
       config.getString("http.interface"), config.getInt("http.port"))
 
   facebookController.setupWelcomeGreeting()
