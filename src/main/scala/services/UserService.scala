@@ -18,11 +18,6 @@ class UserService {
 
   def getUser(id: String) = users.get(id)
 
-  def getUserIdOrElse(id: String) = users.get(id) match {
-    case Some(user) => user.id
-    case None => id
-  }
-
   def setUser(id: String, user: User): Unit =
     users(id) = user
 

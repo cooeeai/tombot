@@ -1,7 +1,6 @@
 package memory
 
 import akka.event.LoggingAdapter
-import apis.googlemaps.MapsJsonSupport
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.google.inject.Inject
 import com.typesafe.config.Config
@@ -10,8 +9,7 @@ import com.typesafe.config.Config
   * Created by markmo on 6/10/2016.
   */
 class Form @Inject()(config: Config,
-                     logger: LoggingAdapter)
-  extends MapsJsonSupport {
+                     logger: LoggingAdapter) {
 
   val addressApi = config.getString("address.api.url")
 
@@ -21,7 +19,7 @@ class Form @Inject()(config: Config,
       children = Some(List(
         Slot(
           "name",
-          Some("Please provide your full name as <first-name> <last-name>)?"),
+          Some("Please provide your full name as <first-name> <last-name>"),
           children = Some(List(
             Slot(
               "firstName",
@@ -181,6 +179,8 @@ class Form @Inject()(config: Config,
               logger.error(e.getMessage)
               Map()
             }
+            // TODO
+            // do not block
             Await.result(f2, timeout)
           })*/
         ),

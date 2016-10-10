@@ -16,6 +16,7 @@ import scala.util.{Failure, Success}
   */
 class ConversationService @Inject()(config: Config,
                                     logger: LoggingAdapter,
+                                    userService: UserService,
                                     system: ActorSystem)
   extends Conversation {
 
@@ -24,15 +25,18 @@ class ConversationService @Inject()(config: Config,
   implicit val timeout: Timeout = 5 seconds
 
   def converse(sender: String, message: Any): Unit = {
-    logger.debug(s"looking up actor for user/" + sender)
-    system.actorSelection("user/" + sender).resolveOne().onComplete {
+    logger.debug(s"looking up user linked to sender [$sender]")
+    val user = userService.getUser(sender)
+    val userId = user.get.id
+    logger.debug(s"looking up actor for user/" + userId)
+    system.actorSelection("user/" + userId).resolveOne().onComplete {
       case Success(actor) =>
         logger.debug("found actor")
         actor ! message
       case Failure(ex) =>
         logger.debug(ex.getMessage)
         logger.debug("creating new actor")
-        val actor = system.actorOf(GuiceAkkaExtension(system).props(ConciergeActor.name), sender)
+        val actor = system.actorOf(GuiceAkkaExtension(system).props(ConciergeActor.name), userId)
         actor ! message
     }
   }

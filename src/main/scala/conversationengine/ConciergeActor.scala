@@ -3,13 +3,13 @@ package conversationengine
 import java.util.concurrent.TimeoutException
 
 import akka.actor._
+import akka.contrib.pattern.ReceivePipeline
 import akka.pattern.after
 import akka.stream.Materializer
 import apis.ciscospark.SparkTempMembership
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.typesafe.config.Config
-import conversationengine.AgentConversationActor.{SparkMessageEvent, SparkRoomLeftEvent, SparkWrappedEvent}
 import conversationengine.ConciergeActor.{Data, State}
 import conversationengine.events._
 import modules.akkaguice.{GuiceAkkaExtension, NamedActor}
@@ -32,10 +32,11 @@ class ConciergeActor @Inject()(config: Config,
                                implicit val fm: Materializer)
   extends Actor
     with ActorLogging
+    with ReceivePipeline
+    with LoggingInterceptor
     with FSM[State, Data] {
 
   import ConciergeActor._
-  import controllers.Platform._
   import rulesService._
 
   val agentName = "Mark"
@@ -70,7 +71,7 @@ class ConciergeActor @Inject()(config: Config,
   when(UsingBot) {
 
     case Event(ev: TextLike, _) =>
-      log.debug(s"$name received TextLike event")
+      val platform = ev.platform
       val sender = ev.sender
       val text = ev.text
 
@@ -90,16 +91,15 @@ class ConciergeActor @Inject()(config: Config,
 
           case None =>
             log.debug("no content")
-            bot ! Respond(Facebook, sender, text)
+            bot ! Respond(platform, sender, text)
 
         }
       } else {
-        bot ! Respond(Facebook, sender, text)
+        bot ! Respond(platform, sender, text)
       }
       stay
 
     case Event(Fallback(sender, history), _) =>
-      log.debug("falling back")
       provider.sendTextMessage(sender, s"$agentName (Human) is joining the conversation")
       lazy val fut = sparkService.setupTempRoom(sender) withTimeout new TimeoutException("future timed out")
       val tempMembership = Await.result(fut, timeout)
@@ -120,12 +120,10 @@ class ConciergeActor @Inject()(config: Config,
       goto(UsingHuman)
 
     case Event(FillForm(sender, goal), _) =>
-      log.debug(s"$name received FillForm event")
       form ! NextQuestion(sender)
       goto(FillingForm)
 
     case Event(ev, _) =>
-      log.debug(s"$name received event")
       bot ! ev
       stay
 
@@ -134,12 +132,10 @@ class ConciergeActor @Inject()(config: Config,
   when(FillingForm) {
 
     case Event(ev: TextLike, _) =>
-      log.debug(s"$name received TextLike event")
       form ! ev
       stay
 
     case Event(ev: EndFillForm, _) =>
-      log.debug(s"$name received EndFillForm event")
       bot ! ev
       goto(UsingBot)
 
@@ -148,12 +144,10 @@ class ConciergeActor @Inject()(config: Config,
   when(UsingHuman) {
 
     case Event(ev: SparkMessageEvent, _) =>
-      log.debug(s"$name received spark message event")
       agent ! ev
       stay
 
     case Event(SparkRoomLeftEvent(sender), _) =>
-      log.debug(s"$name received room left event")
       provider.sendTextMessage(sender, s"$agentName (Human) is leaving the conversation")
       val tempMembership = tempMemberships(sender)
       sparkService.deleteWebhook(tempMembership.leaveRoomWebhookId)
@@ -162,7 +156,6 @@ class ConciergeActor @Inject()(config: Config,
       goto(UsingBot)
 
     case Event(ev: TextLike, _) =>
-      log.debug(s"$name received facebook event")
       val tempMembership = tempMemberships(ev.sender)
       agent ! SparkWrappedEvent(tempMembership.roomId, tempMembership.personId, ev)
       stay
@@ -172,7 +165,6 @@ class ConciergeActor @Inject()(config: Config,
   whenUnhandled {
 
     case Event(Reset, _) =>
-      log.debug(s"$name received Reset event")
       form ! Reset
       bot ! Reset
       goto(UsingBot)

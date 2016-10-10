@@ -1,6 +1,7 @@
 package conversationengine
 
 import akka.actor.{Actor, ActorLogging, ActorSystem, FSM}
+import akka.contrib.pattern.ReceivePipeline
 import akka.stream.Materializer
 import apis.witapi.WitJsonSupport
 import com.google.inject.Inject
@@ -22,10 +23,11 @@ class IntentActor @Inject()(intentService: IntentService,
   extends Actor
     with ActorLogging
     with WitJsonSupport
+    with ReceivePipeline
+    with LoggingInterceptor
     with FSM[State, Data] {
 
   import IntentActor._
-  import controllers.Platform._
 
   val child = context.actorOf(GuiceAkkaExtension(context.system).props(ConversationActor.name))
 
@@ -33,8 +35,12 @@ class IntentActor @Inject()(intentService: IntentService,
 
   when(Active) {
 
+    case Event(ev: Confirm, _) =>
+      child ! ev
+      stay
+
     case Event(ev: TextLike, _) =>
-      log.debug(s"$name received TextLike event")
+      val platform = ev.platform
       val sender = ev.sender
       val text = ev.text
 
@@ -47,7 +53,7 @@ class IntentActor @Inject()(intentService: IntentService,
 
           case Some("buy") =>
             log.debug("responding to [buy] intent")
-            child ! Qualify(Facebook, sender, meaning.getEntityValue("product_type"), text)
+            child ! Qualify(platform, sender, meaning.getEntityValue("product_type"), text)
 
           case Some("greet") =>
             log.debug("responding to [greet] intent")
@@ -56,7 +62,7 @@ class IntentActor @Inject()(intentService: IntentService,
 
               case Some(user) =>
                 log.debug("user: " + user)
-                child ! Greet(Facebook, sender, user, text)
+                child ! Greet(platform, sender, user, text)
 
               case None =>
                 log.warning("user not found")
@@ -65,22 +71,21 @@ class IntentActor @Inject()(intentService: IntentService,
 
           case Some("analyze") =>
             log.debug("responding to [analyze] intent")
-            child ! Analyze(Facebook, sender, text)
+            child ! Analyze(platform, sender, text)
 
           case Some("bill-enquiry") =>
             log.debug("responding to [bill-enquiry] intent")
-            child ! BillEnquiry(Facebook, sender, text)
+            child ! BillEnquiry(platform, sender, text)
 
           case _ =>
             log.debug("responding to [unknown] intent")
-            child ! Respond(Facebook, sender, text)
+            child ! Respond(platform, sender, text)
 
         }
       }
       stay
 
     case Event(Deactivate, _) =>
-      log.debug(s"$name received Deactivate event")
       goto(Inactive)
 
   }
@@ -88,7 +93,6 @@ class IntentActor @Inject()(intentService: IntentService,
   when(Inactive) {
 
     case Event(Activate, _) =>
-      log.debug(s"$name received Activate event")
       goto(Active)
 
   }
@@ -96,17 +100,14 @@ class IntentActor @Inject()(intentService: IntentService,
   whenUnhandled {
 
     case Event(Reset, _) =>
-      log.debug(s"$name received Reset event")
       child ! Reset
       goto(Active)
 
     case Event(ev: FillForm, _) =>
-      log.debug(s"$name received FillForm event")
       context.parent ! ev
       stay
 
     case Event(ev, _) =>
-      log.error(s"$name received event")
       child ! ev
       stay
 

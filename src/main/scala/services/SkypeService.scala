@@ -1,5 +1,7 @@
 package services
 
+import javax.inject.Singleton
+
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.Http
@@ -18,6 +20,7 @@ import scala.concurrent.Future
 /**
   * Created by markmo on 14/08/2016.
   */
+@Singleton
 class SkypeService @Inject()(config: Config,
                              logger: LoggingAdapter,
                              implicit val system: ActorSystem,

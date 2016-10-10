@@ -16,6 +16,8 @@ import spray.json._
 import spray.json.lenses.JsonLenses._
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent._
+import scala.concurrent.duration._
 
 /**
   * Created by markmo on 17/07/2016.
@@ -23,7 +25,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class FacebookController @Inject()(config: Config,
                                    logger: LoggingAdapter,
                                    conversationService: Conversation,
-                                   intentService: IntentService,
                                    @Named(FacebookService.name) provider: MessagingProvider,
                                    userService: UserService,
                                    rulesService: RulesService,
@@ -33,6 +34,8 @@ class FacebookController @Inject()(config: Config,
   import Platform._
   import StatusCodes._
   import conversationService._
+
+  implicit val timeout = 5 second
 
   def receivedAuthentication(event: FacebookAuthenticationEvent): Unit = {
     val sender = event.sender.id
@@ -71,8 +74,8 @@ class FacebookController @Inject()(config: Config,
       val messagingEvents = response.entry.head.messaging
       val event = messagingEvents.head
       val text = event.message.get.text
-      val sender = userService.getUserIdOrElse(event.sender.id)
-      converse(sender, Respond(Facebook, sender, text))
+      val sender = event.sender.id
+      converse(sender, Confirm(Facebook, sender, text))
 
     } else if (messageAttachments.isDefined) {
       logger.info("received attachments")
@@ -82,7 +85,7 @@ class FacebookController @Inject()(config: Config,
       val response = data.convertTo[FacebookResponse]
       val messagingEvents = response.entry.head.messaging
       for (event <- messagingEvents) {
-        val sender = userService.getUserIdOrElse(event.sender.id)
+        val sender = event.sender.id
         if (event.message.isDefined) {
           logger.info("event.message is defined")
 
@@ -124,7 +127,6 @@ class FacebookController @Inject()(config: Config,
     // implement a queue using message echoes to advance the queue
     // facebook doesn't guarantee message order - https://developers.facebook.com/bugs/565416400306038
     //facebookService.sendTextMessage(sender, "Welcome, login successful")
-    converse(sender, PostAuth(sender))
 
     logger.info(
       s"""
@@ -261,9 +263,11 @@ class FacebookController @Inject()(config: Config,
           userService.authenticate(username, password) match {
             case Some(user) =>
               logger.debug("login successful")
-              provider.asInstanceOf[FacebookService].getSenderId(sender) map { psid =>
+              val f = provider.asInstanceOf[FacebookService].getSenderId(sender) map { psid =>
+                logger.debug("psid:\n" + psid.toJson.prettyPrint)
                 userService.setUser(psid.recipient, user)
               }
+              Await.result(f, timeout)
               redirect(successURI, Found)
             case None =>
               logger.debug("login failed")

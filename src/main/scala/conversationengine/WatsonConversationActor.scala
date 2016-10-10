@@ -4,6 +4,7 @@ import java.lang.{Boolean => JBoolean}
 import java.util.{Map => JMap}
 
 import akka.actor.{Actor, ActorLogging}
+import akka.contrib.pattern.ReceivePipeline
 import com.google.inject.Inject
 import com.typesafe.config.Config
 import conversationengine.events._
@@ -19,7 +20,10 @@ import scala.collection.mutable
 class WatsonConversationActor @Inject()(config: Config,
                                         facebookService: FacebookService,
                                         watsonConversationService: WatsonConversationService)
-  extends Actor with ActorLogging {
+  extends Actor
+    with ActorLogging
+    with ReceivePipeline
+    with LoggingInterceptor {
 
   val maxFailCount = config.getInt("max.fail.count")
 
@@ -33,8 +37,14 @@ class WatsonConversationActor @Inject()(config: Config,
     case ev: TextLike =>
       val sender = ev.sender
       val response = watsonConversationService.converse(ev.text, contextMap.get(sender))
-      log.debug("intents: " + response.getIntents.map(intent => s"${intent.getIntent} (${intent.getConfidence})").mkString(", "))
-      log.debug("entities: " + response.getEntities.map(entity => s"${entity.getEntity} (${entity.getValue})").mkString(", "))
+      log.debug("intents: " +
+        response.getIntents.
+          map(intent => s"${intent.getIntent} (${intent.getConfidence})").
+          mkString(", "))
+      log.debug("entities: " +
+        response.getEntities.
+          map(entity => s"${entity.getEntity} (${entity.getValue})").
+          mkString(", "))
       val conversationCtx = response.getContext
       val text = response.getText.mkString("\n")
       history append Exchange(Some(ev.text), text)

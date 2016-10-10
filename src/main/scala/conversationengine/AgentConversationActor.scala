@@ -1,7 +1,7 @@
 package conversationengine
 
 import akka.actor.{Actor, ActorLogging}
-import apis.ciscospark.SparkWebhookResponseData
+import akka.contrib.pattern.ReceivePipeline
 import com.google.inject.Inject
 import conversationengine.events._
 import modules.akkaguice.NamedActor
@@ -13,9 +13,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
   * Created by markmo on 10/09/2016.
   */
 class AgentConversationActor @Inject()(facebookService: FacebookService, sparkService: SparkService)
-  extends Actor with ActorLogging {
-
-  import AgentConversationActor._
+  extends Actor
+    with ReceivePipeline
+    with LoggingInterceptor
+    with ActorLogging {
 
   override def receive = {
 
@@ -35,11 +36,5 @@ class AgentConversationActor @Inject()(facebookService: FacebookService, sparkSe
 object AgentConversationActor extends NamedActor {
 
   override final val name = "AgentConversationActor"
-
-  case class SparkMessageEvent(sender: String, data: SparkWebhookResponseData)
-
-  case class SparkRoomLeftEvent(sender: String)
-
-  case class SparkWrappedEvent(roomId: String, personId: String, message: TextLike)
 
 }

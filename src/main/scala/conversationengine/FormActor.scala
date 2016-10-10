@@ -1,6 +1,7 @@
 package conversationengine
 
 import akka.actor.{Actor, ActorLogging}
+import akka.contrib.pattern.ReceivePipeline
 import com.google.inject.Inject
 import conversationengine.events._
 import memory._
@@ -13,16 +14,16 @@ import services.{FacebookService, SlotContainer, SlotService}
 class FormActor @Inject()(facebookService: FacebookService,
                           slotService: SlotService,
                           form: Form)
-  extends Actor with ActorLogging {
-
-  import FormActor._
+  extends Actor
+    with ActorLogging
+    with ReceivePipeline
+    with LoggingInterceptor {
 
   var currentKey: Option[String] = None
 
   var confirming = false
 
   val originalSlot = SlotContainer(slotService, form.data("purchase"))
-//    .fillSlot("name", "Mark Moloney")
     .fillSlot("phone", "0395551535")
     .fillSlot("cardholderName", "Mark Moloney")
     .fillSlot("cardNumber", "**** **** 1234")
@@ -43,11 +44,9 @@ class FormActor @Inject()(facebookService: FacebookService,
       slot = originalSlot
 
     case NextQuestion(sender) =>
-      log.debug(s"$name received NextQuestion event")
       nextQuestion(sender)
 
     case ev: TextLike =>
-      log.debug(s"$name received TextLike event")
       val sender = ev.sender
       val text = ev.text
       if (currentKey.isDefined) {

@@ -6,7 +6,7 @@ import akka.http.scaladsl.server.Directives._
 import apis.ciscospark.{SparkJsonSupport, SparkWebhookResponse}
 import com.google.inject.Inject
 import com.typesafe.config.Config
-import conversationengine.AgentConversationActor.{SparkRoomLeftEvent, SparkMessageEvent}
+import conversationengine.events._
 import services.ConversationService
 import spray.json.JsObject
 
@@ -18,8 +18,8 @@ class SparkController @Inject()(config: Config,
                                 conversationService: ConversationService)
   extends SparkJsonSupport {
 
-  import conversationService._
   import StatusCodes._
+  import conversationService._
 
   def routes =
     pathPrefix("sparkwebhook-message-created") {
@@ -57,4 +57,5 @@ class SparkController @Inject()(config: Config,
         }
       }
     }
+
 }

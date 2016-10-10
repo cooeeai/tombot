@@ -1,6 +1,7 @@
 package conversationengine
 
 import akka.actor.{Actor, ActorLogging, ActorSystem, FSM}
+import akka.contrib.pattern.ReceivePipeline
 import akka.pattern.after
 import akka.stream.Materializer
 import apis.googlemaps.MapsJsonSupport
@@ -35,6 +36,8 @@ class ConversationActor @Inject()(config: Config,
     with ActorLogging
     with MapsJsonSupport
     with GoogleJsonSupport
+    with ReceivePipeline
+    with LoggingInterceptor
     with FSM[State, Data] {
 
   import ConversationActor._
@@ -49,193 +52,111 @@ class ConversationActor @Inject()(config: Config,
     }
   }
 
-  val maxFailCount = config.getInt("max.fail.count")
-
-  var currentProvider = Facebook
+  var currentPlatform = Facebook
 
   var provider: MessagingProvider = facebookService
 
-  var isAuthenticated = false
-
-  var postAuthAction: () => this.State = () => stay
+  val maxFailCount = config.getInt("max.fail.count")
 
   var failCount = 0
 
   val history = mutable.ListBuffer[Exchange]()
+
+  var authenticated = false
+
+  var postAction: Option[Action] = None
 
   startWith(Qualifying, Uninitialized)
 
   when(Qualifying) {
 
     case Event(Qualify(platform, sender, productType, text), _) =>
-      log.debug(s"$name received Qualify event")
-      testPlatformChange(platform, sender)
       productType match {
-
-        case Some(typ) =>
-          postAuthAction = () => {
-            context.parent ! Deactivate
-            val message = s"What type of $typ did you have in mind?"
-            history append Exchange(Some(text), message)
-            provider.sendTextMessage(sender, message)
-            goto(Qualifying)
-          }
-
-        case None =>
-          postAuthAction = () => {
-            val message = "What did you want to buy?"
-            history append Exchange(Some(text), message)
-            provider.sendTextMessage(sender, message)
-            stay
-          }
-
-      }
-      if (isAuthenticated) {
-        postAuthAction()
-      } else {
-        history append Exchange(None, "login")
-        provider.sendLoginCard(sender)
-        stay
+        case Some(t) => privilegedAction(platform, sender, text) {
+          say(sender, text, s"What type of $t did you have in mind?")
+          goto(Qualifying)
+        }
+        case None => privilegedAction(platform, sender, text) {
+          say(sender, text, "What did you want to buy?")
+          stay
+        }
       }
 
     case Event(Respond(platform, sender, text), _) =>
-      log.debug(s"$name received Respond event")
-      testPlatformChange(platform, sender)
-
       if (text == "iphone") {
-        history append Exchange(Some(text), "showing product")
-        provider.sendHeroCard(sender)
-        goto(Buying)
-
+        action(platform, sender, text) {
+          history += Exchange(Some(text), "show product catalog")
+          provider.sendHeroCard(sender)
+          goto(Buying)
+        }
       } else {
-        val message = "Sorry, I didn't understand that"
-        history append Exchange(Some(text), message)
-        provider.sendTextMessage(sender, message)
-        stay
+        action(platform, sender, text) {
+          say(sender, text, "Sorry, I didn't understand that")
+          stay
+        }
       }
   }
 
   when(Buying) {
 
     case Event(Buy(platform, sender, _, text), _) =>
-      log.debug(s"$name received Buy event")
-      testPlatformChange(platform, sender)
-      context.parent ! FillForm(sender, "purchase")
-//      val message = "Shall I use the card ending in 1234?"
-//      history append Exchange(Some(text), message)
-//      provider.sendQuickReply(sender, message)
-      stay
+      action(platform, sender, text) {
+        context.parent ! FillForm(sender, "purchase")
+        stay
+      }
 
     case Event(EndFillForm(sender, slot), _) =>
-      log.debug(s"$name received EndFillForm event")
       provider.sendReceiptCard(sender, slot)
       goto(Qualifying)
-
-//    case Event(Respond(platform, sender, text), _) =>
-//      log.debug("received Respond event")
-//      testPlatformChange(platform, sender)
-//
-//      if (isPaymentVerified) {
-//        log.debug("looking up address: " + text)
-//        // TODO wrap in a function
-//        lazy val f = addressService.getAddress(text)
-//        val f1 = f withTimeout new TimeoutException("future timed out")
-//        val f2 = f1 map { response =>
-//          log.debug("received address lookup response:\n" + response.toJson.prettyPrint)
-//          if (response.results.nonEmpty) {
-//            isAddressVerified = true
-//            val address = response.results.head.getAddress
-//            val message = address.toString
-//            history append Exchange(Some(text), message)
-//            provider.sendReceiptCard(sender, address)
-//            goto(Starting)
-//          } else {
-//            val message = "Sorry, I could not interpret that"
-//            history append Exchange(Some(text), message)
-//            provider.sendTextMessage(sender, message)
-//            stay
-//          }
-//        }
-//        f2.failed map { e =>
-//          log.error(e.getMessage)
-//          stay
-//        }
-//        Await.result(f2, timeout)
-//      } else {
-//        isPaymentVerified = true
-//        val message = "What address should I send the order to?"
-//        history append Exchange(Some(text), message)
-//        provider.sendTextMessage(sender, message)
-//        stay
-//      }
 
   }
 
   whenUnhandled {
 
+    case Event(Confirm(platform, sender, text), _) =>
+      stay
+
     case Event(Reset, _) =>
-      log.debug(s"$name received Reset event")
-      isAuthenticated = false
-      postAuthAction = () => stay
+      authenticated = false
+      postAction = None
       failCount = 0
       history.clear()
       goto(Qualifying)
 
     case Event(Greet(platform, sender, user, text), _) =>
-      log.debug(s"$name received Greet event")
-      testPlatformChange(platform, sender)
-      greet(sender, user, text)
-      stay
+      action(platform, sender, text) {
+        greet(sender, user, text)
+        stay
+      }
 
     case Event(Respond(platform, sender, text), _) =>
-      log.debug(s"$name received Respond event")
-      testPlatformChange(platform, sender)
-      val reply = smallTalkService.getSmallTalkResponse(sender, text)
-      if (reply == "Didn't get that!") {
-        //analyze(sender, text)
-        shrug(sender, text)
-      } else {
-        history append Exchange(Some(text), reply)
-        provider.sendTextMessage(sender, reply)
+      action(platform, sender, text) {
+        smallTalkService.getSmallTalkResponse(sender, text) match {
+          case "Didn't get that!" => shrug(sender, text)
+          case reply => say(sender, text, reply)
+        }
+        stay
       }
-      stay
 
     case Event(Analyze(platform, sender, text), _) =>
-      log.debug(s"$name received Analyze event")
-      testPlatformChange(platform, sender)
-      analyze(sender, text)
-      stay
+      action(platform, sender, text) {
+        analyze(sender, text)
+        stay
+      }
 
     case Event(BillEnquiry(platform, sender, text), _) =>
-      log.debug(s"$name received BillEnquiry event")
-      testPlatformChange(platform, sender)
-      if (isAuthenticated) {
-        val message = "Your current balance is $41.25. Would you like to pay it now?"
-        history append Exchange(Some(text), message)
-        provider.sendQuickReply(sender, message)
-      } else {
-        postAuthAction = () => {
-          val message = "Your current balance is $41.25. Would you like to pay it now?"
-          history append Exchange(Some(text), message)
-          provider.sendQuickReply(sender, message)
-          stay
-        }
-        history append Exchange(None, "login")
-        provider.sendLoginCard(sender)
+      privilegedAction(platform, sender, text) {
+        quickReply(sender, text, "Your current balance is $41.25. Would you like to pay it now?")
+        stay
       }
-      stay
-
-    case Event(PostAuth(sender), _) =>
-      log.debug(s"$name received PostAuth event")
-      postAuthAction()
 
     case Event(Welcome(platform, sender), _) =>
-      log.debug("received Authenticate event")
-      isAuthenticated = true
-      testPlatformChange(platform, sender)
-      history append Exchange(None, "logged in")
+      authenticated = true
+      history += Exchange(None, "logged in")
       //provider.sendTextMessage(sender, "Welcome, login successful")
-      stay
+      val action = postAction.get
+      postAction = None
+      action.block
 
     case Event(ev, _) =>
       log.error(s"$name received invalid event [${ev.toString}] while in state [${this.stateName}]")
@@ -243,6 +164,75 @@ class ConversationActor @Inject()(config: Config,
   }
 
   initialize()
+
+  def action(platform: Platform.Value,
+             sender: String,
+             text: String,
+             privileged: Boolean = false
+            )(b: => State): State = {
+    log.debug(s"actioning request from $platform, sender [$sender], [$text], ${if (privileged) "privileged" else "public"}")
+    if (postAction.isDefined) {
+      log.debug("post action is defined")
+      if (confirmed(text)) {
+        log.debug("confirmed")
+        history += Exchange(Some(text), "confirmed")
+        val action = postAction.get
+        postAction = None
+        action.block
+      } else {
+        log.debug("denied")
+        history += Exchange(Some(text), "denied")
+        postAction = None
+        stay
+      }
+    } else if (privileged && !authenticated) {
+      log.debug("call to login")
+      val action = new Action {
+        lazy val block = b
+      }
+      postAction = Some(action)
+      history += Exchange(Some(text), "login")
+      context.parent ! Deactivate
+      provider.sendLoginCard(sender)
+      log.debug("postAction " + postAction)
+      stay
+    } else if (currentPlatform != platform) {
+      log.debug(s"switching from [$currentPlatform] to [$platform]")
+      val action = new Action {
+        lazy val block = b
+      }
+      postAction = Some(action)
+      val oldPlatform = currentPlatform
+      currentPlatform = platform
+      provider = platform match {
+        case Facebook => facebookService
+        case Skype => skypeService
+      }
+      context.parent ! Deactivate
+      provider.sendQuickReply(sender, s"Do you want to carry on our conversation from $oldPlatform?")
+      stay
+    } else {
+      log.debug("executing standard action")
+      b
+    }
+  }
+
+  def privilegedAction(platform: Platform.Value,
+                       sender: String,
+                       text: String
+                      )(b: => State): State = action(platform, sender, text, privileged = true)(b)
+
+  private def confirmed(text: String): Boolean = text.toLowerCase == "yes"
+
+  private def say(sender: String, text: String, message: String): Unit = {
+    history += Exchange(Some(text), message)
+    provider.sendTextMessage(sender, message)
+  }
+
+  private def quickReply(sender: String, text: String, message: String): Unit = {
+    history += Exchange(Some(text), message)
+    provider.sendQuickReply(sender, message)
+  }
 
   def analyze(sender: String, text: String) = {
     lazy val entitiesRequest = languageService.getEntities(text)
@@ -253,13 +243,11 @@ class ConversationActor @Inject()(config: Config,
       entitiesResponse <- f1
       sentimentResponse <- f2
     } yield {
-      log.debug("received entities response:\n" + entitiesResponse.toJson.prettyPrint)
-      log.debug("received sentiment response:\n" + sentimentResponse.toJson.prettyPrint)
-      val message =
-        "¯\\_(ツ)_/¯ Didn't get that, but I can understand that\n" +
-          formatEntities(entitiesResponse.entities) + "\n" + formatSentiment(sentimentResponse.documentSentiment)
-      history append Exchange(Some(text), message)
-      provider.sendTextMessage(sender, message)
+      log.debug("entities:\n" + entitiesResponse.toJson.prettyPrint)
+      log.debug("sentiment:\n" + sentimentResponse.toJson.prettyPrint)
+      say(sender, text, shrugEmoji + "Didn't get that, but I can understand that\n" +
+        formatEntities(entitiesResponse.entities) + "\n" +
+        formatSentiment(sentimentResponse.documentSentiment))
     }
     f3 recover {
       case e: Throwable => log.error(e.getMessage)
@@ -267,22 +255,18 @@ class ConversationActor @Inject()(config: Config,
   }
 
   def greet(sender: String, user: User, text: String) = {
-    val greeting = greetings(random.nextInt(greetings.size)) + " " + user.firstName + "!"
-    history append Exchange(Some(text), greeting)
-    provider.sendTextMessage(sender, greeting)
+    val greeting = greetings(random.nextInt(greetings.size)).format(user.firstName)
+    say(sender, text, greeting)
   }
 
   def shrug(sender: String, text: String) = {
-    //val joke = if (random.nextInt(10) < 3) "\nHow about a joke instead?\n" + humourService.getJoke else ""
     failCount += 1
     if (failCount > maxFailCount) {
       context.parent ! Fallback(sender, history.toList)
       failCount = 0
       history.clear()
     } else {
-      val message = "¯\\_(ツ)_/¯ " + shrugs(random.nextInt(shrugs.size)) // + joke
-      history append Exchange(Some(text), message)
-      provider.sendTextMessage(sender, message)
+      say(sender, text, shrugEmoji + shrugs(random.nextInt(shrugs.size)))
     }
   }
 
@@ -303,16 +287,6 @@ class ConversationActor @Inject()(config: Config,
     s"Sentiment is $s"
   }
 
-  def testPlatformChange(platform: Platform.Value, sender: String) = {
-    if (currentProvider != platform) {
-      val oldPlatform = currentProvider
-      provider = if (platform == Facebook) facebookService else skypeService
-      currentProvider = platform
-      provider.sendTextMessage(sender, s"Do you want to carry on our conversation from $oldPlatform?")
-      // TODO
-    }
-  }
-
 }
 
 object ConversationActor extends NamedActor {
@@ -329,17 +303,44 @@ object ConversationActor extends NamedActor {
 
   case object Uninitialized extends Data
 
+  abstract class Action {
+    val block: FSM.State[State, Data]
+  }
+
   val random = new Random
+
+  val shrugEmoji = "¯\\_(ツ)_/¯ "
 
   val shrugs = Vector(
     //"I'm sorry, I did not understand. I don't even have arms.",
-    "I'm sorry, I did not understand. These arms aren't even real."
-    //    "I'm not that bright sometimes",
-    //    "That's outside my circle of knowledge"
+    "I'm sorry, I did not understand. These arms aren't even real.",
+    "I'm sorry. I'm having trouble understanding the question.",
+    "I think I may have misunderstood your last statement.",
+    "I'm sorry. I didn't quite grasp what you just said.",
+    "I don't think I'm qualified to answer that yet.",
+    "I'm a bit confused by that last part.",
+    "I'm not totally sure about that.",
+    "I'm not sure I follow.",
+    "I'm afraid I don't understand.",
+    "I'm a bit confused."
   )
 
   val greetings = Vector(
-    "Hi there", "Hello"
+    "Hi there %s!",
+    "Hello %s!",
+    "Howdy %s!",
+    "Ahoy %s!",
+    "Hello %s, my name is Inigo Montoya",
+    "I'm Batman",
+    "‘Ello Mate",
+    "What's cookin' Good Lookin'?",
+    "Aloha %s!",
+    "Hola %s!",
+    "Que Pasa %s!",
+    "Bonjour %s!",
+    "Hallo %s!",
+    "Ciao %s!",
+    "Konnichiwa %s!"
   )
 
 }

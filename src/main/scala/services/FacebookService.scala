@@ -117,8 +117,8 @@ class FacebookService @Inject()(config: Config,
         withTimestamp 1428444852L
         withElements elements
         withAddress address
-        withSummary (subtotal = "1047.00", shippingCost = "25.00", totalTax = "104.70", totalCost = "942.30")
-        addAdjustment (name = "Coupon DAY1", amount = "-100.00")
+        withSummary(subtotal = "1047.00", shippingCost = "25.00", totalTax = "104.70", totalCost = "942.30")
+        addAdjustment(name = "Coupon DAY1", amount = "-100.00")
         build()
       )
     logger.debug("sending payload:\n" + payload.toJson.prettyPrint)
@@ -167,8 +167,11 @@ class FacebookService @Inject()(config: Config,
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.GET,
         uri = s"https://graph.facebook.com/v2.6/me?access_token=$accessToken&fields=recipient&account_linking_token=$accountLinkingToken"))
-      entity <- Unmarshal(response.entity).to[FacebookUserPSID]
-    } yield entity
+      entity <- Unmarshal(response.entity).to[String]
+    } yield {
+      logger.debug("response:\n" + entity)
+      entity.parseJson.convertTo[FacebookUserPSID]
+    }
   }
 
   def setupWelcomeGreeting(): Unit = {

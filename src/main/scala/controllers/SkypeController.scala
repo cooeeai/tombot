@@ -1,5 +1,7 @@
 package controllers
 
+import javax.inject.Singleton
+
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
@@ -7,7 +9,8 @@ import akkahttptwirl.TwirlSupport._
 import apis.skype._
 import com.google.inject.Inject
 import com.typesafe.config.Config
-import services.{IntentService, SkypeService, UserService}
+import conversationengine.events._
+import services.{Conversation, SkypeService, UserService}
 import spray.json._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -15,14 +18,17 @@ import scala.concurrent.ExecutionContext.Implicits.global
 /**
   * Created by markmo on 13/08/2016.
   */
+@Singleton
 class SkypeController @Inject()(config: Config,
                                 logger: LoggingAdapter,
-                                intentService: IntentService,
+                                conversationService: Conversation,
                                 skypeService: SkypeService,
                                 userService: UserService)
   extends SkypeJsonSupport {
 
+  import Platform._
   import StatusCodes._
+  import conversationService._
 
   var token: Option[MicrosoftToken] = None
 
@@ -38,12 +44,15 @@ class SkypeController @Inject()(config: Config,
               val userMessage = data.convertTo[SkypeUserMessage]
               val conversationId = userMessage.conversation.id
               val sender = userMessage.from.id
+              logger.debug("token: " + token)
               token match {
                 case Some(_) =>
-                  skypeService.sendLoginCard(sender, conversationId)
+                  converse(conversationId, Respond(Skype, conversationId, userMessage.text))
                 case None =>
                   skypeService.getMicrosoftToken map { tk =>
+                    logger.debug("tk: " + tk)
                     token = Some(tk)
+                    skypeService.token = token
                     skypeService.sendLoginCard(sender, conversationId)
                   }
               }
