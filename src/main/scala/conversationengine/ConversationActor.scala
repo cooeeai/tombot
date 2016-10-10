@@ -194,7 +194,6 @@ class ConversationActor @Inject()(config: Config,
       history += Exchange(Some(text), "login")
       context.parent ! Deactivate
       provider.sendLoginCard(sender)
-      log.debug("postAction " + postAction)
       stay
     } else if (currentPlatform != platform) {
       log.debug(s"switching from [$currentPlatform] to [$platform]")
