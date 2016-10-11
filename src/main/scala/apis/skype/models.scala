@@ -31,10 +31,10 @@ case class SkypeLinkButton(title: String, value: String) extends SkypeButton {
 
 case class SkypeSigninAttachmentContent(text: String, buttons: List[SkypeSigninButton])
 
-case class SkypeHeroAttachmentContent(title: Option[String],
-                                      subtitle: Option[String],
-                                      images: Option[List[SkypeImage]],
-                                      buttons: List[SkypeButton])
+case class SkypeImageCardAttachmentContent(title: Option[String],
+                                           subtitle: Option[String],
+                                           images: Option[List[SkypeImage]],
+                                           buttons: List[SkypeButton])
 
 sealed trait SkypeAttachment {
   val contentType: String
@@ -44,8 +44,12 @@ case class SkypeSigninAttachment(content: SkypeSigninAttachmentContent) extends 
   override val contentType = "application/vnd.microsoft.card.signin"
 }
 
-case class SkypeHeroAttachment(content: SkypeHeroAttachmentContent) extends SkypeAttachment {
+case class SkypeHeroAttachment(content: SkypeImageCardAttachmentContent) extends SkypeAttachment {
   override val contentType = "application/vnd.microsoft.card.hero"
+}
+
+case class SkypeThumbnailAttachment(content: SkypeImageCardAttachmentContent) extends SkypeAttachment {
+  override val contentType = "application/vnd.microsoft.card.thumbnail"
 }
 
 case class SkypeUserMessage(id: String,
@@ -76,6 +80,10 @@ case class SkypeList(attachments: List[SkypeAttachment]) extends SkypeAttachment
 }
 
 case class SkypeSigninCard(cardType: String, attachments: List[SkypeSigninAttachment])
+
+case class SkypeHeroCard(attachments: List[SkypeHeroAttachment])
+
+case class SkypeThumbnailCard(attachments: List[SkypeThumbnailAttachment])
 
 case class MicrosoftToken(tokenType: String, expires: Int, extExpires: Int, accessToken: String)
 
@@ -133,7 +141,7 @@ trait SkypeJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
   }
 
   implicit val skypeSigninAttachmentContentJsonFormat = jsonFormat2(SkypeSigninAttachmentContent)
-  implicit val skypeHeroAttachmentContentJsonFormat = jsonFormat4(SkypeHeroAttachmentContent)
+  implicit val skypeImageCardAttachmentContentJsonFormat = jsonFormat4(SkypeImageCardAttachmentContent)
 
   implicit object skypeAttachmentJsonFormat extends RootJsonFormat[SkypeAttachment] {
 
@@ -153,7 +161,7 @@ trait SkypeJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
         case "application/vnd.microsoft.card.signin" =>
           SkypeSigninAttachment(value.extract[SkypeSigninAttachmentContent]('content))
         case "application/vnd.microsoft.card.hero" =>
-          SkypeHeroAttachment(value.extract[SkypeHeroAttachmentContent]('content))
+          SkypeHeroAttachment(value.extract[SkypeImageCardAttachmentContent]('content))
         case _ => throw DeserializationException("SkypeAttachment expected")
       }
 
@@ -181,7 +189,20 @@ trait SkypeJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
       )
 
     def read(value: JsValue) =
-      SkypeHeroAttachment(value.extract[SkypeHeroAttachmentContent]('content))
+      SkypeHeroAttachment(value.extract[SkypeImageCardAttachmentContent]('content))
+
+  }
+
+  implicit object skypeThumbnailAttachmentJsonFormat extends RootJsonFormat[SkypeThumbnailAttachment] {
+
+    def write(a: SkypeThumbnailAttachment) =
+      JsObject(
+        "contentType" -> JsString(a.contentType),
+        "content" -> a.content.toJson
+      )
+
+    def read(value: JsValue) =
+      SkypeThumbnailAttachment(value.extract[SkypeImageCardAttachmentContent]('content))
 
   }
 
@@ -207,11 +228,60 @@ trait SkypeJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val skypeUserMessageJsonFormat = jsonFormat(SkypeUserMessage, "id", "type", "timestamp", "text", "channelId", "serviceUrl", "conversation", "from", "recipient", "attachments", "entities")
   implicit val skypeBotMessageJsonFormat = jsonFormat(SkypeBotMessage, "type", "text", "attachments")
   implicit val skypeSigninCardJsonFormat = jsonFormat(SkypeSigninCard, "type", "attachments")
+  implicit val skypeHeroCardJsonFormat = jsonFormat1(SkypeHeroCard)
+  implicit val skypeThumbnailCardJsonFormat = jsonFormat1(SkypeThumbnailCard)
   implicit val microsoftTokenJsonFormat = jsonFormat(MicrosoftToken, "token_type", "expires_in", "ext_expires_in", "access_token")
 
 }
 
 object Builder {
+
+  class ThumbnailCardBuilder(title: Option[String], subtitle: Option[String], images: List[SkypeImage], buttons: List[SkypeButton]) {
+
+    def withTitle(value: String) = new ThumbnailCardBuilder(Some(value), subtitle, images, buttons)
+
+    def withSubtitle(value: String) = new ThumbnailCardBuilder(title, Some(subtitle), images, buttons)
+
+    def addImage(image: SkypeImage) = new ThumbnailCardBuilder(title, subtitle, images :+ image, buttons)
+
+    def addImage(url: String) = new ThumbnailCardBuilder(title, subtitle, images :+ SkypeImage(url), buttons)
+
+    def addButton(button: SkypeButton) = new ThumbnailCardBuilder(title, subtitle, images, buttons :+ button)
+
+    def build() =
+      SkypeThumbnailCard(
+        attachments = SkypeThumbnailAttachment(
+          SkypeImageCardAttachmentContent(
+            title = title.getOrElse(""),
+            subtitle = subtitle.getOrElse(""),
+            images = images,
+            buttons = buttons
+          ) :: Nil
+        )
+      )
+
+  }
+
+  def thumbnailCard = new ThumbnailCardBuilder(None, None, Nil, Nil)
+
+  class HeroCardBuilder(title: Option[String], subtitle: Option[String], images: List[SkypeImage], buttons: List[SkypeButton])
+    extends ThumbnailCardBuilder {
+
+    override def build() =
+      SkypeCarousel(
+        attachments = SkypeHeroAttachment(
+          SkypeImageCardAttachmentContent(
+            title = title.getOrElse(""),
+            subtitle = subtitle.getOrElse(""),
+            images = images,
+            buttons = buttons
+          )
+        )
+      )
+
+  }
+
+  def heroCard = new HeroCardBuilder(None, None, Nil, Nil)
 
   class SigninCardBuilder(api: Option[String], sender: Option[String], text: Option[String], buttonTitle: Option[String]) {
 

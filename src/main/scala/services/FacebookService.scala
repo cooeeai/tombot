@@ -77,7 +77,7 @@ class FacebookService @Inject()(config: Config,
   def sendHeroCard(sender: String): Unit = {
     logger.info("sending generic message to sender: " + sender)
     import Builder._
-    val elements = catalogService.getElements
+    val elements = itemsToFacebookElements(catalogService.getItems)
     val payload = (
       genericTemplate
         forSender sender
@@ -200,6 +200,20 @@ class FacebookService @Inject()(config: Config,
         entity = request))
     } yield ()
   }
+
+  private def itemsToFacebookElements(items: List[Item]): List[FacebookElement] =
+    items map { item =>
+      FacebookElement(
+        title = item.title,
+        subtitle = item.subtitle,
+        itemURL = item.itemURL,
+        imageURL = item.imageURL,
+        buttons = item.actions map {
+          case ItemLinkAction(title, url) => FacebookLinkButton(title, url)
+          case ItemPostbackAction(title, payload) => FacebookPostbackButton(title, payload)
+        }
+      )
+    }
 
 }
 

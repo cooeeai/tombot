@@ -43,7 +43,6 @@ class SkypeService @Inject()(config: Config,
     logger.info(s"sending Skype message [$text] to conversation [$conversationId]")
     import Builder._
     val url = config.getString("microsoft.api.url")
-    //logger.debug("token:\n" + token.toJson.prettyPrint)
     val authorization = Authorization(OAuth2BearerToken(token.get.accessToken))
 
     val payload = messageElement withText text build()
@@ -83,7 +82,25 @@ class SkypeService @Inject()(config: Config,
     } yield ()
   }
 
-  def sendHeroCard(sender: String): Unit = ???
+  def sendHeroCard(sender: String, text: String): Unit = {
+    logger.info("sending Skype hero card")
+    import Builder._
+
+    val payload = (
+      heroCard
+        withTitle text
+        build()
+      )
+
+    for {
+      request <- Marshal(payload).to[RequestEntity]
+      response <- http.singleRequest(HttpRequest(
+        method = HttpMethods.POST,
+        uri = s"$url/v3/conversations/$conversationId/activities",
+        headers = List(authorization),
+        entity = request))
+    } yield ()
+  }
 
   def sendReceiptCard(sender: String, slot: Slot): Unit = ???
 
