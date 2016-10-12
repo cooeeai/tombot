@@ -1,5 +1,6 @@
 package conversationengine
 
+import akka.actor.ActorRef
 import apis.ciscospark.SparkWebhookResponseData
 import controllers.Platform._
 import memory.Slot
@@ -33,6 +34,8 @@ object events {
   case class Analyze(platform: Platform, sender: String, text: String) extends TextLike
 
   case class BillEnquiry(platform: Platform, sender: String, text: String) extends TextLike
+
+  case class Merge(platform: Platform, sender: String, ref: ActorRef)
 
   case class Fallback(sender: String, history: List[Exchange])
 
