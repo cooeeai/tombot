@@ -165,7 +165,7 @@ class ConversationActor @Inject()(config: Config,
 
   initialize()
 
-  def action(platform: Platform.Value,
+  def action(platform: Platform,
              sender: String,
              text: String,
              privileged: Boolean = false
@@ -216,7 +216,7 @@ class ConversationActor @Inject()(config: Config,
     }
   }
 
-  def privilegedAction(platform: Platform.Value,
+  def privilegedAction(platform: Platform,
                        sender: String,
                        text: String
                       )(b: => State): State = action(platform, sender, text, privileged = true)(b)

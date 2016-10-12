@@ -11,6 +11,7 @@ import apis.facebookmessenger._
 import com.google.inject.Inject
 import com.typesafe.config.Config
 import memory.Slot
+import models.{Item, ItemLinkAction, ItemPostbackAction}
 import spray.json._
 
 import scala.concurrent.Future

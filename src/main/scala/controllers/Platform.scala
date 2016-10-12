@@ -5,6 +5,8 @@ package controllers
   */
 object Platform extends Enumeration {
 
+  type Platform = Value
+
   val Facebook, Skype = Value
 
 }

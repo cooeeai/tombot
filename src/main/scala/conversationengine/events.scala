@@ -1,7 +1,7 @@
 package conversationengine
 
 import apis.ciscospark.SparkWebhookResponseData
-import controllers.Platform
+import controllers.Platform._
 import memory.Slot
 import services.User
 
@@ -13,26 +13,26 @@ object events {
   case class Exchange(userSaid: Option[String], botSaid: String)
 
   trait TextLike {
-    val platform: Platform.Value
+    val platform: Platform
     val sender: String
     val text: String
   }
 
-  case class Greet(platform: Platform.Value, sender: String, user: User, text: String) extends TextLike
+  case class Greet(platform: Platform, sender: String, user: User, text: String) extends TextLike
 
-  case class Qualify(platform: Platform.Value, sender: String, productType: Option[String], text: String) extends TextLike
+  case class Qualify(platform: Platform, sender: String, productType: Option[String], text: String) extends TextLike
 
-  case class Buy(platform: Platform.Value, sender: String, productType: String, text: String)
+  case class Buy(platform: Platform, sender: String, productType: String, text: String)
 
-  case class Respond(platform: Platform.Value, sender: String, text: String) extends TextLike
+  case class Respond(platform: Platform, sender: String, text: String) extends TextLike
 
-  case class Confirm(platform: Platform.Value, sender: String, text: String) extends TextLike
+  case class Confirm(platform: Platform, sender: String, text: String) extends TextLike
 
-  case class Welcome(platform: Platform.Value, sender: String)
+  case class Welcome(platform: Platform, sender: String)
 
-  case class Analyze(platform: Platform.Value, sender: String, text: String) extends TextLike
+  case class Analyze(platform: Platform, sender: String, text: String) extends TextLike
 
-  case class BillEnquiry(platform: Platform.Value, sender: String, text: String) extends TextLike
+  case class BillEnquiry(platform: Platform, sender: String, text: String) extends TextLike
 
   case class Fallback(sender: String, history: List[Exchange])
 

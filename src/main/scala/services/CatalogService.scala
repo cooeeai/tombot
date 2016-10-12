@@ -2,6 +2,7 @@ package services
 
 import com.google.inject.Inject
 import com.typesafe.config.Config
+import models.{Item, ItemLinkAction, ItemPostbackAction}
 import spray.json._
 
 /**
@@ -42,21 +43,3 @@ class CatalogService @Inject()(config: Config) {
   )
 
 }
-
-object ItemActionType extends Enumeration {
-  val Link, Postback = Value
-}
-
-sealed trait ItemAction {
-  val actionType: ItemActionType.Value
-}
-
-case class ItemLinkAction(title: String, url: String) {
-  override val actionType: ItemActionType.Link
-}
-
-case class ItemPostbackAction(title: String, payload: JsValue) {
-  override val actionType: ItemActionType.Postback
-}
-
-case class Item(title: String, subtitle: String, itemURL: String, imageURL: String, actions: List[ItemAction])
