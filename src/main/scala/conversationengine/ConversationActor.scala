@@ -253,7 +253,7 @@ class ConversationActor @Inject()(config: Config,
   def shrug(sender: String, text: String, ctx: ConversationContext): ConversationContext = {
     failCount += 1
     if (failCount > maxFailCount) {
-      context.parent ! Fallback(sender, ctx.history)
+      context.parent ! Fallback(sender, ctx.history.reverse)
       failCount = 0
       ctx.copy(history = Nil)
     } else {
