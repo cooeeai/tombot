@@ -44,13 +44,11 @@ class SkypeController @Inject()(config: Config,
               val userMessage = data.convertTo[SkypeUserMessage]
               val conversationId = userMessage.conversation.id
               val sender = userMessage.from.id
-              logger.debug("token: " + token)
               token match {
                 case Some(_) =>
                   converse(conversationId, Respond(Skype, conversationId, userMessage.text))
                 case None =>
                   skypeService.getMicrosoftToken map { tk =>
-                    logger.debug("tk: " + tk)
                     token = Some(tk)
                     skypeService.token = token
                     skypeService.sendLoginCard(sender, conversationId)

@@ -35,7 +35,7 @@ class FacebookController @Inject()(config: Config,
   import StatusCodes._
   import conversationService._
 
-  implicit val timeout = 5 second
+  implicit val timeout = 30 second
 
   def receivedAuthentication(event: FacebookAuthenticationEvent): Unit = {
     val sender = event.sender.id

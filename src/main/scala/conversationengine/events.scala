@@ -1,6 +1,5 @@
 package conversationengine
 
-import akka.actor.ActorRef
 import apis.ciscospark.SparkWebhookResponseData
 import controllers.Platform._
 import memory.Slot
@@ -35,13 +34,13 @@ object events {
 
   case class BillEnquiry(platform: Platform, sender: String, text: String) extends TextLike
 
-  case class Merge(platform: Platform, sender: String, ref: ActorRef)
+  case class ShowHistory(sender: String)
 
   case class Fallback(sender: String, history: List[Exchange])
 
   case class FillForm(sender: String, goal: String)
 
-  case class EndFillForm(sender: String, slot: Slot)
+  case class EndFillForm(sender: String, slot: Slot, history: List[Exchange])
 
   case class NextQuestion(sender: String)
 

@@ -8,6 +8,8 @@ import memory._
 import modules.akkaguice.NamedActor
 import services.{FacebookService, SlotContainer, SlotService}
 
+import scala.collection.mutable
+
 /**
   * Created by markmo on 14/09/2016.
   */
@@ -34,7 +36,9 @@ class FormActor @Inject()(facebookService: FacebookService,
 
   var slot = originalSlot
 
-  log.debug("slot:\n" + slot.toString)
+  val history = mutable.ListBuffer[Exchange]()
+
+  //log.debug("slot:\n" + slot.toString)
 
   override def receive = {
 
@@ -44,7 +48,7 @@ class FormActor @Inject()(facebookService: FacebookService,
       slot = originalSlot
 
     case NextQuestion(sender) =>
-      nextQuestion(sender)
+      nextQuestion(sender, None)
 
     case ev: TextLike =>
       val sender = ev.sender
@@ -56,10 +60,10 @@ class FormActor @Inject()(facebookService: FacebookService,
           facebookService.sendTextMessage(sender, maybeError.get.message)
         } else {
           slot = s
-          nextQuestion(sender)
+          nextQuestion(sender, Some(text))
         }
       } else {
-        nextQuestion(sender)
+        nextQuestion(sender, Some(text))
       }
 
   }
@@ -79,22 +83,24 @@ class FormActor @Inject()(facebookService: FacebookService,
       slotService.fillSlot(slot, key, value)
     }
 
-  private def nextQuestion(sender: String) =
+  private def nextQuestion(sender: String, text: Option[String]) =
     slot.nextQuestion match {
 
       case Some(Question(key, question, false)) =>
         currentKey = Some(key)
+        history += Exchange(text, question)
         facebookService.sendTextMessage(sender, question)
 
       case Some(Question(key, question, true)) =>
         currentKey = Some(key)
+        history += Exchange(text, question)
         confirming = true
         facebookService.sendQuickReply(sender, question)
 
       case None =>
         log.debug("No next question")
         log.debug("slot:\n" + slot.toString)
-        context.parent ! EndFillForm(sender, slot)
+        context.parent ! EndFillForm(sender, slot, history.toList.reverse)
 
     }
 

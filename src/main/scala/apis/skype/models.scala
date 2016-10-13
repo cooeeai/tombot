@@ -29,14 +29,14 @@ case class SkypeImage(url: String, alt: Option[String], value: Option[String])
 sealed trait SkypeButton {
   val buttonType: String
   val title: String
-  val tap: String
+  val value: String
 }
 
-case class SkypeSigninButton(title: String, tap: String) extends SkypeButton {
+case class SkypeSigninButton(title: String, value: String) extends SkypeButton {
   override val buttonType = "signin"
 }
 
-case class SkypeLinkButton(title: String, tap: String) extends SkypeButton {
+case class SkypeLinkButton(title: String, value: String) extends SkypeButton {
   override val buttonType = "openUrl"
 }
 
@@ -44,15 +44,15 @@ case class SkypeLinkButton(title: String, tap: String) extends SkypeButton {
 // It can be useful to send context back to your bot (e.g. a request ID) without showing this information to the user in a message. To do this you can append hidden XML to the visible string shown to the user, which is only seen by your bot.
 // Visible message &lt;context hiddenId='10'/&gt;
 
-case class SkypePostbackButton(title: String, tap: String) extends SkypeButton {
+case class SkypePostbackButton(title: String, value: String) extends SkypeButton {
   override val buttonType = "imBack"
 }
 
-case class SkypeCallButton(title: String, tap: String) extends SkypeButton {
+case class SkypeCallButton(title: String, value: String) extends SkypeButton {
   override val buttonType = "call"
 }
 
-case class SkypeShowImageButton(title: String, tap: String) extends SkypeButton {
+case class SkypeShowImageButton(title: String, value: String) extends SkypeButton {
   override val buttonType = "showImage"
 }
 
@@ -129,11 +129,11 @@ case class SkypeList(attachments: List[SkypeAttachment]) extends SkypeAttachment
 
 case class SkypeSigninCard(cardType: String, attachments: List[SkypeSigninAttachment])
 
-case class SkypeHeroCard(attachments: List[SkypeHeroAttachment])
+case class SkypeHeroCard(cardType: String, attachments: List[SkypeHeroAttachment])
 
-case class SkypeThumbnailCard(attachments: List[SkypeThumbnailAttachment])
+case class SkypeThumbnailCard(cardType: String, attachments: List[SkypeThumbnailAttachment])
 
-case class SkypeReceiptCard(attachments: List[SkypeReceiptAttachment])
+case class SkypeReceiptCard(cardType: String, attachments: List[SkypeReceiptAttachment])
 
 case class MicrosoftToken(tokenType: String, expires: Int, extExpires: Int, accessToken: String)
 
@@ -149,21 +149,21 @@ trait SkypeJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
       JsObject(
         "type" -> JsString(b.buttonType),
         "title" -> JsString(b.title),
-        "tap" -> JsString(b.tap)
+        "value" -> JsString(b.value)
       )
 
     def read(value: JsValue) =
       value.extract[String]('type) match {
         case "signin" =>
-          SkypeSigninButton(value.extract[String]('title), value.extract[String]('tap))
+          SkypeSigninButton(value.extract[String]('title), value.extract[String]('value))
         case "openUrl" =>
-          SkypeLinkButton(value.extract[String]('title), value.extract[String]('tap))
+          SkypeLinkButton(value.extract[String]('title), value.extract[String]('value))
         case "imBack" =>
-          SkypePostbackButton(value.extract[String]('title), value.extract[String]('tap))
+          SkypePostbackButton(value.extract[String]('title), value.extract[String]('value))
         case "call" =>
-          SkypeCallButton(value.extract[String]('title), value.extract[String]('tap))
+          SkypeCallButton(value.extract[String]('title), value.extract[String]('value))
         case "showImage" =>
-          SkypeShowImageButton(value.extract[String]('title), value.extract[String]('tap))
+          SkypeShowImageButton(value.extract[String]('title), value.extract[String]('value))
         case _ => throw DeserializationException("SkypeButton expected")
       }
 
@@ -175,11 +175,11 @@ trait SkypeJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
       JsObject(
         "type" -> JsString(b.buttonType),
         "title" -> JsString(b.title),
-        "tap" -> JsString(b.tap)
+        "value" -> JsString(b.value)
       )
 
     def read(value: JsValue) =
-      SkypeSigninButton(value.extract[String]('title), value.extract[String]('tap))
+      SkypeSigninButton(value.extract[String]('title), value.extract[String]('value))
 
   }
 
@@ -189,10 +189,10 @@ trait SkypeJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
       JsObject(
         "type" -> JsString(b.buttonType),
         "title" -> JsString(b.title),
-        "tap" -> JsString(b.tap)
+        "value" -> JsString(b.value)
       )
 
-    def read(value: JsValue) = SkypeLinkButton(value.extract[String]('title), value.extract[String]('tap))
+    def read(value: JsValue) = SkypeLinkButton(value.extract[String]('title), value.extract[String]('value))
 
   }
 
@@ -202,10 +202,10 @@ trait SkypeJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
       JsObject(
         "type" -> JsString(b.buttonType),
         "title" -> JsString(b.title),
-        "tap" -> JsString(b.tap)
+        "value" -> JsString(b.value)
       )
 
-    def read(value: JsValue) = SkypePostbackButton(value.extract[String]('title), value.extract[String]('tap))
+    def read(value: JsValue) = SkypePostbackButton(value.extract[String]('title), value.extract[String]('value))
 
   }
 
@@ -215,10 +215,10 @@ trait SkypeJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
       JsObject(
         "type" -> JsString(b.buttonType),
         "title" -> JsString(b.title),
-        "tap" -> JsString(b.tap)
+        "value" -> JsString(b.value)
       )
 
-    def read(value: JsValue) = SkypeCallButton(value.extract[String]('title), value.extract[String]('tap))
+    def read(value: JsValue) = SkypeCallButton(value.extract[String]('title), value.extract[String]('value))
 
   }
 
@@ -228,10 +228,10 @@ trait SkypeJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
       JsObject(
         "type" -> JsString(b.buttonType),
         "title" -> JsString(b.title),
-        "tap" -> JsString(b.tap)
+        "value" -> JsString(b.value)
       )
 
-    def read(value: JsValue) = SkypeShowImageButton(value.extract[String]('title), value.extract[String]('tap))
+    def read(value: JsValue) = SkypeShowImageButton(value.extract[String]('title), value.extract[String]('value))
 
   }
 
@@ -377,9 +377,9 @@ trait SkypeJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val skypeUserMessageJsonFormat = jsonFormat(SkypeUserMessage, "id", "type", "timestamp", "text", "channelId", "serviceUrl", "conversation", "from", "recipient", "attachments", "entities")
   implicit val skypeBotMessageJsonFormat = jsonFormat(SkypeBotMessage, "type", "text", "attachments")
   implicit val skypeSigninCardJsonFormat = jsonFormat(SkypeSigninCard, "type", "attachments")
-  implicit val skypeHeroCardJsonFormat = jsonFormat1(SkypeHeroCard)
-  implicit val skypeThumbnailCardJsonFormat = jsonFormat1(SkypeThumbnailCard)
-  implicit val skypeReceiptCardJsonFormat = jsonFormat1(SkypeReceiptCard)
+  implicit val skypeHeroCardJsonFormat = jsonFormat(SkypeHeroCard, "type", "attachments")
+  implicit val skypeThumbnailCardJsonFormat = jsonFormat(SkypeThumbnailCard, "type", "attachments")
+  implicit val skypeReceiptCardJsonFormat = jsonFormat(SkypeReceiptCard, "type", "attachments")
   implicit val microsoftTokenJsonFormat = jsonFormat(MicrosoftToken, "token_type", "expires_in", "ext_expires_in", "access_token")
 
 }
@@ -404,7 +404,7 @@ object Builder {
 
     def withButtons(value: List[SkypeButton]) = new ThumbnailCardBuilder(attachmentBuilder withButtons value)
 
-    def build() = SkypeThumbnailCard(List(attachmentBuilder build()))
+    def build() = SkypeThumbnailCard("message/card.carousel", List(attachmentBuilder build()))
 
   }
 
@@ -428,7 +428,7 @@ object Builder {
 
     def withButtons(value: List[SkypeButton]) = new HeroCardBuilder(attachmentBuilder withButtons value)
 
-    def build() = SkypeHeroCard(List(attachmentBuilder build()))
+    def build() = SkypeHeroCard("message/card.carousel", List(attachmentBuilder build()))
 
   }
 
@@ -547,6 +547,7 @@ object Builder {
 
     def build() =
       SkypeReceiptCard(
+        cardType = "message/card.carousel",
         attachments = List(
           SkypeReceiptAttachment(
             SkypeReceiptAttachmentContent(
@@ -611,7 +612,7 @@ object Builder {
             text = text.get,
             buttons = SkypeSigninButton(
               title = buttonTitle.get,
-              tap = s"${api.get}/skypeauthorize?sender=${sender.get}"
+              value = s"${api.get}/skypeauthorize?sender=${sender.get}"
             ) :: Nil
           )
         ) :: Nil

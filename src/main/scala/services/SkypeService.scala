@@ -15,6 +15,7 @@ import com.google.inject.Inject
 import com.typesafe.config.Config
 import memory.Slot
 import models.{Item, ItemLinkAction, ItemPostbackAction}
+import spray.json._
 
 import scala.concurrent.Future
 
@@ -63,7 +64,7 @@ class SkypeService @Inject()(config: Config,
   }
 
   def sendLoginCard(sender: String, conversationId: String): Unit = {
-    logger.info("sending Skype signin request")
+    logger.info(s"sending Skype signin request to sender [$sender] using conversationId [$conversationId]")
     import Builder._
     val authorization = Authorization(OAuth2BearerToken(token.get.accessToken))
 
@@ -75,6 +76,8 @@ class SkypeService @Inject()(config: Config,
         withButtonTitle "Connect"
         build()
       )
+
+    logger.debug("sending payload:\n" + payload.toJson.prettyPrint)
 
     for {
       request <- Marshal(payload).to[RequestEntity]
@@ -130,7 +133,30 @@ class SkypeService @Inject()(config: Config,
     } yield ()
   }
 
-  def sendQuickReply(sender: String, text: String): Unit = ???
+  def sendQuickReply(conversationId: String, text: String): Unit = {
+    logger.info(s"sending Skype quick reply using conversationId [$conversationId]")
+    import Builder._
+    val authorization = Authorization(OAuth2BearerToken(token.get.accessToken))
+
+    val payload = (
+      heroCard
+        withTitle text
+        addButton SkypePostbackButton("Yes", "yes")
+        addButton SkypePostbackButton("No", "no")
+        build()
+      )
+
+    logger.debug("sending payload:\n" + payload.toJson.prettyPrint)
+
+    for {
+      request <- Marshal(payload).to[RequestEntity]
+      response <- http.singleRequest(HttpRequest(
+        method = HttpMethods.POST,
+        uri = s"$skypeApi/v3/conversations/$conversationId/activities",
+        headers = List(authorization),
+        entity = request))
+    } yield ()
+  }
 
   def getUserProfile(sender: String): Future[String] = ???
 

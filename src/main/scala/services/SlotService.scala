@@ -33,7 +33,7 @@ class SlotService @Inject()(logger: LoggingAdapter,
 
   val invalidMessageDefault = "Invalid format. Please try again."
 
-  val timeout = 5 second
+  val timeout = 30 second
 
   implicit object AnyJsonFormat extends JsonFormat[Any] {
 

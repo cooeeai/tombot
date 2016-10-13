@@ -29,6 +29,7 @@ class ConversationActor @Inject()(config: Config,
                                   languageService: LanguageService,
                                   humourService: HumourService,
                                   smallTalkService: SmallTalkService,
+                                  bus: LookupBusImpl,
                                   implicit val system: ActorSystem,
                                   implicit val fm: Materializer)
   extends Actor
@@ -43,7 +44,7 @@ class ConversationActor @Inject()(config: Config,
   import Platform._
   import system.dispatcher
 
-  implicit val timeout = 20 second
+  implicit val timeout = 30 second
 
   implicit class FutureExtensions[T](f: Future[T]) {
     def withTimeout(timeout: => Throwable)(implicit duration: FiniteDuration, system: ActorSystem): Future[T] = {
@@ -51,17 +52,34 @@ class ConversationActor @Inject()(config: Config,
     }
   }
 
-  var currentPlatform = Facebook
+  var currentPlatform: Option[Platform] = None
 
   var provider: MessagingProvider = facebookService
 
   val maxFailCount = config.getInt("max.fail.count")
+
+  val maxMessageLength = 300
 
   var failCount = 0
 
   startWith(Qualifying, ConversationContext(authenticated = false, history = Nil, postAction = None))
 
   when(Qualifying) {
+
+    case Event(Welcome(platform, sender), cc: ConversationContext) =>
+      provider.sendTextMessage(sender, "Welcome, login successful")
+      bus publish MsgEnvelope(s"authenticated:$sender", Authenticated(sender, self))
+      stay
+
+    case Event(TransferState(sender, ctx), _) =>
+      if (ctx.postAction.isDefined) {
+        val action = ctx.postAction.get
+        val ctx1 = ctx.copy(authenticated = true, history = Exchange(None, "logged in") :: ctx.history, postAction = None)
+        action(ctx1)
+      } else {
+        val ctx1 = ctx.copy(authenticated = true, history = Exchange(None, "logged in") :: ctx.history)
+        stay using ctx1
+      }
 
     case Event(Qualify(platform, sender, productType, text), cc: ConversationContext) =>
       productType match {
@@ -98,17 +116,19 @@ class ConversationActor @Inject()(config: Config,
         stay using ctx
       }
 
-    case Event(EndFillForm(sender, slot), cc: ConversationContext) =>
+    case Event(EndFillForm(sender, slot, history), cc: ConversationContext) =>
+      val ctx1 = cc.copy(history = history ++ cc.history)
       provider.sendReceiptCard(sender, slot)
-      goto(Qualifying) using cc
+      goto(Qualifying) using ctx1
 
   }
 
   whenUnhandled {
 
-    case Event(Merge(platform, sender, ref: ActorRef), cc: ConversationContext) =>
-      ref ! TransferState(platform, sender, cc)
-      goto(Qualifying) using cc
+    case Event(Authenticated(sender, ref), cc: ConversationContext) =>
+      ref ! TransferState(sender, cc)
+      context.stop(self)
+      stay
 
     case Event(Confirm(platform, sender, text), cc: ConversationContext) =>
       stay using cc
@@ -117,6 +137,10 @@ class ConversationActor @Inject()(config: Config,
       failCount = 0
       val ctx1 = cc.copy(authenticated = false, history = Nil, postAction = None)
       goto(Qualifying) using ctx1
+
+    case Event(ShowHistory(sender), cc: ConversationContext) =>
+      multiMessage(sender, formatHistory(cc.history.reverse))
+      stay
 
     case Event(Greet(platform, sender, user, text), cc: ConversationContext) =>
       action(platform, sender, text, cc) { ctx =>
@@ -144,12 +168,6 @@ class ConversationActor @Inject()(config: Config,
         val ctx1 = quickReply(sender, text, "Your current balance is $41.25. Would you like to pay it now?", ctx)
         stay using ctx1
       }
-
-    case Event(Welcome(platform, sender), cc: ConversationContext) =>
-      //provider.sendTextMessage(sender, "Welcome, login successful")
-      val action = cc.postAction.get
-      val ctx1 = cc.copy(authenticated = true, history = Exchange(None, "logged in") :: cc.history, postAction = None)
-      action(ctx1)
 
     case Event(ev, cc: ConversationContext) =>
       log.error(s"$name received invalid event [${ev.toString}] while in state [${this.stateName}]")
@@ -186,11 +204,11 @@ class ConversationActor @Inject()(config: Config,
       provider.sendLoginCard(sender)
       stay using ctx1
 
-    } else if (currentPlatform != platform) {
-      log.debug(s"switching from [$currentPlatform] to [$platform]")
+    } else if (currentPlatform.isDefined && currentPlatform.get != platform) {
+      log.debug(s"switching from [${currentPlatform.get}] to [$platform]")
       val ctx1 = ctx.copy(postAction = Some(b))
-      val oldPlatform = currentPlatform
-      currentPlatform = platform
+      val oldPlatform = currentPlatform.get
+      currentPlatform = Some(platform)
       provider = platform match {
         case Facebook => facebookService
         case Skype => skypeService
@@ -198,6 +216,15 @@ class ConversationActor @Inject()(config: Config,
       context.parent ! Deactivate
       provider.sendQuickReply(sender, s"Do you want to carry on our conversation from $oldPlatform?")
       stay using ctx1
+
+    } else if (currentPlatform.isEmpty) {
+      log.debug(s"setting platform to [$platform]")
+      currentPlatform = Some(platform)
+      provider = platform match {
+        case Facebook => facebookService
+        case Skype => skypeService
+      }
+      b(ctx)
 
     } else {
       log.debug("executing standard action")
@@ -261,6 +288,27 @@ class ConversationActor @Inject()(config: Config,
     }
   }
 
+  def multiMessage(sender: String, message: String): Unit =
+    message.split("\n").foldLeft(0, 0, List[(Int, String)]()) {
+      case ((group, len, lines), line) =>
+        val len1 = len + line.length
+        if (len1 < maxMessageLength) {
+          (group, len1, (group, line) :: lines)
+        } else {
+          (group + 1, line.length, (group + 1, line) :: lines)
+        }
+    }._3 groupBy (_._1) foreach {
+      case (_, ls) =>
+        val lines = ls.map(_._2).reverse
+        provider.sendTextMessage(sender, lines mkString "\n")
+    }
+
+  def formatHistory(history: List[Exchange]) =
+    history map {
+      case Exchange(Some(userSaid), botSaid) => s"$userSaid <- $botSaid"
+      case Exchange(None, botSaid) => s" <- $botSaid"
+    } mkString "\n"
+
   def formatEntities(entities: List[GoogleEntity]) =
     entities map { entity =>
       //val salience = f"${entity.salience}%2.2f"
@@ -296,7 +344,9 @@ object ConversationActor extends NamedActor {
                                  history: List[Exchange],
                                  postAction: Option[ConversationContext => FSM.State[State, Data]]) extends Data
 
-  case class TransferState(platform: Platform.Value, sender: String, ctx: ConversationContext)
+  case class TransferState(sender: String, ctx: ConversationContext)
+
+  case class Authenticated(sender: String, ref: ActorRef)
 
   val random = new Random
 

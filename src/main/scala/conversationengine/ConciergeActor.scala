@@ -43,7 +43,7 @@ class ConciergeActor @Inject()(config: Config,
 
   val tempMemberships = mutable.Map[String, SparkTempMembership]()
 
-  implicit val timeout = 20 second
+  implicit val timeout = 30 second
 
   implicit class FutureExtensions[T](f: Future[T]) {
     def withTimeout(timeout: => Throwable)(implicit duration: FiniteDuration, system: ActorSystem): Future[T] = {
@@ -75,7 +75,13 @@ class ConciergeActor @Inject()(config: Config,
       val sender = ev.sender
       val text = ev.text
 
-      if (text startsWith "/alchemy") {
+      if (text startsWith "/login") {
+        provider.sendLoginCard(sender)
+
+      } else if (text startsWith "/history") {
+        bot ! ShowHistory(sender)
+
+      } else if (text startsWith "/alchemy") {
         // alchemy command - show keywords
         val keywords = alchemyService.getKeywords(text.substring(8).trim)
         provider.sendTextMessage(sender, "Keywords:\n" + formatKeywords(keywords))
@@ -94,6 +100,7 @@ class ConciergeActor @Inject()(config: Config,
             bot ! Respond(platform, sender, text)
 
         }
+
       } else {
         bot ! Respond(platform, sender, text)
       }
