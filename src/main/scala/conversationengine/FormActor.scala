@@ -68,7 +68,7 @@ class FormActor @Inject()(facebookService: FacebookService,
 
   }
 
-  private def updateSlot(key: String, value: String): (Option[SlotError], Slot) =
+  def updateSlot(key: String, value: String): (Option[SlotError], Slot) =
     if (confirming) {
       confirming = false
       if (value.toLowerCase == "no") {
@@ -83,7 +83,7 @@ class FormActor @Inject()(facebookService: FacebookService,
       slotService.fillSlot(slot, key, value)
     }
 
-  private def nextQuestion(sender: String, text: Option[String]) =
+  def nextQuestion(sender: String, text: Option[String]) =
     slot.nextQuestion match {
 
       case Some(Question(key, question, false)) =>

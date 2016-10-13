@@ -238,14 +238,14 @@ class ConversationActor @Inject()(config: Config,
                        ctx: ConversationContext
                       )(b: ConversationContext => State): State = action(platform, sender, text, ctx, privileged = true)(b)
 
-  private def confirmed(text: String): Boolean = text.toLowerCase == "yes"
+  def confirmed(text: String): Boolean = text.toLowerCase == "yes"
 
-  private def say(sender: String, text: String, message: String, ctx: ConversationContext): ConversationContext = {
+  def say(sender: String, text: String, message: String, ctx: ConversationContext): ConversationContext = {
     provider.sendTextMessage(sender, message)
     ctx.copy(history = Exchange(Some(text), message) :: ctx.history)
   }
 
-  private def quickReply(sender: String, text: String, message: String, ctx: ConversationContext): ConversationContext = {
+  def quickReply(sender: String, text: String, message: String, ctx: ConversationContext): ConversationContext = {
     provider.sendQuickReply(sender, message)
     ctx.copy(history = Exchange(Some(text), message) :: ctx.history)
   }

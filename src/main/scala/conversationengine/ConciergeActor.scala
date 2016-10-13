@@ -184,7 +184,7 @@ class ConciergeActor @Inject()(config: Config,
 
   initialize()
 
-  private def formatKeywords(keywords: Map[String, Double]) = {
+  def formatKeywords(keywords: Map[String, Double]) = {
     keywords map {
       case (keyword, relevance) => f"$keyword ($relevance%2.2f)"
     } mkString "\n"
