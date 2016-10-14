@@ -102,7 +102,7 @@ class ConversationActor @Inject()(config: Config,
         }
       } else {
         action(platform, sender, text, cc) { ctx =>
-          val ctx1 = say(sender, text, "Sorry, I didn't understand that", ctx)
+          val ctx1 = shrug(sender, text, ctx)
           stay using ctx1
         }
       }
@@ -279,8 +279,9 @@ class ConversationActor @Inject()(config: Config,
 
   def shrug(sender: String, text: String, ctx: ConversationContext): ConversationContext = {
     failCount += 1
+    log.debug("shrug fail count: " + failCount)
     if (failCount > maxFailCount) {
-      context.parent ! Fallback(sender, ctx.history.reverse)
+      bus publish MsgEnvelope(s"fallback:$sender", Fallback(sender, ctx.history.reverse))
       failCount = 0
       ctx.copy(history = Nil)
     } else {
@@ -371,15 +372,15 @@ object ConversationActor extends NamedActor {
     "Hello %s!",
     "Howdy %s!",
     "Ahoy %s!",
-    "Hello %s, my name is Inigo Montoya",
-    "I'm Batman",
+//    "Hello %s, my name is Inigo Montoya",
+//    "I'm Batman",
     "‘Ello Mate",
     "What's cookin' Good Lookin'?",
     "Aloha %s!",
     "Hola %s!",
     "Que Pasa %s!",
     "Bonjour %s!",
-    "Hallo %s!",
+//    "Hallo %s!",
     "Ciao %s!",
     "Konnichiwa %s!"
   )
