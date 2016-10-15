@@ -31,8 +31,7 @@ class SparkController @Inject()(config: Config,
           //          complete(OK)
           //        }
           entity(as[JsObject]) { json =>
-            logger.debug("sparkwebhook response:\n")
-            logger.debug(json.prettyPrint)
+            logger.debug("sparkwebhook response:\n" + json.prettyPrint)
             val response = json.convertTo[SparkWebhookResponse]
             converse(sender, SparkMessageEvent(sender, response.data))
             complete(OK)
@@ -49,8 +48,7 @@ class SparkController @Inject()(config: Config,
           //          complete(OK)
           //        }
           entity(as[JsObject]) { json =>
-            logger.debug("sparkwebhook response:\n")
-            logger.debug(json.prettyPrint)
+            logger.debug("sparkwebhook response:\n" + json.prettyPrint)
             converse(sender, SparkRoomLeftEvent(sender))
             complete(OK)
           }

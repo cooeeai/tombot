@@ -112,7 +112,7 @@ trait FacebookJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val facebookEntryJsonFormat = jsonFormat3(FacebookEntry)
   implicit val facebookResponseJsonFormat = jsonFormat(FacebookResponse, "object", "entry")
 
-  implicit object buttonJsonFormat extends RootJsonFormat[FacebookButton] {
+  implicit object facebookButtonJsonFormat extends RootJsonFormat[FacebookButton] {
 
     def write(b: FacebookButton) = b match {
       case l: FacebookLinkButton => JsObject(

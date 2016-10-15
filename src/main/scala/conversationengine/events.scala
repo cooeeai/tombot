@@ -2,6 +2,7 @@ package conversationengine
 
 import apis.ciscospark.SparkWebhookResponseData
 import controllers.Platform._
+import conversationengine.ConversationEngine.ConversationEngine
 import memory.Slot
 import services.User
 
@@ -35,6 +36,8 @@ object events {
   case class BillEnquiry(platform: Platform, sender: String, text: String) extends TextLike
 
   case class ShowHistory(sender: String)
+
+  case class SwitchConversationEngine(sender: String, engine: ConversationEngine)
 
   case class Fallback(sender: String, history: List[Exchange])
 

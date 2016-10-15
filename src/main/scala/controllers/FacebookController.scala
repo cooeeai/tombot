@@ -34,6 +34,7 @@ class FacebookController @Inject()(config: Config,
   import Platform._
   import StatusCodes._
   import conversationService._
+  import conversationengine.ConversationEngine._
 
   implicit val timeout = 30 second
 
@@ -93,6 +94,12 @@ class FacebookController @Inject()(config: Config,
           logger.debug("text: [" + text + "]")
           if (text startsWith "/reset") {
             converse(sender, Reset)
+          } else if (text startsWith "/engine") {
+            if (text contains "watson") {
+              converse(sender, SwitchConversationEngine(sender, Watson))
+            } else {
+              converse(sender, SwitchConversationEngine(sender, Cooee))
+            }
           } else {
             converse(sender, Respond(Facebook, sender, text))
           }

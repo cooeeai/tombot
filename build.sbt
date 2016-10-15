@@ -34,6 +34,8 @@ libraryDependencies ++= Seq(
   "wit" % "duckling" % "0.4.13",
   "com.github.mfornos" % "humanize-slim" % "1.2.2",
   "com.googlecode.libphonenumber" % "libphonenumber" % "7.7.2",
+  "net.oauth.core" % "oauth" % "20090617",
+  "net.oauth.core" % "oauth-httpclient4" % "20090913",
   "btomala" %% "akka-http-twirl" % "1.1.0" excludeAll
     ExclusionRule(organization = "com.typesafe.akka")
 )

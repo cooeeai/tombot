@@ -1,6 +1,6 @@
 # tombot
 
-A Bot Framework using Scala and akka-http.
+A Bot Framework using Scala and akka-http. See [https://cooeeai.github.io/](https://cooeeai.github.io/) for more details.
 
 The purpose of this project is to create a robust bot framework for the JVM and enterprise use. It aims to support
 non-trivial use cases:

@@ -37,6 +37,7 @@ class ConciergeActor @Inject()(config: Config,
     with FSM[State, Data] {
 
   import ConciergeActor._
+  import ConversationEngine._
   import rulesService._
 
   val agentName = "Mark"
@@ -51,19 +52,15 @@ class ConciergeActor @Inject()(config: Config,
     }
   }
 
-  val conversationEngine = config.getString("conversation.engine")
+  val conversationEngineDefault = config.getString("conversation.engine")
 
   // bot conversation actor
-  val bot = if (conversationEngine == "watson") {
-    context.actorOf(GuiceAkkaExtension(context.system).props(WatsonConversationActor.name))
-  } else {
-    context.actorOf(GuiceAkkaExtension(context.system).props(IntentActor.name))
-  }
+  var bot = getConversationActor(conversationEngineDefault)
 
   // form conversation actor
   val form = context.actorOf(GuiceAkkaExtension(context.system).props(FormActor.name))
 
-  // agent conversation actor
+  // live agent conversation actor
   val agent = context.actorOf(GuiceAkkaExtension(context.system).props(AgentConversationActor.name))
 
   startWith(UsingBot, Uninitialized)
@@ -176,6 +173,11 @@ class ConciergeActor @Inject()(config: Config,
       bot ! Reset
       goto(UsingBot)
 
+    case Event(SwitchConversationEngine(sender, engine), _) =>
+      bot = getConversationActor(engine.toString)
+      provider.sendTextMessage(sender, "switched conversation engine to " + engine)
+      stay
+
     case Event(ev, _) =>
       log.error(s"$name received invalid event [${ev.toString}] while in state [${this.stateName}]")
       stay
@@ -188,6 +190,11 @@ class ConciergeActor @Inject()(config: Config,
     keywords map {
       case (keyword, relevance) => f"$keyword ($relevance%2.2f)"
     } mkString "\n"
+  }
+
+  def getConversationActor(engineName: String): ActorRef = engineName.toLowerCase match {
+    case "watson" => context.actorOf(GuiceAkkaExtension(context.system).props(WatsonConversationActor.name))
+    case _ => context.actorOf(GuiceAkkaExtension(context.system).props(IntentActor.name))
   }
 
 }
