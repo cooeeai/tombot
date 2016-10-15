@@ -8,7 +8,7 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Sink, Source}
 import com.google.inject.Guice
 import com.typesafe.config.Config
-import controllers.{ValidationController, SparkController, FacebookController, SkypeController}
+import controllers._
 import modules.akkaguice.AkkaModule
 import modules.config.ConfigModule
 import modules.conversation.ConversationModule
@@ -21,6 +21,8 @@ import scala.util.Properties
   * Created by markmo on 16/07/2016.
   */
 object Main extends App {
+
+  import StatusCodes._
 
   val injector = Guice.createInjector(
     new ConfigModule(),
@@ -37,24 +39,26 @@ object Main extends App {
   val config = injector.instance[Config]
   val logger = injector.instance[LoggingAdapter]
 
-  implicit def myRejectionHandler =
-    RejectionHandler.newBuilder().handle {
+  implicit def myRejectionHandler = {
+    val handler = RejectionHandler.newBuilder().handle {
       case MalformedRequestContentRejection(message, e) =>
         logger.error(message)
         extractRequest { request =>
           logger.error(request._4.toString)
-          complete(StatusCodes.BadRequest)
+          complete(BadRequest)
         }
       case e =>
         logger.error(e.toString)
-        complete(StatusCodes.BadRequest)
+        complete(BadRequest)
     }
-      .result()
+    handler.result()
+  }
 
   val facebookController = injector.instance[FacebookController]
   val skypeController = injector.instance[SkypeController]
   val sparkController = injector.instance[SparkController]
   val addressController = injector.instance[ValidationController]
+  val smsController = injector.instance[SMSController]
 
   val port = Properties.envOrElse("PORT", "8080").toInt
 
@@ -74,7 +78,8 @@ object Main extends App {
       facebookController.routes ~
         skypeController.routes ~
         sparkController.routes ~
-        addressController.routes,
+        addressController.routes ~
+        smsController.routes,
       config.getString("http.interface"), config.getInt("http.port"))
 
   facebookController.setupWelcomeGreeting()
