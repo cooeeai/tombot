@@ -68,3 +68,5 @@ crashlytics-build.properties
 
 setenv.sh
 tombot-49aab3740f12.json
+src/main/resources/videos/
+*.webm
