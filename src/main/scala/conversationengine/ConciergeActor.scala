@@ -37,8 +37,8 @@ class ConciergeActor @Inject()(config: Config,
     with FSM[State, Data] {
 
   import ConciergeActor._
-  import ConversationEngine._
   import rulesService._
+  import utils.RegexUtils._
 
   val agentName = "Mark"
 
@@ -63,6 +63,12 @@ class ConciergeActor @Inject()(config: Config,
   // live agent conversation actor
   val agent = context.actorOf(GuiceAkkaExtension(context.system).props(AgentConversationActor.name))
 
+  val LoginCommand = command("login")
+
+  val HistoryCommand = command("history")
+
+  val AlchemyCommand = command("alchemy")
+
   startWith(UsingBot, Uninitialized)
 
   when(UsingBot) {
@@ -72,13 +78,13 @@ class ConciergeActor @Inject()(config: Config,
       val sender = ev.sender
       val text = ev.text
 
-      if (text startsWith "/login") {
+      if (LoginCommand matches text) {
         provider.sendLoginCard(sender)
 
-      } else if (text startsWith "/history") {
+      } else if (HistoryCommand matches text) {
         bot ! ShowHistory(sender)
 
-      } else if (text startsWith "/alchemy") {
+      } else if (AlchemyCommand matches text) {
         // alchemy command - show keywords
         val keywords = alchemyService.getKeywords(text.substring(8).trim)
         provider.sendTextMessage(sender, "Keywords:\n" + formatKeywords(keywords))
@@ -127,6 +133,11 @@ class ConciergeActor @Inject()(config: Config,
       form ! NextQuestion(sender)
       goto(FillingForm)
 
+    case Event(SwitchConversationEngine(sender, engine), _) =>
+      bot = getConversationActor(engine.toString)
+      provider.sendTextMessage(sender, "switched conversation engine to " + engine)
+      stay
+
     case Event(ev, _) =>
       bot ! ev
       stay
@@ -173,11 +184,6 @@ class ConciergeActor @Inject()(config: Config,
       bot ! Reset
       goto(UsingBot)
 
-    case Event(SwitchConversationEngine(sender, engine), _) =>
-      bot = getConversationActor(engine.toString)
-      provider.sendTextMessage(sender, "switched conversation engine to " + engine)
-      stay
-
     case Event(ev, _) =>
       log.error(s"$name received invalid event [${ev.toString}] while in state [${this.stateName}]")
       stay
@@ -196,6 +202,8 @@ class ConciergeActor @Inject()(config: Config,
     case "watson" => context.actorOf(GuiceAkkaExtension(context.system).props(WatsonConversationActor.name))
     case _ => context.actorOf(GuiceAkkaExtension(context.system).props(IntentActor.name))
   }
+
+  def command(name: String) = s"""^[/:]$name.*""".r
 
 }
 

@@ -8,6 +8,8 @@ import com.google.inject.Inject
 import com.typesafe.config.Config
 import services.{Conversation, SMSService}
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 /**
   * Created by markmo on 15/10/2016.
   */

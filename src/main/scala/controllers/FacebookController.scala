@@ -95,9 +95,12 @@ class FacebookController @Inject()(config: Config,
           if (text startsWith "/reset") {
             converse(sender, Reset)
           } else if (text startsWith "/engine") {
+            logger.debug("switching conversation engine")
             if (text contains "watson") {
+              logger.debug("choosing Watson")
               converse(sender, SwitchConversationEngine(sender, Watson))
             } else {
+              logger.debug("choosing Cooee")
               converse(sender, SwitchConversationEngine(sender, Cooee))
             }
           } else {

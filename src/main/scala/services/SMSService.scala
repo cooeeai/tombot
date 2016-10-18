@@ -46,7 +46,7 @@ class SMSService @Inject()(config: Config,
         headers = List(authorization),
         entity = request))
       entity <- Unmarshal(response.entity).to[SMSMessageResponse]
-    } yield ()
+    } yield entity
   }
 
   /**
