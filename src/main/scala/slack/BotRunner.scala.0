@@ -27,7 +27,7 @@ object BotRunner extends Shutdownable {
     logger.info("SlackBot started")
     try {
       slackBot ! Start
-      slackBot ! WebSocket.Connect("https://tombot1.localtunnel.me", 8080, "/echo", withSsl = true)
+      slackBot ! WebSocket.Connect("https://tombot1.ngrok.io", 8080, "/echo", withSsl = true)
       Await.result(system.whenTerminated, Duration.Inf)
     } catch {
       case e: Exception =>

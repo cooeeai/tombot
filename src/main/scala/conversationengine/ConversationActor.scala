@@ -127,7 +127,9 @@ class ConversationActor @Inject()(config: Config,
 
     case Event(Authenticated(sender, ref), cc: ConversationContext) =>
       ref ! TransferState(sender, cc)
-      context.stop(self)
+      if (ref != self) {
+        context.stop(self)
+      }
       stay
 
     case Event(Confirm(platform, sender, text), cc: ConversationContext) =>
@@ -281,7 +283,8 @@ class ConversationActor @Inject()(config: Config,
     failCount += 1
     log.debug("shrug fail count: " + failCount)
     if (failCount > maxFailCount) {
-      bus publish MsgEnvelope(s"fallback:$sender", Fallback(sender, ctx.history.reverse))
+      //bus publish MsgEnvelope(s"fallback:$sender", Fallback(sender, ctx.history.reverse))
+      context.parent ! Fallback(sender, ctx.history.reverse)
       failCount = 0
       ctx.copy(history = Nil)
     } else {

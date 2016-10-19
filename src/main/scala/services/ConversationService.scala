@@ -42,7 +42,7 @@ class ConversationService @Inject()(config: Config,
         logger.debug("creating new actor")
         val actor = system.actorOf(GuiceAkkaExtension(system).props(ConciergeActor.name), userId)
         bus.subscribe(actor, s"authenticated:$userId")
-        bus.subscribe(actor, s"fallback:$userId")
+        //bus.subscribe(actor, s"fallback:$userId")
         actor ! message
     }
   }

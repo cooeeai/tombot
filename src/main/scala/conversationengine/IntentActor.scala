@@ -103,6 +103,11 @@ class IntentActor @Inject()(intentService: IntentService,
       child ! Reset
       goto(Active)
 
+    // TODO
+    case Event(ev: Fallback, _) =>
+      context.parent ! ev
+      stay
+
     case Event(ev: FillForm, _) =>
       context.parent ! ev
       stay

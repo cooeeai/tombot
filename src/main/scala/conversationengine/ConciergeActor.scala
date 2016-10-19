@@ -15,7 +15,6 @@ import conversationengine.events._
 import modules.akkaguice.{GuiceAkkaExtension, NamedActor}
 import services._
 
-import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
 import scala.concurrent.duration._
@@ -40,11 +39,7 @@ class ConciergeActor @Inject()(config: Config,
   import rulesService._
   import utils.RegexUtils._
 
-  val agentName = "Mark"
-
-  val tempMemberships = mutable.Map[String, SparkTempMembership]()
-
-  implicit val timeout = 30 second
+  implicit val timeout = 60 second
 
   implicit class FutureExtensions[T](f: Future[T]) {
     def withTimeout(timeout: => Throwable)(implicit duration: FiniteDuration, system: ActorSystem): Future[T] = {
@@ -53,9 +48,6 @@ class ConciergeActor @Inject()(config: Config,
   }
 
   val conversationEngineDefault = config.getString("conversation.engine")
-
-  // bot conversation actor
-  var bot = getConversationActor(conversationEngineDefault)
 
   // form conversation actor
   val form = context.actorOf(GuiceAkkaExtension(context.system).props(FormActor.name))
@@ -69,11 +61,14 @@ class ConciergeActor @Inject()(config: Config,
 
   val AlchemyCommand = command("alchemy")
 
-  startWith(UsingBot, Uninitialized)
+  startWith(UsingBot, ConversationContext(
+    botActor = getConversationActor(conversationEngineDefault), // bot conversation actor
+    tempMemberships = Map[String, SparkTempMembership](),
+    agentName = "Mark"))
 
   when(UsingBot) {
 
-    case Event(ev: TextLike, _) =>
+    case Event(ev: TextLike, ctx: ConversationContext) =>
       val platform = ev.platform
       val sender = ev.sender
       val text = ev.text
@@ -82,7 +77,7 @@ class ConciergeActor @Inject()(config: Config,
         provider.sendLoginCard(sender)
 
       } else if (HistoryCommand matches text) {
-        bot ! ShowHistory(sender)
+        ctx.botActor ! ShowHistory(sender)
 
       } else if (AlchemyCommand matches text) {
         // alchemy command - show keywords
@@ -100,20 +95,20 @@ class ConciergeActor @Inject()(config: Config,
 
           case None =>
             log.debug("no content")
-            bot ! Respond(platform, sender, text)
+            ctx.botActor ! Respond(platform, sender, text)
 
         }
 
       } else {
-        bot ! Respond(platform, sender, text)
+        ctx.botActor ! Respond(platform, sender, text)
       }
-      stay
+      stay using ctx
 
-    case Event(Fallback(sender, history), _) =>
-      provider.sendTextMessage(sender, s"$agentName (Human) is joining the conversation")
+    case Event(Fallback(sender, history), ctx: ConversationContext) =>
+      provider.sendTextMessage(sender, s"${ctx.agentName} (Human) is joining the conversation")
       lazy val fut = sparkService.setupTempRoom(sender) withTimeout new TimeoutException("future timed out")
       val tempMembership = Await.result(fut, timeout)
-      tempMemberships(sender) = tempMembership
+      log.debug(s"setting up temporary membership to room [${tempMembership.roomId}] for sender [$sender]")
 
       // print transcript history
       history map {
@@ -127,66 +122,75 @@ class ConciergeActor @Inject()(config: Config,
         // hack due to messages posting out of sequence
         Thread.sleep(2000)
       }
-      goto(UsingHuman)
+      val ctx1 = ctx.copy(tempMemberships = ctx.tempMemberships + (sender -> tempMembership))
+      goto(UsingHuman) using ctx1
 
-    case Event(FillForm(sender, goal), _) =>
+    case Event(FillForm(sender, goal), ctx: ConversationContext) =>
       form ! NextQuestion(sender)
-      goto(FillingForm)
+      goto(FillingForm) using ctx
 
-    case Event(SwitchConversationEngine(sender, engine), _) =>
-      bot = getConversationActor(engine.toString)
+    case Event(SwitchConversationEngine(sender, engine), ctx: ConversationContext) =>
+      val ctx1 = ctx.copy(botActor = getConversationActor(engine.toString))
       provider.sendTextMessage(sender, "switched conversation engine to " + engine)
-      stay
+      stay using ctx1
 
-    case Event(ev, _) =>
-      bot ! ev
-      stay
+    // TODO
+    case Event(ev: SparkMessageEvent, ctx: ConversationContext) =>
+      agent ! ev
+      goto(UsingHuman) using ctx
+
+    case Event(ev, ctx: ConversationContext) =>
+      ctx.botActor ! ev
+      stay using ctx
 
   }
 
   when(FillingForm) {
 
-    case Event(ev: TextLike, _) =>
+    case Event(ev: TextLike, ctx: ConversationContext) =>
       form ! ev
-      stay
+      stay using ctx
 
-    case Event(ev: EndFillForm, _) =>
-      bot ! ev
-      goto(UsingBot)
+    case Event(ev: EndFillForm, ctx: ConversationContext) =>
+      ctx.botActor ! ev
+      goto(UsingBot) using ctx
 
   }
 
   when(UsingHuman) {
 
-    case Event(ev: SparkMessageEvent, _) =>
+    case Event(ev: SparkMessageEvent, ctx: ConversationContext) =>
       agent ! ev
-      stay
+      stay using ctx
 
-    case Event(SparkRoomLeftEvent(sender), _) =>
-      provider.sendTextMessage(sender, s"$agentName (Human) is leaving the conversation")
-      val tempMembership = tempMemberships(sender)
+    case Event(SparkRoomLeftEvent(sender), ctx: ConversationContext) =>
+      provider.sendTextMessage(sender, s"${ctx.agentName} (Human) is leaving the conversation")
+      val tempMembership = ctx.tempMemberships(sender)
       sparkService.deleteWebhook(tempMembership.leaveRoomWebhookId)
       sparkService.deleteWebhook(tempMembership.webhookId)
       sparkService.deleteTeam(tempMembership.teamId)
-      goto(UsingBot)
+      goto(UsingBot) using ctx
 
-    case Event(ev: TextLike, _) =>
-      val tempMembership = tempMemberships(ev.sender)
+    case Event(ev: TextLike, ctx: ConversationContext) =>
+      val tempMembership = ctx.tempMemberships(ev.sender)
       agent ! SparkWrappedEvent(tempMembership.roomId, tempMembership.personId, ev)
-      stay
+      stay using ctx
 
   }
 
   whenUnhandled {
 
-    case Event(Reset, _) =>
+    case Event(Reset, ctx: ConversationContext) =>
       form ! Reset
-      bot ! Reset
-      goto(UsingBot)
+      ctx.botActor ! Reset
+      goto(UsingBot) using ConversationContext(
+        botActor = getConversationActor(conversationEngineDefault),
+        tempMemberships = Map[String, SparkTempMembership](),
+        agentName = "Mark")
 
-    case Event(ev, _) =>
+    case Event(ev, ctx: ConversationContext) =>
       log.error(s"$name received invalid event [${ev.toString}] while in state [${this.stateName}]")
-      stay
+      stay using ctx
 
   }
 
@@ -221,6 +225,8 @@ object ConciergeActor extends NamedActor {
 
   sealed trait Data
 
-  case object Uninitialized extends Data
+  case class ConversationContext(botActor: ActorRef,
+                                 tempMemberships: Map[String, SparkTempMembership],
+                                 agentName: String) extends Data
 
 }
