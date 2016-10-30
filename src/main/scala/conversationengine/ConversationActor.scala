@@ -2,7 +2,6 @@ package conversationengine
 
 import akka.actor._
 import akka.contrib.pattern.ReceivePipeline
-import akka.pattern.after
 import akka.stream.Materializer
 import apis.googlemaps.MapsJsonSupport
 import apis.googlenlp._
@@ -16,8 +15,7 @@ import services._
 import spray.json._
 
 import scala.concurrent._
-import scala.concurrent.duration._
-import scala.util.Random
+import scala.util.{Failure, Random, Success}
 
 /**
   * Created by markmo on 27/07/2016.
@@ -27,8 +25,8 @@ class ConversationActor @Inject()(config: Config,
                                   skypeService: SkypeService,
                                   addressService: AddressService,
                                   languageService: LanguageService,
-                                  humourService: HumourService,
                                   smallTalkService: SmallTalkService,
+                                  catalogService: CatalogService,
                                   bus: LookupBusImpl,
                                   implicit val system: ActorSystem,
                                   implicit val fm: Materializer)
@@ -38,19 +36,12 @@ class ConversationActor @Inject()(config: Config,
     with GoogleJsonSupport
     with ReceivePipeline
     with LoggingInterceptor
+    with FutureExtensions
     with FSM[State, Data] {
 
   import ConversationActor._
   import Platform._
   import system.dispatcher
-
-  implicit val timeout = 30 second
-
-  implicit class FutureExtensions[T](f: Future[T]) {
-    def withTimeout(timeout: => Throwable)(implicit duration: FiniteDuration, system: ActorSystem): Future[T] = {
-      Future firstCompletedOf Seq(f, after(duration, system.scheduler)(Future.failed(timeout)))
-    }
-  }
 
   var currentPlatform: Option[Platform] = None
 
@@ -66,44 +57,22 @@ class ConversationActor @Inject()(config: Config,
 
   when(Qualifying) {
 
-    case Event(Welcome(platform, sender), cc: ConversationContext) =>
-      provider.sendTextMessage(sender, "Welcome, login successful")
-      bus publish MsgEnvelope(s"authenticated:$sender", Authenticated(sender, self))
-      stay
-
-    case Event(TransferState(sender, ctx), _) =>
-      if (ctx.postAction.isDefined) {
-        val action = ctx.postAction.get
-        val ctx1 = ctx.copy(authenticated = true, history = Exchange(None, "logged in") :: ctx.history, postAction = None)
-        action(ctx1)
-      } else {
-        val ctx1 = ctx.copy(authenticated = true, history = Exchange(None, "logged in") :: ctx.history)
-        stay using ctx1
-      }
-
     case Event(Qualify(platform, sender, productType, text), cc: ConversationContext) =>
-      productType match {
-        case Some(t) => privilegedAction(platform, sender, text, cc) { ctx =>
-          val ctx1 = say(sender, text, s"What type of $t did you have in mind?", ctx)
-          goto(Qualifying) using ctx1
-        }
-        case None => privilegedAction(platform, sender, text, cc) { ctx =>
-          val ctx1 = say(sender, text, "What did you want to buy?", ctx)
-          stay using ctx1
-        }
-      }
-
-    case Event(Respond(platform, sender, text), cc: ConversationContext) =>
-      if (text == "iphone") {
-        action(platform, sender, text, cc) { ctx =>
-          provider.sendHeroCard(sender)
-          val ctx1 = ctx.copy(history = Exchange(Some(text), "show product catalog") :: ctx.history)
-          goto(Buying) using ctx1
-        }
-      } else {
-        action(platform, sender, text, cc) { ctx =>
-          val ctx1 = shrug(sender, text, ctx)
-          stay using ctx1
+      privilegedAction(platform, sender, text, cc) { ctx =>
+        productType match {
+          case Some(t) =>
+            catalogService.items.get(t) match {
+              case Some(items) =>
+                provider.sendHeroCard(sender, items)
+                val ctx1 = ctx.copy(history = Exchange(Some(text), "show product catalog") :: ctx.history)
+                goto(Buying) using ctx1
+              case None =>
+                val ctx1 = shrug(sender, text, ctx)
+                stay using ctx1
+            }
+          case None =>
+            val ctx1 = shrug(sender, text, ctx)
+            stay using ctx1
         }
       }
   }
@@ -125,12 +94,38 @@ class ConversationActor @Inject()(config: Config,
 
   whenUnhandled {
 
-    case Event(Authenticated(sender, ref), cc: ConversationContext) =>
-      ref ! TransferState(sender, cc)
-      if (ref != self) {
-        context.stop(self)
-      }
+    case Event(Welcome(platform, sender), cc: ConversationContext) =>
+      provider.sendTextMessage(sender, "Welcome, login successful")
+      bus publish MsgEnvelope(s"authenticated:$sender", Authenticated(sender, self))
       stay
+
+    case Event(Authenticated(sender, ref), cc: ConversationContext) =>
+      if (self != ref) {
+        log.debug("transferring state")
+
+        // lookup the concierge actor (grandparent)
+        context.actorSelection("../..").resolveOne()(timeout).onComplete {
+          case Success(subscriber) => bus unsubscribe subscriber
+          case Failure(e) => log.error(e, e.getMessage)
+        }
+        ref ! TransferState(sender, cc)
+        context.stop(self)
+
+      } else {
+        log.debug("re-authenticating")
+        self ! TransferState(sender, cc)
+      }
+      stay using cc
+
+    case Event(TransferState(sender, ctx), _) =>
+      if (ctx.postAction.isDefined) {
+        val action = ctx.postAction.get
+        val ctx1 = ctx.copy(authenticated = true, history = Exchange(None, "logged in") :: ctx.history, postAction = None)
+        action(ctx1)
+      } else {
+        val ctx1 = ctx.copy(authenticated = true, history = Exchange(None, "logged in") :: ctx.history)
+        stay using ctx1
+      }
 
     case Event(Confirm(platform, sender, text), cc: ConversationContext) =>
       stay using cc
@@ -201,6 +196,7 @@ class ConversationActor @Inject()(config: Config,
 
     } else if (privileged && !ctx.authenticated) {
       log.debug("call to login")
+      say(sender, text, "I need to confirm your identity if that is OK", ctx)
       val ctx1 = ctx.copy(history = Exchange(Some(text), "login") :: ctx.history, postAction = Some(b))
       context.parent ! Deactivate
       provider.sendLoginCard(sender)
@@ -269,7 +265,7 @@ class ConversationActor @Inject()(config: Config,
     }
     f3 recover {
       case e: Throwable =>
-        log.error(e.getMessage)
+        log.error(e, e.getMessage)
         ctx
     }
   }
@@ -375,15 +371,12 @@ object ConversationActor extends NamedActor {
     "Hello %s!",
     "Howdy %s!",
     "Ahoy %s!",
-//    "Hello %s, my name is Inigo Montoya",
-//    "I'm Batman",
     "‘Ello Mate",
     "What's cookin' Good Lookin'?",
     "Aloha %s!",
     "Hola %s!",
     "Que Pasa %s!",
     "Bonjour %s!",
-//    "Hallo %s!",
     "Ciao %s!",
     "Konnichiwa %s!"
   )

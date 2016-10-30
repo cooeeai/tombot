@@ -19,6 +19,7 @@ class ConversationModule extends AbstractModule with ScalaModule {
     bind[Actor].annotatedWith(Names.named(ConciergeActor.name)).to[ConciergeActor]
     bind[Actor].annotatedWith(Names.named(FormActor.name)).to[FormActor]
     bind[Actor].annotatedWith(Names.named(IntentActor.name)).to[IntentActor]
+    bind[Actor].annotatedWith(Names.named(FacebookMessageQueue.name)).to[FacebookMessageQueue]
     bind[MessagingProvider].annotatedWith(Names.named(FacebookService.name)).to[FacebookService]
     bind[MessagingProvider].annotatedWith(Names.named(SkypeService.name)).to[SkypeService]
     bind[Conversation].to[ConversationService]

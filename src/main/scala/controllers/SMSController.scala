@@ -3,9 +3,10 @@ package controllers
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
-import apis.telstra.{SMSReply, TelstraJsonSupport}
+import apis.telstra.{SMSMessage, SMSReply, TelstraJsonSupport}
 import com.google.inject.Inject
 import com.typesafe.config.Config
+import conversationengine.events.Respond
 import services.{Conversation, SMSService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -19,6 +20,7 @@ class SMSController @Inject()(config: Config,
                               conversationService: Conversation)
   extends TelstraJsonSupport {
 
+  import Platform._
   import StatusCodes._
   import conversationService._
 
@@ -31,8 +33,18 @@ class SMSController @Inject()(config: Config,
           // cache messageId and sender details
           smsService.getMessageStatus(reply.messageId) map { messageStatus =>
             // no need to check status as message has been delivered
-            converse(messageStatus.to, reply.content)
+            val sender = messageStatus.to
+            converse(sender, Respond(SMS, sender, reply.content))
           }
+          complete(OK)
+        }
+      }
+    } ~
+    path("sms-send") {
+      post {
+        logger.info("SMS send request")
+        entity(as[SMSMessage]) { message =>
+          smsService.sendTextMessage(message.to, message.body)
           complete(OK)
         }
       }

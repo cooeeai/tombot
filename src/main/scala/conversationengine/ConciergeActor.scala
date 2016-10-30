@@ -4,20 +4,18 @@ import java.util.concurrent.TimeoutException
 
 import akka.actor._
 import akka.contrib.pattern.ReceivePipeline
-import akka.pattern.after
 import akka.stream.Materializer
 import apis.ciscospark.SparkTempMembership
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.typesafe.config.Config
 import conversationengine.ConciergeActor.{Data, State}
+import conversationengine.ConversationEngine._
 import conversationengine.events._
 import modules.akkaguice.{GuiceAkkaExtension, NamedActor}
 import services._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
-import scala.concurrent.duration._
 
 /**
   * Created by markmo on 9/09/2016.
@@ -33,60 +31,70 @@ class ConciergeActor @Inject()(config: Config,
     with ActorLogging
     with ReceivePipeline
     with LoggingInterceptor
+    with FutureExtensions
     with FSM[State, Data] {
 
   import ConciergeActor._
   import rulesService._
   import utils.RegexUtils._
 
-  implicit val timeout = 60 second
-
-  implicit class FutureExtensions[T](f: Future[T]) {
-    def withTimeout(timeout: => Throwable)(implicit duration: FiniteDuration, system: ActorSystem): Future[T] = {
-      Future firstCompletedOf Seq(f, after(duration, system.scheduler)(Future.failed(timeout)))
-    }
-  }
+  val AlchemyCommand = command("alchemy")
+  val SwitchEngineCommand = command("engine")
+  val HistoryCommand = command("history")
+  val LoginCommand = command("login")
+  val ResetCommand = command("reset")
 
   val conversationEngineDefault = config.getString("conversation.engine")
 
   // form conversation actor
-  val form = context.actorOf(GuiceAkkaExtension(context.system).props(FormActor.name))
+  val formActor = context.actorOf(GuiceAkkaExtension(context.system).props(FormActor.name))
 
   // live agent conversation actor
-  val agent = context.actorOf(GuiceAkkaExtension(context.system).props(AgentConversationActor.name))
-
-  val LoginCommand = command("login")
-
-  val HistoryCommand = command("history")
-
-  val AlchemyCommand = command("alchemy")
+  val agentConversationActor = context.actorOf(GuiceAkkaExtension(context.system).props(AgentConversationActor.name))
 
   startWith(UsingBot, ConversationContext(
-    botActor = getConversationActor(conversationEngineDefault), // bot conversation actor
+    actor = getConversationActor(conversationEngineDefault),
     tempMemberships = Map[String, SparkTempMembership](),
     agentName = "Mark"))
 
   when(UsingBot) {
 
     case Event(ev: TextLike, ctx: ConversationContext) =>
+      log.debug("front door - check for commands")
       val platform = ev.platform
       val sender = ev.sender
       val text = ev.text
 
-      if (LoginCommand matches text) {
-        provider.sendLoginCard(sender)
-
-      } else if (HistoryCommand matches text) {
-        ctx.botActor ! ShowHistory(sender)
-
-      } else if (AlchemyCommand matches text) {
-        // alchemy command - show keywords
+      if (AlchemyCommand matches text) {
+        log.debug("using alchemy service to show keywords")
         val keywords = alchemyService.getKeywords(text.substring(8).trim)
         provider.sendTextMessage(sender, "Keywords:\n" + formatKeywords(keywords))
 
+      } else if (SwitchEngineCommand matches text) {
+        log.debug("switching conversation engine")
+        if (text contains "watson") {
+          log.debug("choosing Watson")
+          self ! SwitchConversationEngine(sender, Watson)
+        } else {
+          log.debug("choosing Cooee")
+          self ! SwitchConversationEngine(sender, Cooee)
+        }
+
+      } else if (HistoryCommand matches text) {
+        log.debug("showing history")
+        ctx.actor ! ShowHistory(sender)
+
+      } else if (LoginCommand matches text) {
+        log.debug("sending login card")
+        provider.sendLoginCard(sender)
+
+      } else if (ResetCommand matches text) {
+        log.debug("resetting")
+        self ! Reset
+
       } else if (isQuestion(text)) {
-        // hears question
         log.debug("text is interpreted as a question")
+
         getContent(text) match {
 
           case Some(content) =>
@@ -95,12 +103,13 @@ class ConciergeActor @Inject()(config: Config,
 
           case None =>
             log.debug("no content")
-            ctx.botActor ! Respond(platform, sender, text)
+            ctx.actor ! Respond(platform, sender, text)
 
         }
 
       } else {
-        ctx.botActor ! Respond(platform, sender, text)
+        ctx.actor ! Respond(platform, sender, text)
+
       }
       stay using ctx
 
@@ -126,21 +135,21 @@ class ConciergeActor @Inject()(config: Config,
       goto(UsingHuman) using ctx1
 
     case Event(FillForm(sender, goal), ctx: ConversationContext) =>
-      form ! NextQuestion(sender)
+      formActor ! NextQuestion(sender)
       goto(FillingForm) using ctx
 
     case Event(SwitchConversationEngine(sender, engine), ctx: ConversationContext) =>
-      val ctx1 = ctx.copy(botActor = getConversationActor(engine.toString))
+      val ctx1 = ctx.copy(actor = getConversationActor(engine.toString))
       provider.sendTextMessage(sender, "switched conversation engine to " + engine)
       stay using ctx1
 
     // TODO
     case Event(ev: SparkMessageEvent, ctx: ConversationContext) =>
-      agent ! ev
+      agentConversationActor ! ev
       goto(UsingHuman) using ctx
 
     case Event(ev, ctx: ConversationContext) =>
-      ctx.botActor ! ev
+      ctx.actor ! ev
       stay using ctx
 
   }
@@ -148,11 +157,11 @@ class ConciergeActor @Inject()(config: Config,
   when(FillingForm) {
 
     case Event(ev: TextLike, ctx: ConversationContext) =>
-      form ! ev
+      formActor ! ev
       stay using ctx
 
     case Event(ev: EndFillForm, ctx: ConversationContext) =>
-      ctx.botActor ! ev
+      ctx.actor ! ev
       goto(UsingBot) using ctx
 
   }
@@ -160,7 +169,7 @@ class ConciergeActor @Inject()(config: Config,
   when(UsingHuman) {
 
     case Event(ev: SparkMessageEvent, ctx: ConversationContext) =>
-      agent ! ev
+      agentConversationActor ! ev
       stay using ctx
 
     case Event(SparkRoomLeftEvent(sender), ctx: ConversationContext) =>
@@ -173,7 +182,7 @@ class ConciergeActor @Inject()(config: Config,
 
     case Event(ev: TextLike, ctx: ConversationContext) =>
       val tempMembership = ctx.tempMemberships(ev.sender)
-      agent ! SparkWrappedEvent(tempMembership.roomId, tempMembership.personId, ev)
+      agentConversationActor ! SparkWrappedEvent(tempMembership.roomId, tempMembership.personId, ev)
       stay using ctx
 
   }
@@ -181,10 +190,10 @@ class ConciergeActor @Inject()(config: Config,
   whenUnhandled {
 
     case Event(Reset, ctx: ConversationContext) =>
-      form ! Reset
-      ctx.botActor ! Reset
+      formActor ! Reset
+      ctx.actor ! Reset
       goto(UsingBot) using ConversationContext(
-        botActor = getConversationActor(conversationEngineDefault),
+        actor = getConversationActor(conversationEngineDefault),
         tempMemberships = Map[String, SparkTempMembership](),
         agentName = "Mark")
 
@@ -225,7 +234,7 @@ object ConciergeActor extends NamedActor {
 
   sealed trait Data
 
-  case class ConversationContext(botActor: ActorRef,
+  case class ConversationContext(actor: ActorRef,
                                  tempMemberships: Map[String, SparkTempMembership],
                                  agentName: String) extends Data
 

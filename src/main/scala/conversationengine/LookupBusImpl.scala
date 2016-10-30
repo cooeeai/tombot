@@ -1,10 +1,9 @@
 package conversationengine
 
-import javax.inject._
-
 import akka.actor.ActorRef
 import akka.event.EventBus
 import akka.event.LookupClassification
+import com.google.inject.Singleton
 
 /**
   * Created by markmo on 13/10/2016.

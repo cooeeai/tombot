@@ -35,7 +35,6 @@ object Main extends App {
   implicit val materializer = ActorMaterializer()
   implicit val executionContext = system.dispatcher
 
-  val http = Http()
   val config = injector.instance[Config]
   val logger = injector.instance[LoggingAdapter]
 
@@ -59,8 +58,20 @@ object Main extends App {
   val sparkController = injector.instance[SparkController]
   val addressController = injector.instance[ValidationController]
   val smsController = injector.instance[SMSController]
+  val chatController = injector.instance[ChatController]
 
-  val port = Properties.envOrElse("PORT", "8080").toInt
+  val routes =
+    facebookController.routes ~
+    skypeController.routes ~
+    sparkController.routes ~
+    addressController.routes ~
+    smsController.routes ~
+    chatController.routes
+
+  val interface = config.getString("http.interface")
+  val port = config.getInt("http.port")
+
+//  val port = Properties.envOrElse("PORT", "8080").toInt
 
 //  val proxy = Route { context =>
 //    val request = context.request
@@ -73,14 +84,7 @@ object Main extends App {
 //    handler
 //  }
 
-  val bindingFuture =
-    http.bindAndHandle(
-      facebookController.routes ~
-        skypeController.routes ~
-        sparkController.routes ~
-        addressController.routes ~
-        smsController.routes,
-      config.getString("http.interface"), config.getInt("http.port"))
+  val bindingFuture = Http().bindAndHandle(routes, interface, port)
 
   facebookController.setupWelcomeGreeting()
 

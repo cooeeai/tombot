@@ -34,9 +34,10 @@ class FacebookController @Inject()(config: Config,
   import Platform._
   import StatusCodes._
   import conversationService._
-  import conversationengine.ConversationEngine._
 
   implicit val timeout = 30 second
+
+  val verifyToken = System.getenv("FB_VERIFY_TOKEN")
 
   def receivedAuthentication(event: FacebookAuthenticationEvent): Unit = {
     val sender = event.sender.id
@@ -92,20 +93,7 @@ class FacebookController @Inject()(config: Config,
 
           val text = event.message.get.text
           logger.debug("text: [" + text + "]")
-          if (text startsWith "/reset") {
-            converse(sender, Reset)
-          } else if (text startsWith "/engine") {
-            logger.debug("switching conversation engine")
-            if (text contains "watson") {
-              logger.debug("choosing Watson")
-              converse(sender, SwitchConversationEngine(sender, Watson))
-            } else {
-              logger.debug("choosing Cooee")
-              converse(sender, SwitchConversationEngine(sender, Cooee))
-            }
-          } else {
-            converse(sender, Respond(Facebook, sender, text))
-          }
+          converse(sender, Respond(Facebook, sender, text))
         }
       }
     }
@@ -184,8 +172,8 @@ class FacebookController @Inject()(config: Config,
   val routes =
     path("webhook") {
       get {
-        parameters("hub.verify_token", "hub.challenge") { (verifyToken, challenge) =>
-          if (verifyToken == "dingdong") {
+        parameters("hub.verify_token", "hub.challenge") { (token, challenge) =>
+          if (token == verifyToken) {
             complete(challenge)
           } else {
             complete("Error, invalid token")

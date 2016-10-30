@@ -1,6 +1,7 @@
 package services
 
 import memory.Slot
+import models.Item
 
 import scala.concurrent.Future
 
@@ -13,7 +14,7 @@ trait MessagingProvider {
 
   def sendLoginCard(sender: String, conversationId: String = ""): Unit
 
-  def sendHeroCard(sender: String): Unit
+  def sendHeroCard(sender: String, items: List[Item]): Unit
 
   def sendReceiptCard(sender: String, slot: Slot): Unit
 

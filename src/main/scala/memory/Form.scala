@@ -155,7 +155,8 @@ class Form @Inject()(config: Config,
               |    country: value.country
               |  };
               |}
-            """.stripMargin)
+            """.stripMargin),
+          confirm = Some("Is this address correct?")
           /*
           parseFn = Some((value) => {
             lazy val f = addressService.getAddress(value)

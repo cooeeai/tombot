@@ -1,7 +1,5 @@
 package services
 
-import javax.inject.Singleton
-
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.Http
@@ -11,7 +9,7 @@ import akka.http.scaladsl.model.{FormData, HttpMethods, HttpRequest, RequestEnti
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.Materializer
 import apis.skype._
-import com.google.inject.Inject
+import com.google.inject.{Inject, Singleton}
 import com.typesafe.config.Config
 import memory.Slot
 import models.{Item, ItemLinkAction, ItemPostbackAction}
@@ -25,7 +23,6 @@ import scala.concurrent.Future
 @Singleton
 class SkypeService @Inject()(config: Config,
                              logger: LoggingAdapter,
-                             catalogService: CatalogService,
                              implicit val system: ActorSystem,
                              implicit val fm: Materializer)
   extends MessagingProvider with SkypeJsonSupport {
@@ -89,11 +86,11 @@ class SkypeService @Inject()(config: Config,
     } yield ()
   }
 
-  def sendHeroCard(conversationId: String): Unit = {
+  def sendHeroCard(conversationId: String, items: List[Item]): Unit = {
     logger.info("sending Skype hero card")
     import Builder._
     val authorization = Authorization(OAuth2BearerToken(token.get.accessToken))
-    val attachments = itemsToSkypeHeroAttachments(catalogService.getItems)
+    val attachments = itemsToSkypeHeroAttachments(items)
 
     val payload = (
       carouselHeroCard

@@ -23,27 +23,26 @@ class ConversationService @Inject()(config: Config,
 
   import system.dispatcher
 
-  implicit val timeout: Timeout = 30 seconds
+  implicit val timeout: Timeout = 60 seconds
 
   def converse(sender: String, message: Any): Unit = {
     logger.debug(s"looking up user linked to sender [$sender]")
     val user = userService.getUser(sender)
-    val userId = user match {
-      case Some(usr) => usr.id
+    val uid = user match {
+      case Some(u) => u.id
       case None => sender
     }
-    logger.debug(s"looking up actor for user/" + userId)
-    system.actorSelection("user/" + userId).resolveOne().onComplete {
-      case Success(actor) =>
+    logger.debug(s"looking up actor for user/" + uid)
+    system.actorSelection("user/" + uid).resolveOne().onComplete {
+      case Success(ref) =>
         logger.debug("found actor")
-        actor ! message
-      case Failure(ex) =>
-        logger.debug(ex.getMessage)
+        ref ! message
+      case Failure(e) =>
+        logger.debug(e.getMessage)
         logger.debug("creating new actor")
-        val actor = system.actorOf(GuiceAkkaExtension(system).props(ConciergeActor.name), userId)
-        bus.subscribe(actor, s"authenticated:$userId")
-        //bus.subscribe(actor, s"fallback:$userId")
-        actor ! message
+        val ref = system.actorOf(GuiceAkkaExtension(system).props(ConciergeActor.name), uid)
+        bus.subscribe(ref, s"authenticated:$sender")
+        ref ! message
     }
   }
 

@@ -8,10 +8,12 @@ import akka.http.scaladsl.model.{HttpMethods, HttpRequest, RequestEntity}
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.Materializer
 import apis.facebookmessenger._
-import com.google.inject.Inject
+import com.google.inject.{Inject, Singleton}
 import com.typesafe.config.Config
+import conversationengine.events.Respond
 import memory.Slot
 import models.{Item, ItemLinkAction, ItemPostbackAction}
+import modules.akkaguice.GuiceAkkaExtension
 import spray.json._
 
 import scala.concurrent.Future
@@ -19,36 +21,40 @@ import scala.concurrent.Future
 /**
   * Created by markmo on 14/08/2016.
   */
+@Singleton
 class FacebookService @Inject()(config: Config,
                                 logger: LoggingAdapter,
-                                catalogService: CatalogService,
                                 paymentService: PaymentService,
                                 implicit val system: ActorSystem,
                                 implicit val fm: Materializer)
   extends MessagingProvider with FacebookJsonSupport {
 
+  import controllers.Platform._
   import system.dispatcher
-
-  val http = Http()
 
   val api = config.getString("api.host")
 
   val accessToken = System.getenv("FB_PAGE_ACCESS_TOKEN")
 
+  val http = Http()
+
+  val messageQueueActor = system.actorOf(GuiceAkkaExtension(system).props(FacebookMessageQueue.name))
+
   def sendTextMessage(sender: String, text: String): Unit = {
-    logger.info(s"sending text message: [$text] to sender [$sender]")
-    import Builder._
-
-    val payload = messageElement forSender sender withText text build()
-
-    logger.debug("sending payload:\n" + payload.toJson.prettyPrint)
-    for {
-      request <- Marshal(payload).to[RequestEntity]
-      response <- http.singleRequest(HttpRequest(
-        method = HttpMethods.POST,
-        uri = s"https://graph.facebook.com/v2.6/me/messages?access_token=$accessToken",
-        entity = request))
-    } yield ()
+    messageQueueActor ! Respond(Facebook, sender, text)
+//    logger.info(s"sending text message: [$text] to sender [$sender]")
+//    import Builder._
+//
+//    val payload = messageElement forSender sender withText text build()
+//
+//    logger.debug("sending payload:\n" + payload.toJson.prettyPrint)
+//    for {
+//      request <- Marshal(payload).to[RequestEntity]
+//      response <- http.singleRequest(HttpRequest(
+//        method = HttpMethods.POST,
+//        uri = s"https://graph.facebook.com/v2.8/me/messages?access_token=$accessToken",
+//        entity = request))
+//    } yield ()
   }
 
   def sendLoginCard(sender: String, conversationId: String): Unit = {
@@ -70,15 +76,15 @@ class FacebookService @Inject()(config: Config,
       request <- Marshal(payload).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.POST,
-        uri = s"https://graph.facebook.com/v2.6/me/messages?access_token=$accessToken",
+        uri = s"https://graph.facebook.com/v2.8/me/messages?access_token=$accessToken",
         entity = request))
     } yield ()
   }
 
-  def sendHeroCard(sender: String): Unit = {
+  def sendHeroCard(sender: String, items: List[Item]): Unit = {
     logger.info("sending generic message to sender: " + sender)
     import Builder._
-    val elements = itemsToFacebookElements(catalogService.getItems)
+    val elements = itemsToFacebookElements(items)
     val payload = (
       genericTemplate
         forSender sender
@@ -90,7 +96,7 @@ class FacebookService @Inject()(config: Config,
       request <- Marshal(payload).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.POST,
-        uri = s"https://graph.facebook.com/v2.6/me/messages?access_token=$accessToken",
+        uri = s"https://graph.facebook.com/v2.8/me/messages?access_token=$accessToken",
         entity = request))
     } yield ()
   }
@@ -127,7 +133,7 @@ class FacebookService @Inject()(config: Config,
       request <- Marshal(payload).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.POST,
-        uri = s"https://graph.facebook.com/v2.6/me/messages?access_token=$accessToken",
+        uri = s"https://graph.facebook.com/v2.8/me/messages?access_token=$accessToken",
         entity = request))
     } yield ()
   }
@@ -146,18 +152,19 @@ class FacebookService @Inject()(config: Config,
       request <- Marshal(payload).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.POST,
-        uri = s"https://graph.facebook.com/v2.6/me/messages?access_token=$accessToken",
+        uri = s"https://graph.facebook.com/v2.8/me/messages?access_token=$accessToken",
         entity = request))
     } yield ()
   }
 
   // don't know why I can't unmarshal to UserProfile or JsValue
   def getUserProfile(userId: String): Future[String] = {
-    logger.info("getting user profile for id: " + userId)
+    logger.info(s"getting user profile for id[$userId]")
+    println(accessToken)
     for {
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.GET,
-        uri = s"https://graph.facebook.com/v2.6/$userId?fields=first_name,last_name,profile_pic,locale,timezone,gender&access_token=$accessToken"))
+        uri = s"https://graph.facebook.com/v2.8/$userId?fields=first_name,last_name,profile_pic,locale,timezone,gender&access_token=$accessToken"))
       entity <- Unmarshal(response.entity).to[String]
     } yield entity
   }
@@ -167,7 +174,7 @@ class FacebookService @Inject()(config: Config,
     for {
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.GET,
-        uri = s"https://graph.facebook.com/v2.6/me?access_token=$accessToken&fields=recipient&account_linking_token=$accountLinkingToken"))
+        uri = s"https://graph.facebook.com/v2.8/me?access_token=$accessToken&fields=recipient&account_linking_token=$accountLinkingToken"))
       entity <- Unmarshal(response.entity).to[String]
     } yield {
       logger.debug("response:\n" + entity)
@@ -183,21 +190,12 @@ class FacebookService @Inject()(config: Config,
         "text" -> JsString("Hi, my name is Tom")
       )
     )
-    //    val payload = JsObject(
-    //      "setting_type" -> JsString("call_to_actions"),
-    //      "thread_state" -> JsString("new_thread"),
-    //      "call_to_actions" -> JsArray(
-    //        JsObject(
-    //          "payload" -> JsString("Hi, my name is Tom")
-    //          )
-    //        )
-    //      )
     logger.info("sending payload:\n" + payload.toJson.prettyPrint)
     for {
       request <- Marshal(payload).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.POST,
-        uri = s"https://graph.facebook.com/v2.6/me/thread_settings?access_token=$accessToken",
+        uri = s"https://graph.facebook.com/v2.8/me/thread_settings?access_token=$accessToken",
         entity = request))
     } yield ()
   }

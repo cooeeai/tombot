@@ -1,8 +1,7 @@
 package services
 
-import javax.inject._
-
 import apis.facebookmessenger.FacebookUserProfile
+import com.google.inject.Singleton
 
 import scala.collection.mutable
 

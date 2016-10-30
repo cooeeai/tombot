@@ -1,13 +1,11 @@
 package controllers
 
-import javax.inject.Singleton
-
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akkahttptwirl.TwirlSupport._
 import apis.skype._
-import com.google.inject.Inject
+import com.google.inject.{Inject, Singleton}
 import com.typesafe.config.Config
 import conversationengine.events._
 import services.{Conversation, SkypeService, UserService}

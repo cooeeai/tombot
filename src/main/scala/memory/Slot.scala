@@ -70,6 +70,41 @@ case class Slot(key: String,
     loop(this)._2
   }
 
+  def numberQuestions: Int = {
+
+    def loop(slot: Slot): Int = {
+      val Slot(_, question, children, value, _, _, _, _, _, confirm, confirmed, _) = slot
+      if (value.isEmpty) {
+        if (children.isDefined) {
+          val qs = children.get.map(child => loop(child))
+          if (qs.forall(_ == 0)) {
+            // if all child slots have been filled
+            if (confirm.isDefined && !confirmed) 1 else 0
+
+          } else if (question.isDefined && qs.forall(_ > 0)) {
+            // if all child slots have questions (and therefore need to be filled),
+            // and a question is defined at the parent slot (and therefore a
+            // composite response can be given), then ask the next question from
+            // this slot
+            1
+
+          } else {
+            // if a composite response is not possible, or some, but not all,
+            // child slots have already been answered, then ask the next question
+            // from the first unanswered child slot
+            qs.sum
+          }
+        } else {
+          1
+        }
+      } else {
+        if (confirm.isDefined && !confirmed) 1 else 0
+      }
+    }
+
+    loop(this)
+  }
+
   def printValue: String =
     if (children.isDefined) {
       children.get.map(_.printValue).mkString("\n")
@@ -102,9 +137,9 @@ case class Slot(key: String,
   def empty(): Slot =
     if (children.isDefined) {
       val slots = children.get.map(_.empty())
-      Slot(this.key, question, Some(slots), None, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed, caption)
+      Slot(this.key, question, Some(slots), value = None, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed = false, caption)
     } else {
-      Slot(this.key, question, children, None, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed, caption)
+      Slot(this.key, question, children, value = None, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed = false, caption)
     }
 
   def emptySlot(key: String): Slot =
@@ -112,6 +147,16 @@ case class Slot(key: String,
       empty()
     } else if (children.isDefined) {
       val slots = children.get.map(_.emptySlot(key))
+      Slot(this.key, question, Some(slots), value, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed, caption)
+    } else {
+      this
+    }
+
+  def updateSlot(key: String, slot: Slot): Slot =
+    if (this.key == key) {
+      slot
+    } else if (children.isDefined) {
+      val slots = children.get.map(_.updateSlot(key, slot))
       Slot(this.key, question, Some(slots), value, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed, caption)
     } else {
       this
@@ -128,6 +173,31 @@ case class Slot(key: String,
     } else {
       None
     }
+
+  def answers: List[QA] = {
+
+    def loop(slot: Slot): List[QA] = {
+      val Slot(_, question, children, value, _, _, _, _, _, _, _, _) = slot
+      if (question.isDefined) {
+        if (value.isDefined) {
+          List(QA(question.get, value.get.toString))
+        } else {
+          Nil
+        }
+      } else if (children.isDefined) {
+        children.get.flatMap(child => loop(child))
+      } else {
+        Nil
+      }
+    }
+
+    loop(this)
+  }
+
+  def printAnswers: String =
+    answers map {
+      case QA(q, a) => s"? $q\n\n> $a"
+    } mkString "\n"
 
   def getString(key: String): String = getValue(key).get.toString
 
@@ -181,6 +251,8 @@ case class Slot(key: String,
 case class Question(slotKey: String, question: String, confirmation: Boolean)
 
 case class SlotError(key: String, message: String)
+
+case class QA(question: String, answer: String)
 
 /*
 object Slot {
