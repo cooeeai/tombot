@@ -33,7 +33,7 @@ class ConversationService @Inject()(config: Config,
       case None => sender
     }
     logger.debug(s"looking up actor for user/" + uid)
-    system.actorSelection("user/" + uid).resolveOne().onComplete {
+    system.actorSelection("user/" + uid).resolveOne() onComplete {
       case Success(ref) =>
         logger.debug("found actor")
         ref ! message
@@ -41,7 +41,7 @@ class ConversationService @Inject()(config: Config,
         logger.debug(e.getMessage)
         logger.debug("creating new actor")
         val ref = system.actorOf(GuiceAkkaExtension(system).props(ConciergeActor.name), uid)
-        bus.subscribe(ref, s"authenticated:$sender")
+        bus subscribe(ref, s"authenticated:$sender")
         ref ! message
     }
   }

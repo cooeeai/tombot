@@ -104,12 +104,12 @@ class ConversationActor @Inject()(config: Config,
         log.debug("transferring state")
 
         // lookup the concierge actor (grandparent)
-        context.actorSelection("../..").resolveOne()(timeout).onComplete {
+        context.actorSelection("../..").resolveOne()(timeout) onComplete {
           case Success(subscriber) => bus unsubscribe subscriber
           case Failure(e) => log.error(e, e.getMessage)
         }
         ref ! TransferState(sender, cc)
-        context.stop(self)
+        context stop self
 
       } else {
         log.debug("re-authenticating")

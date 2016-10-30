@@ -213,6 +213,7 @@ class ConciergeActor @Inject()(config: Config,
 
   def getConversationActor(engineName: String): ActorRef = engineName.toLowerCase match {
     case "watson" => context.actorOf(GuiceAkkaExtension(context.system).props(WatsonConversationActor.name))
+    case "cooee" => context.actorOf(GuiceAkkaExtension(context.system).props(IntentActor.name))
     case _ => context.actorOf(GuiceAkkaExtension(context.system).props(IntentActor.name))
   }
 
