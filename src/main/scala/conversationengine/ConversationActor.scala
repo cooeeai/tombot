@@ -3,7 +3,7 @@ package conversationengine
 import akka.actor._
 import akka.contrib.pattern.ReceivePipeline
 import akka.stream.Materializer
-import apis.facebookmessenger.{FacebookMessageReadEvent, FacebookMessageDeliveredEvent}
+import apis.facebookmessenger.{FacebookMessageDeliveredEvent, FacebookMessageReadEvent}
 import apis.googlenlp._
 import com.google.inject.{Inject, Injector}
 import com.typesafe.config.Config
@@ -276,17 +276,18 @@ class ConversationActor @Inject()(config: Config,
   def analyze(text: String): Future[Option[(List[GoogleEntity], GoogleSentiment)]] = {
     lazy val entitiesRequest = languageService.getEntities(text)
     lazy val sentimentRequest = languageService.getSentiment(text)
+
+    // assigning the requests here starts them in parallel
     val f1 = entitiesRequest withTimeout new TimeoutException("entities future timed out")
     val f2 = sentimentRequest withTimeout new TimeoutException("sentiment future timed out")
-    val f3 = for {
+    (for {
       entitiesResponse <- f1
       sentimentResponse <- f2
     } yield {
       log.debug("entities:\n" + entitiesResponse.toJson.prettyPrint)
       log.debug("sentiment:\n" + sentimentResponse.toJson.prettyPrint)
       Some((entitiesResponse.entities, sentimentResponse.documentSentiment))
-    }
-    f3 recover {
+    }) recover {
       case e: Throwable =>
         log.error(e, e.getMessage)
         None

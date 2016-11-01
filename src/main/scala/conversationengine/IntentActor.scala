@@ -4,10 +4,10 @@ import akka.actor.{Actor, ActorLogging, ActorSystem, FSM}
 import akka.contrib.pattern.ReceivePipeline
 import akka.stream.Materializer
 import apis.witapi.WitJsonSupport
-import com.google.inject.Inject
+import com.google.inject.{Inject, Injector}
 import conversationengine.IntentActor.{Data, State}
 import conversationengine.events._
-import modules.akkaguice.{GuiceAkkaExtension, NamedActor}
+import modules.akkaguice.{ActorInject, NamedActor}
 import services.{IntentService, UserService}
 import spray.json._
 
@@ -20,8 +20,10 @@ class IntentActor @Inject()(sender: String,
                             intentService: IntentService,
                             userService: UserService,
                             implicit val system: ActorSystem,
-                            implicit val fm: Materializer)
+                            implicit val fm: Materializer,
+                            val injector: Injector)
   extends Actor
+    with ActorInject
     with ActorLogging
     with WitJsonSupport
     with ReceivePipeline
@@ -30,7 +32,7 @@ class IntentActor @Inject()(sender: String,
 
   import IntentActor._
 
-  val child = context.actorOf(GuiceAkkaExtension(context.system).props(ConversationActor.name))
+  val child = injectActor[ConversationActor]
 
   startWith(Active, Uninitialized)
 
@@ -59,15 +61,13 @@ class IntentActor @Inject()(sender: String,
           case Some("greet") =>
             log.debug("responding to [greet] intent")
             log.debug(s"looking up user with id [$sender]")
-            userService.getUser(sender) match {
 
+            userService.getUser(sender) match {
               case Some(user) =>
                 log.debug("user: " + user)
                 child ! Greet(platform, sender, user, text)
-
               case None =>
                 log.warning("user not found")
-
             }
 
           case Some("analyze") =>
@@ -128,13 +128,10 @@ object IntentActor extends NamedActor {
   override final val name = "IntentActor"
 
   sealed trait State
-
   case object Active extends State
-
   case object Inactive extends State
 
   sealed trait Data
-
   case object Uninitialized extends Data
 
 }

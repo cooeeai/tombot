@@ -48,11 +48,9 @@ class ConciergeActor @Inject()(config: Config,
   val conversationEngineDefault = config.getString("conversation.engine")
 
   // form conversation actor
-  //val formActor = context.actorOf(GuiceAkkaExtension(context.system).props(FormActor.name))
   val formActor = injectActor[FormActor]
 
   // live agent conversation actor
-  //val agentConversationActor = context.actorOf(GuiceAkkaExtension(context.system).props(AgentConversationActor.name))
   val agentConversationActor = injectActor[AgentConversationActor]
 
   val provider = injectActor[FacebookSendQueue]
@@ -214,9 +212,9 @@ class ConciergeActor @Inject()(config: Config,
   }
 
   def getConversationActor(engineName: String): ActorRef = engineName.toLowerCase match {
-    case "watson" => injectActor[WatsonConversationActor] //context.actorOf(GuiceAkkaExtension(context.system).props(WatsonConversationActor.name))
-    case "cooee" => injectActor[IntentActor] //context.actorOf(GuiceAkkaExtension(context.system).props(IntentActor.name))
-    case _ => injectActor[IntentActor] //context.actorOf(GuiceAkkaExtension(context.system).props(IntentActor.name))
+    case "watson" => injectActor[WatsonConversationActor]
+    case "cooee" => injectActor[IntentActor]
+    case _ => injectActor[IntentActor]
   }
 
   def command(name: String) = s"""^[/:]$name.*""".r
@@ -228,15 +226,11 @@ object ConciergeActor extends NamedActor {
   override final val name = "ConciergeActor"
 
   sealed trait State
-
   case object UsingBot extends State
-
   case object FillingForm extends State
-
   case object UsingHuman extends State
 
   sealed trait Data
-
   case class ConversationContext(actor: ActorRef,
                                  tempMemberships: Map[String, SparkTempMembership],
                                  agentName: String) extends Data
