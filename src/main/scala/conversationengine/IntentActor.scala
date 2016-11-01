@@ -16,7 +16,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 /**
   * Created by markmo on 18/09/2016.
   */
-class IntentActor @Inject()(intentService: IntentService,
+class IntentActor @Inject()(sender: String,
+                            intentService: IntentService,
                             userService: UserService,
                             implicit val system: ActorSystem,
                             implicit val fm: Materializer)

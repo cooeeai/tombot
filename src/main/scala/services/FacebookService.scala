@@ -4,16 +4,14 @@ import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshalling.Marshal
-import akka.http.scaladsl.model.{HttpMethods, HttpRequest, RequestEntity}
+import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.Materializer
 import apis.facebookmessenger._
 import com.google.inject.{Inject, Singleton}
 import com.typesafe.config.Config
-import conversationengine.events.Respond
 import memory.Slot
-import models.{Item, ItemLinkAction, ItemPostbackAction}
-import modules.akkaguice.GuiceAkkaExtension
+import models.{Item, ItemLinkAction, ItemPostbackAction, UserProfile}
 import spray.json._
 
 import scala.concurrent.Future
@@ -29,7 +27,6 @@ class FacebookService @Inject()(config: Config,
                                 implicit val fm: Materializer)
   extends MessagingProvider with FacebookJsonSupport {
 
-  import controllers.Platform._
   import system.dispatcher
 
   val api = config.getString("api.host")
@@ -38,26 +35,25 @@ class FacebookService @Inject()(config: Config,
 
   val http = Http()
 
-  val messageQueueActor = system.actorOf(GuiceAkkaExtension(system).props(FacebookMessageQueue.name))
+  def sendTextMessage(sender: String, text: String): Future[SendResponse] = {
+    logger.info(s"sending text message: [$text] to sender [$sender]")
+    import Builder._
 
-  def sendTextMessage(sender: String, text: String): Unit = {
-    messageQueueActor ! Respond(Facebook, sender, text)
-//    logger.info(s"sending text message: [$text] to sender [$sender]")
-//    import Builder._
-//
-//    val payload = messageElement forSender sender withText text build()
-//
-//    logger.debug("sending payload:\n" + payload.toJson.prettyPrint)
-//    for {
-//      request <- Marshal(payload).to[RequestEntity]
-//      response <- http.singleRequest(HttpRequest(
-//        method = HttpMethods.POST,
-//        uri = s"https://graph.facebook.com/v2.8/me/messages?access_token=$accessToken",
-//        entity = request))
-//    } yield ()
+    val payload = messageElement forSender sender withText text build()
+
+    logger.debug("sending payload:\n" + payload.toJson.prettyPrint)
+    for {
+      request <- Marshal(payload).to[RequestEntity]
+      response <- http.singleRequest(HttpRequest(
+        method = HttpMethods.POST,
+        uri = s"https://graph.facebook.com/v2.8/me/messages?access_token=$accessToken",
+        headers = List(headers.Accept(MediaTypes.`application/json`)),
+        entity = request))
+      entity <- Unmarshal(response.entity).to[FacebookResponse]
+    } yield SendResponse(entity.messageId)
   }
 
-  def sendLoginCard(sender: String, conversationId: String): Unit = {
+  def sendLoginCard(sender: String, conversationId: String): Future[SendResponse] = {
     logger.info("sending login message to sender: " + sender)
     import Builder._
 
@@ -77,11 +73,13 @@ class FacebookService @Inject()(config: Config,
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.POST,
         uri = s"https://graph.facebook.com/v2.8/me/messages?access_token=$accessToken",
+        headers = List(headers.Accept(MediaTypes.`application/json`)),
         entity = request))
-    } yield ()
+      entity <- Unmarshal(response.entity).to[FacebookResponse]
+    } yield SendResponse(entity.messageId)
   }
 
-  def sendHeroCard(sender: String, items: List[Item]): Unit = {
+  def sendHeroCard(sender: String, items: List[Item]): Future[SendResponse] = {
     logger.info("sending generic message to sender: " + sender)
     import Builder._
     val elements = itemsToFacebookElements(items)
@@ -97,11 +95,13 @@ class FacebookService @Inject()(config: Config,
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.POST,
         uri = s"https://graph.facebook.com/v2.8/me/messages?access_token=$accessToken",
+        headers = List(headers.Accept(MediaTypes.`application/json`)),
         entity = request))
-    } yield ()
+      entity <- Unmarshal(response.entity).to[FacebookResponse]
+    } yield SendResponse(entity.messageId)
   }
 
-  def sendReceiptCard(sender: String, slot: Slot): Unit = {
+  def sendReceiptCard(sender: String, slot: Slot): Future[SendResponse] = {
     logger.info("sending receipt message to sender: " + sender)
     import Builder._
     val elements = paymentService.getElements
@@ -134,11 +134,13 @@ class FacebookService @Inject()(config: Config,
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.POST,
         uri = s"https://graph.facebook.com/v2.8/me/messages?access_token=$accessToken",
+        headers = List(headers.Accept(MediaTypes.`application/json`)),
         entity = request))
-    } yield ()
+      entity <- Unmarshal(response.entity).to[FacebookResponse]
+    } yield SendResponse(entity.messageId)
   }
 
-  def sendQuickReply(sender: String, text: String): Unit = {
+  def sendQuickReply(sender: String, text: String): Future[SendResponse] = {
     logger.info("sending quick reply to sender: " + sender)
     import Builder._
     val payload = (
@@ -153,20 +155,23 @@ class FacebookService @Inject()(config: Config,
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.POST,
         uri = s"https://graph.facebook.com/v2.8/me/messages?access_token=$accessToken",
+        headers = List(headers.Accept(MediaTypes.`application/json`)),
         entity = request))
-    } yield ()
+      entity <- Unmarshal(response.entity).to[FacebookResponse]
+    } yield SendResponse(entity.messageId)
   }
 
-  // don't know why I can't unmarshal to UserProfile or JsValue
-  def getUserProfile(userId: String): Future[String] = {
+  def getUserProfile(userId: String): Future[UserProfile] = {
     logger.info(s"getting user profile for id[$userId]")
-    println(accessToken)
     for {
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.GET,
-        uri = s"https://graph.facebook.com/v2.8/$userId?fields=first_name,last_name,profile_pic,locale,timezone,gender&access_token=$accessToken"))
-      entity <- Unmarshal(response.entity).to[String]
-    } yield entity
+        uri = s"https://graph.facebook.com/v2.8/$userId?fields=first_name,last_name,profile_pic,locale,timezone,gender&access_token=$accessToken",
+        headers = List(headers.Accept(MediaTypes.`application/json`))))
+      entity <- Unmarshal(response.entity).to[FacebookUserProfile]
+    } yield UserProfile(
+      entity.firstName, entity.lastName, entity.picture,
+      entity.locale, entity.timezone, entity.gender)
   }
 
   def getSenderId(accountLinkingToken: String): Future[FacebookUserPSID] = {
@@ -174,12 +179,10 @@ class FacebookService @Inject()(config: Config,
     for {
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.GET,
-        uri = s"https://graph.facebook.com/v2.8/me?access_token=$accessToken&fields=recipient&account_linking_token=$accountLinkingToken"))
-      entity <- Unmarshal(response.entity).to[String]
-    } yield {
-      logger.debug("response:\n" + entity)
-      entity.parseJson.convertTo[FacebookUserPSID]
-    }
+        uri = s"https://graph.facebook.com/v2.8/me?access_token=$accessToken&fields=recipient&account_linking_token=$accountLinkingToken",
+        headers = List(headers.Accept(MediaTypes.`application/json`))))
+      entity <- Unmarshal(response.entity).to[FacebookUserPSID]
+    } yield entity
   }
 
   def setupWelcomeGreeting(): Unit = {

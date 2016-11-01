@@ -150,12 +150,12 @@ class FormActor @Inject()(facebookService: FacebookService,
   def nextQuestion(sender: String, text: Option[String]) =
     slot.nextQuestion match {
 
-      case Some(Question(key, question, false)) =>
+      case Some(Question(key, question, false, _)) =>
         currentKey = Some(key)
         history += Exchange(text, question)
         facebookService.sendTextMessage(sender, question)
 
-      case Some(Question(key, question, true)) =>
+      case Some(Question(key, question, true, _)) =>
         currentKey = Some(key)
         history += Exchange(text, question)
         confirming = true

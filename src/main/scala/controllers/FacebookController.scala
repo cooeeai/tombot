@@ -11,6 +11,7 @@ import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.typesafe.config.Config
 import conversationengine.events._
+import conversationengine.{LookupBusImpl, MsgEnvelope}
 import services._
 import spray.json._
 import spray.json.lenses.JsonLenses._
@@ -28,7 +29,8 @@ class FacebookController @Inject()(config: Config,
                                    @Named(FacebookService.name) provider: MessagingProvider,
                                    userService: UserService,
                                    rulesService: RulesService,
-                                   alchemyService: AlchemyService)
+                                   alchemyService: AlchemyService,
+                                   bus: LookupBusImpl)
   extends FacebookJsonSupport with WitJsonSupport {
 
   import Platform._
@@ -72,7 +74,7 @@ class FacebookController @Inject()(config: Config,
 
     } else if (payload.isDefined) {
       logger.info("received quick reply")
-      val response = data.convertTo[FacebookResponse]
+      val response = data.convertTo[FacebookQuickReplyResponse]
       val messagingEvents = response.entry.head.messaging
       val event = messagingEvents.head
       val text = event.message.get.text
@@ -84,7 +86,7 @@ class FacebookController @Inject()(config: Config,
       // TODO
 
     } else if (messageText.isDefined) {
-      val response = data.convertTo[FacebookResponse]
+      val response = data.convertTo[FacebookQuickReplyResponse]
       val messagingEvents = response.entry.head.messaging
       for (event <- messagingEvents) {
         val sender = event.sender.id
@@ -107,10 +109,24 @@ class FacebookController @Inject()(config: Config,
     val watermark = delivery.watermark
     val sequenceNumber = delivery.seq
 
-    messageIds.foreach { messageId =>
-      logger.info("Received delivery confirmation for message ID: " + messageId)
+    messageIds.getOrElse(Nil).foreach { messageId =>
+      logger.debug("Received delivery confirmation for message ID: " + messageId)
     }
-    logger.info(s"All messages before $watermark were delivered")
+    logger.debug(s"All messages before $watermark were delivered")
+
+    bus publish MsgEnvelope(s"delivered:$sender", event)
+  }
+
+  def receivedReadConfirmation(event: FacebookMessageReadEvent): Unit = {
+    val sender = event.sender.id
+    val recipient = event.recipient.id
+    val read = event.read
+    val watermark = read.watermark
+    val sequenceNumber = read.seq
+
+    logger.debug(s"All messages before $watermark were read")
+
+    bus publish MsgEnvelope(s"delivered:$sender", event)
   }
 
   def receivedAccountLink(event: FacebookAccountLinkingEvent): Unit = {
@@ -157,6 +173,7 @@ class FacebookController @Inject()(config: Config,
 
     } else if (f.contains("read")) {
       logger.info("received message read event")
+      receivedReadConfirmation(event.convertTo[FacebookMessageReadEvent])
 
     } else if (f.contains("account_linking")) {
       logger.info("received account linking event")
@@ -205,10 +222,7 @@ class FacebookController @Inject()(config: Config,
                         val user = userService.getUser(sender).get
                         processEvent(data, event, sender, user, text)
                       } else {
-                        provider.getUserProfile(sender) map { resp =>
-                          val json = resp.parseJson
-                          logger.info("found profile:\n" + json.prettyPrint)
-                          val profile = json.convertTo[FacebookUserProfile]
+                        provider.getUserProfile(sender) map { profile =>
                           val user = User(sender, profile)
                           logger.debug(s"setting user with id [$sender]")
                           userService.setUser(sender, user)

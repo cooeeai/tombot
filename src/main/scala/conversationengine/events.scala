@@ -1,6 +1,8 @@
 package conversationengine
 
+import akka.actor.ActorRef
 import apis.ciscospark.SparkWebhookResponseData
+import apis.googlenlp.{GoogleEntity, GoogleSentiment}
 import controllers.Platform._
 import conversationengine.ConversationEngine.ConversationEngine
 import memory.Slot
@@ -29,9 +31,15 @@ object events {
 
   case class Confirm(platform: Platform, sender: String, text: String) extends TextLike
 
+  case class Authenticated(sender: String, ref: ActorRef)
+
   case class Welcome(platform: Platform, sender: String)
 
   case class Analyze(platform: Platform, sender: String, text: String) extends TextLike
+
+  case class AnalysisSuccess(platform: Platform, sender: String, text: String, entities: List[GoogleEntity], sentiment: GoogleSentiment)
+
+  case class AnalysisFailure(platform: Platform, sender: String, text: String)
 
   case class BillEnquiry(platform: Platform, sender: String, text: String) extends TextLike
 

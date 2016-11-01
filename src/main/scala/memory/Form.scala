@@ -55,6 +55,24 @@ class Form @Inject()(config: Config,
           })*/
         ),
         Slot(
+          "planChoice",
+          Some("Please choose your plan"),
+          enum = Some(List(
+            "12 mo - BYO mobile - 500 MB",
+            "12 mo - BYO mobile - 5 GB",
+            "12 mo - BYO mobile - 10 GB",
+            "2 yr - 1 GB",
+            "2 yr - 3 GB",
+            "2 yr - 10 GB",
+            "2 yr - 20 GB",
+            "2 yr - 30 GB",
+            "Casual SIM - 500 MB",
+            "Casual SIM - 5 GB",
+            "Casual SIM - 10 GB"
+          )),
+          confirm = Some("Is this correct?")
+        ),
+        Slot(
           "phone",
           Some("What is your phone number?"),
           validateFn = Some(value => {

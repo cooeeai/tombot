@@ -3,10 +3,9 @@ package services
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.util.Timeout
-import com.google.inject.Inject
-import com.typesafe.config.Config
+import com.google.inject.{Inject, Injector, Singleton}
 import conversationengine.{ConciergeActor, LookupBusImpl}
-import modules.akkaguice.GuiceAkkaExtension
+import modules.akkaguice.ActorInject
 
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
@@ -14,12 +13,13 @@ import scala.util.{Failure, Success}
 /**
   * Created by markmo on 13/08/2016.
   */
-class ConversationService @Inject()(config: Config,
-                                    logger: LoggingAdapter,
+@Singleton
+class ConversationService @Inject()(logger: LoggingAdapter,
                                     userService: UserService,
                                     bus: LookupBusImpl,
-                                    system: ActorSystem)
-  extends Conversation {
+                                    system: ActorSystem,
+                                    val injector: Injector)
+  extends Conversation with ActorInject {
 
   import system.dispatcher
 
@@ -40,8 +40,10 @@ class ConversationService @Inject()(config: Config,
       case Failure(e) =>
         logger.debug(e.getMessage)
         logger.debug("creating new actor")
-        val ref = system.actorOf(GuiceAkkaExtension(system).props(ConciergeActor.name), uid)
+        //val ref = system.actorOf(GuiceAkkaExtension(system).props(ConciergeActor.name), uid)
+        val ref = injectTopActor[ConciergeActor](uid)
         bus subscribe(ref, s"authenticated:$sender")
+        bus subscribe(ref, s"delivered:$sender")
         ref ! message
     }
   }

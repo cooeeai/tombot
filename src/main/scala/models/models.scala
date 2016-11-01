@@ -29,3 +29,5 @@ case class ItemPostbackAction(title: String, payload: JsValue) extends ItemActio
 }
 
 case class Item(title: String, subtitle: String, itemURL: String, imageURL: String, actions: List[ItemAction])
+
+case class UserProfile(firstName: String, lastName: String, picture: String, locale: String, timezone: Int, gender: String)

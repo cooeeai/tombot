@@ -12,8 +12,7 @@ import apis.telstra.{Builder, SMSMessageResponse, SMSMessageStatus, TelstraJsonS
 import com.google.inject.Inject
 import com.typesafe.config.Config
 import memory.Slot
-import models.Item
-import spray.json._
+import models.{UserProfile, Item}
 
 import scala.concurrent.Future
 
@@ -34,14 +33,14 @@ class SMSService @Inject()(config: Config,
 
   val accessToken = System.getenv("TELSTRA_ACCESS_TOKEN")
 
-  def sendTextMessage(sender: String, text: String): Unit = {
+  def sendTextMessage(sender: String, text: String): Future[SendResponse] = {
     logger.info(s"sending SMS message [$text] to phone number [$sender]")
     import Builder._
     val authorization = Authorization(OAuth2BearerToken(accessToken))
 
     val payload = sms forSender sender withText text build()
 
-    val f = for {
+    for {
       request <- Marshal(payload).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.POST,
@@ -49,10 +48,7 @@ class SMSService @Inject()(config: Config,
         headers = List(authorization),
         entity = request))
       entity <- Unmarshal(response.entity).to[SMSMessageResponse]
-    } yield entity
-    f map { response =>
-      logger.debug("SMS response:\n" + response.toJson.prettyPrint)
-    }
+    } yield SendResponse(entity.messageId)
   }
 
   /**
@@ -77,14 +73,14 @@ class SMSService @Inject()(config: Config,
     } yield entity
   }
 
-  def sendLoginCard(sender: String, conversationId: String = ""): Unit = ???
+  def sendLoginCard(sender: String, conversationId: String = ""): Future[SendResponse] = ???
 
-  def sendHeroCard(sender: String, items: List[Item]): Unit = ???
+  def sendHeroCard(sender: String, items: List[Item]): Future[SendResponse] = ???
 
-  def sendReceiptCard(sender: String, slot: Slot): Unit = ???
+  def sendReceiptCard(sender: String, slot: Slot): Future[SendResponse] = ???
 
-  def sendQuickReply(sender: String, text: String): Unit = ???
+  def sendQuickReply(sender: String, text: String): Future[SendResponse] = ???
 
-  def getUserProfile(sender: String): Future[String] = ???
+  def getUserProfile(sender: String): Future[UserProfile] = ???
 
 }

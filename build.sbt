@@ -33,6 +33,7 @@ libraryDependencies ++= Seq(
   "net.oauth.core" % "oauth" % "20090617",
   "net.oauth.core" % "oauth-httpclient4" % "20090913",
   "org.scribe" % "scribe" % "1.3.7",
+  "com.google.inject.extensions" % "guice-assistedinject" % "4.1.0",
   "btomala" %% "akka-http-twirl" % "1.1.0" excludeAll
     ExclusionRule(organization = "com.typesafe.akka")
 )

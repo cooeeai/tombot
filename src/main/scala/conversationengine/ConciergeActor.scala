@@ -6,13 +6,13 @@ import akka.actor._
 import akka.contrib.pattern.ReceivePipeline
 import akka.stream.Materializer
 import apis.ciscospark.SparkTempMembership
-import com.google.inject.Inject
-import com.google.inject.name.Named
+import com.google.inject.{Inject, Injector}
 import com.typesafe.config.Config
 import conversationengine.ConciergeActor.{Data, State}
 import conversationengine.ConversationEngine._
 import conversationengine.events._
-import modules.akkaguice.{GuiceAkkaExtension, NamedActor}
+import modules.akkaguice.{ActorInject, NamedActor}
+import services.FacebookSendQueue.{LoginCard, TextMessage}
 import services._
 
 import scala.concurrent._
@@ -21,13 +21,14 @@ import scala.concurrent._
   * Created by markmo on 9/09/2016.
   */
 class ConciergeActor @Inject()(config: Config,
-                               @Named(FacebookService.name) provider: MessagingProvider,
                                sparkService: SparkService,
                                alchemyService: AlchemyService,
                                rulesService: RulesService,
                                implicit val system: ActorSystem,
-                               implicit val fm: Materializer)
+                               implicit val fm: Materializer,
+                               val injector: Injector)
   extends Actor
+    with ActorInject
     with ActorLogging
     with ReceivePipeline
     with LoggingInterceptor
@@ -47,10 +48,14 @@ class ConciergeActor @Inject()(config: Config,
   val conversationEngineDefault = config.getString("conversation.engine")
 
   // form conversation actor
-  val formActor = context.actorOf(GuiceAkkaExtension(context.system).props(FormActor.name))
+  //val formActor = context.actorOf(GuiceAkkaExtension(context.system).props(FormActor.name))
+  val formActor = injectActor[FormActor]
 
   // live agent conversation actor
-  val agentConversationActor = context.actorOf(GuiceAkkaExtension(context.system).props(AgentConversationActor.name))
+  //val agentConversationActor = context.actorOf(GuiceAkkaExtension(context.system).props(AgentConversationActor.name))
+  val agentConversationActor = injectActor[AgentConversationActor]
+
+  val provider = injectActor[FacebookSendQueue]
 
   startWith(UsingBot, ConversationContext(
     actor = getConversationActor(conversationEngineDefault),
@@ -68,7 +73,7 @@ class ConciergeActor @Inject()(config: Config,
       if (AlchemyCommand matches text) {
         log.debug("using alchemy service to show keywords")
         val keywords = alchemyService.getKeywords(text.substring(8).trim)
-        provider.sendTextMessage(sender, "Keywords:\n" + formatKeywords(keywords))
+        provider ! TextMessage(sender, "Keywords:\n" + formatKeywords(keywords))
 
       } else if (SwitchEngineCommand matches text) {
         log.debug("switching conversation engine")
@@ -86,7 +91,7 @@ class ConciergeActor @Inject()(config: Config,
 
       } else if (LoginCommand matches text) {
         log.debug("sending login card")
-        provider.sendLoginCard(sender)
+        provider ! LoginCard(sender)
 
       } else if (ResetCommand matches text) {
         log.debug("resetting")
@@ -96,25 +101,22 @@ class ConciergeActor @Inject()(config: Config,
         log.debug("text is interpreted as a question")
 
         getContent(text) match {
-
           case Some(content) =>
             log.debug(s"found content in response to question [$content]")
-            provider.sendTextMessage(sender, content)
-
+            provider ! TextMessage(sender, content)
           case None =>
             log.debug("no content")
             ctx.actor ! Respond(platform, sender, text)
-
         }
 
       } else {
         ctx.actor ! Respond(platform, sender, text)
 
       }
-      stay using ctx
+      stay
 
     case Event(Fallback(sender, history), ctx: ConversationContext) =>
-      provider.sendTextMessage(sender, s"${ctx.agentName} (Human) is joining the conversation")
+      provider ! TextMessage(sender, s"${ctx.agentName} (Human) is joining the conversation")
       lazy val fut = sparkService.setupTempRoom(sender) withTimeout new TimeoutException("future timed out")
       val tempMembership = Await.result(fut, timeout)
       log.debug(s"setting up temporary membership to room [${tempMembership.roomId}] for sender [$sender]")
@@ -131,59 +133,59 @@ class ConciergeActor @Inject()(config: Config,
         // hack due to messages posting out of sequence
         Thread.sleep(2000)
       }
-      val ctx1 = ctx.copy(tempMemberships = ctx.tempMemberships + (sender -> tempMembership))
-      goto(UsingHuman) using ctx1
+      val c1 = ctx.copy(tempMemberships = ctx.tempMemberships + (sender -> tempMembership))
+      goto(UsingHuman) using c1
 
-    case Event(FillForm(sender, goal), ctx: ConversationContext) =>
+    case Event(FillForm(sender, goal), _) =>
       formActor ! NextQuestion(sender)
-      goto(FillingForm) using ctx
+      goto(FillingForm)
 
     case Event(SwitchConversationEngine(sender, engine), ctx: ConversationContext) =>
-      val ctx1 = ctx.copy(actor = getConversationActor(engine.toString))
-      provider.sendTextMessage(sender, "switched conversation engine to " + engine)
-      stay using ctx1
+      val c1 = ctx.copy(actor = getConversationActor(engine.toString))
+      provider ! TextMessage(sender, "switched conversation engine to " + engine)
+      stay using c1
 
     // TODO
-    case Event(ev: SparkMessageEvent, ctx: ConversationContext) =>
+    case Event(ev: SparkMessageEvent, _) =>
       agentConversationActor ! ev
-      goto(UsingHuman) using ctx
+      goto(UsingHuman)
 
     case Event(ev, ctx: ConversationContext) =>
       ctx.actor ! ev
-      stay using ctx
+      stay
 
   }
 
   when(FillingForm) {
 
-    case Event(ev: TextLike, ctx: ConversationContext) =>
+    case Event(ev: TextLike, _) =>
       formActor ! ev
-      stay using ctx
+      stay
 
     case Event(ev: EndFillForm, ctx: ConversationContext) =>
       ctx.actor ! ev
-      goto(UsingBot) using ctx
+      goto(UsingBot)
 
   }
 
   when(UsingHuman) {
 
-    case Event(ev: SparkMessageEvent, ctx: ConversationContext) =>
+    case Event(ev: SparkMessageEvent, _) =>
       agentConversationActor ! ev
-      stay using ctx
+      stay
 
     case Event(SparkRoomLeftEvent(sender), ctx: ConversationContext) =>
-      provider.sendTextMessage(sender, s"${ctx.agentName} (Human) is leaving the conversation")
+      provider ! TextMessage(sender, s"${ctx.agentName} (Human) is leaving the conversation")
       val tempMembership = ctx.tempMemberships(sender)
       sparkService.deleteWebhook(tempMembership.leaveRoomWebhookId)
       sparkService.deleteWebhook(tempMembership.webhookId)
       sparkService.deleteTeam(tempMembership.teamId)
-      goto(UsingBot) using ctx
+      goto(UsingBot)
 
     case Event(ev: TextLike, ctx: ConversationContext) =>
       val tempMembership = ctx.tempMemberships(ev.sender)
       agentConversationActor ! SparkWrappedEvent(tempMembership.roomId, tempMembership.personId, ev)
-      stay using ctx
+      stay
 
   }
 
@@ -198,8 +200,8 @@ class ConciergeActor @Inject()(config: Config,
         agentName = "Mark")
 
     case Event(ev, ctx: ConversationContext) =>
-      log.error(s"$name received invalid event [${ev.toString}] while in state [${this.stateName}]")
-      stay using ctx
+      log.warning("received unhandled request {} in state {}/{}", ev, stateName, ctx)
+      stay
 
   }
 
@@ -212,9 +214,9 @@ class ConciergeActor @Inject()(config: Config,
   }
 
   def getConversationActor(engineName: String): ActorRef = engineName.toLowerCase match {
-    case "watson" => context.actorOf(GuiceAkkaExtension(context.system).props(WatsonConversationActor.name))
-    case "cooee" => context.actorOf(GuiceAkkaExtension(context.system).props(IntentActor.name))
-    case _ => context.actorOf(GuiceAkkaExtension(context.system).props(IntentActor.name))
+    case "watson" => injectActor[WatsonConversationActor] //context.actorOf(GuiceAkkaExtension(context.system).props(WatsonConversationActor.name))
+    case "cooee" => injectActor[IntentActor] //context.actorOf(GuiceAkkaExtension(context.system).props(IntentActor.name))
+    case _ => injectActor[IntentActor] //context.actorOf(GuiceAkkaExtension(context.system).props(IntentActor.name))
   }
 
   def command(name: String) = s"""^[/:]$name.*""".r

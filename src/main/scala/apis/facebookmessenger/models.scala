@@ -13,6 +13,10 @@ case class FacebookRecipient(id: String)
 
 case class FacebookMessage(mid: String, seq: Int, text: String)
 
+// attachment_id is only returned when the is_reusable flag is set to true
+// on messages sent with a multimedia attachment
+case class FacebookResponse(recipientId: String, messageId: String, attachmentId: Option[String])
+
 case class FacebookPostback(payload: String)
 
 case class FacebookMessaging(sender: FacebookSender,
@@ -23,7 +27,7 @@ case class FacebookMessaging(sender: FacebookSender,
 
 case class FacebookEntry(id: String, time: Long, messaging: List[FacebookMessaging])
 
-case class FacebookResponse(obj: String, entry: List[FacebookEntry])
+case class FacebookQuickReplyResponse(obj: String, entry: List[FacebookEntry])
 
 sealed trait FacebookButton {
   val buttonType: String
@@ -86,9 +90,13 @@ case class FacebookOptIn(ref: String)
 
 case class FacebookAuthenticationEvent(sender: FacebookSender, recipient: FacebookRecipient, timestamp: Long, optin: FacebookOptIn)
 
-case class FacebookDelivery(mids: List[String], watermark: Long, seq: Int)
+case class FacebookDelivery(mids: Option[List[String]], watermark: Long, seq: Int)
 
 case class FacebookMessageDeliveredEvent(sender: FacebookSender, recipient: FacebookRecipient, delivery: FacebookDelivery)
+
+case class FacebookRead(watermark: Long, seq: Int)
+
+case class FacebookMessageReadEvent(sender: FacebookSender, recipient: FacebookRecipient, read: FacebookRead)
 
 case class FacebookAccountLinking(status: String, authorizationCode: Option[String])
 
@@ -107,10 +115,11 @@ trait FacebookJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val facebookSenderJsonFormat = jsonFormat1(FacebookSender)
   implicit val facebookRecipientJsonFormat = jsonFormat1(FacebookRecipient)
   implicit val facebookMessageJsonFormat = jsonFormat3(FacebookMessage)
+  implicit val facebookResponseJsonFormat = jsonFormat(FacebookResponse, "recipient_id", "message_id", "attachment_id")
   implicit val facebookPostbackJsonFormat = jsonFormat1(FacebookPostback)
   implicit val facebookMessagingJsonFormat = jsonFormat5(FacebookMessaging)
   implicit val facebookEntryJsonFormat = jsonFormat3(FacebookEntry)
-  implicit val facebookResponseJsonFormat = jsonFormat(FacebookResponse, "object", "entry")
+  implicit val facebookQuickReplyResponseJsonFormat = jsonFormat(FacebookQuickReplyResponse, "object", "entry")
 
   implicit object facebookButtonJsonFormat extends RootJsonFormat[FacebookButton] {
 
@@ -153,6 +162,8 @@ trait FacebookJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val facebookAuthenticationEventJsonFormat = jsonFormat4(FacebookAuthenticationEvent)
   implicit val facebookDeliveryJsonFormat = jsonFormat3(FacebookDelivery)
   implicit val facebookMessageDeliveredEventJsonFormat = jsonFormat3(FacebookMessageDeliveredEvent)
+  implicit val facebookReadJsonFormat = jsonFormat2(FacebookRead)
+  implicit val facebookMessageReadEventJsonFormat = jsonFormat3(FacebookMessageReadEvent)
   implicit val facebookAccountLinkingJsonFormat = jsonFormat(FacebookAccountLinking, "status", "authorization_code")
   implicit val facebookAccountLinkingEventJsonFormat = jsonFormat(FacebookAccountLinkingEvent, "sender", "recipient", "timestamp", "account_linking")
   implicit val facebookUserPSIDJsonFormat = jsonFormat2(FacebookUserPSID)

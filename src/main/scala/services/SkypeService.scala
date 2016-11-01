@@ -12,7 +12,7 @@ import apis.skype._
 import com.google.inject.{Inject, Singleton}
 import com.typesafe.config.Config
 import memory.Slot
-import models.{Item, ItemLinkAction, ItemPostbackAction}
+import models.{UserProfile, Item, ItemLinkAction, ItemPostbackAction}
 import spray.json._
 
 import scala.concurrent.Future
@@ -43,7 +43,7 @@ class SkypeService @Inject()(config: Config,
 
   val postbackURL = ""
 
-  def sendTextMessage(conversationId: String, text: String): Unit = {
+  def sendTextMessage(conversationId: String, text: String): Future[SendResponse] = {
     logger.info(s"sending Skype message [$text] to conversation [$conversationId]")
     import Builder._
     val authorization = Authorization(OAuth2BearerToken(token.get.accessToken))
@@ -57,10 +57,10 @@ class SkypeService @Inject()(config: Config,
         uri = s"$skypeApi/v3/conversations/$conversationId/activities",
         headers = List(authorization),
         entity = request))
-    } yield ()
+    } yield SendResponse("")
   }
 
-  def sendLoginCard(sender: String, conversationId: String): Unit = {
+  def sendLoginCard(sender: String, conversationId: String): Future[SendResponse] = {
     logger.info(s"sending Skype signin request to sender [$sender] using conversationId [$conversationId]")
     import Builder._
     val authorization = Authorization(OAuth2BearerToken(token.get.accessToken))
@@ -83,10 +83,10 @@ class SkypeService @Inject()(config: Config,
         uri = s"$skypeApi/v3/conversations/$conversationId/activities",
         headers = List(authorization),
         entity = request))
-    } yield ()
+    } yield SendResponse("")
   }
 
-  def sendHeroCard(conversationId: String, items: List[Item]): Unit = {
+  def sendHeroCard(conversationId: String, items: List[Item]): Future[SendResponse] = {
     logger.info("sending Skype hero card")
     import Builder._
     val authorization = Authorization(OAuth2BearerToken(token.get.accessToken))
@@ -105,10 +105,10 @@ class SkypeService @Inject()(config: Config,
         uri = s"$skypeApi/v3/conversations/$conversationId/activities",
         headers = List(authorization),
         entity = request))
-    } yield ()
+    } yield SendResponse("")
   }
 
-  def sendReceiptCard(conversationId: String, slot: Slot): Unit = {
+  def sendReceiptCard(conversationId: String, slot: Slot): Future[SendResponse] = {
     logger.info("sending Skype receipt card")
     import Builder._
     val authorization = Authorization(OAuth2BearerToken(token.get.accessToken))
@@ -127,10 +127,10 @@ class SkypeService @Inject()(config: Config,
         uri = s"$skypeApi/v3/conversations/$conversationId/activities",
         headers = List(authorization),
         entity = request))
-    } yield ()
+    } yield SendResponse("")
   }
 
-  def sendQuickReply(conversationId: String, text: String): Unit = {
+  def sendQuickReply(conversationId: String, text: String): Future[SendResponse] = {
     logger.info(s"sending Skype quick reply using conversationId [$conversationId]")
     import Builder._
     val authorization = Authorization(OAuth2BearerToken(token.get.accessToken))
@@ -152,10 +152,10 @@ class SkypeService @Inject()(config: Config,
         uri = s"$skypeApi/v3/conversations/$conversationId/activities",
         headers = List(authorization),
         entity = request))
-    } yield ()
+    } yield SendResponse("")
   }
 
-  def getUserProfile(sender: String): Future[String] = ???
+  def getUserProfile(sender: String): Future[UserProfile] = ???
 
   def getMicrosoftToken: Future[MicrosoftToken] = {
     logger.info("getting MS token")
