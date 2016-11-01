@@ -196,7 +196,7 @@ class ConversationActor @Inject()(config: Config,
       }
 
     case Event(ev, ctx: ConversationContext) =>
-      log.error(s"$name received invalid event [${ev.toString}] while in state [${this.stateName}]")
+      log.warning("received unhandled request {} in state {}/{}", ev, stateName, ctx)
       stay
   }
 

@@ -37,14 +37,16 @@ class WatsonConversationActor @Inject()(config: Config,
     case ev: TextLike =>
       val sender = ev.sender
       val response = watsonConversationService.converse(ev.text, contextMap.get(sender))
+
       log.debug("intents: " +
-        response.getIntents.
-          map(intent => s"${intent.getIntent} (${intent.getConfidence})").
-          mkString(", "))
+        response.getIntents
+          .map(intent => s"${intent.getIntent} (${intent.getConfidence})")
+          .mkString(", "))
       log.debug("entities: " +
-        response.getEntities.
-          map(entity => s"${entity.getEntity} (${entity.getValue})").
-          mkString(", "))
+        response.getEntities
+          .map(entity => s"${entity.getEntity} (${entity.getValue})")
+          .mkString(", "))
+
       val conversationCtx = response.getContext
       val text = response.getText.mkString("\n")
       history append Exchange(Some(ev.text), text)
