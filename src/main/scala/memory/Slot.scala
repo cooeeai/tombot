@@ -17,13 +17,28 @@ case class Slot(key: String,
                 confirm: Option[String] = None,
                 confirmed: Boolean = false,
                 caption: Option[String] = None,
-                enum: Option[List[String]] = None) {
+                enum: Option[List[String]] = None,
+                shortlist: Option[List[String]] = None) {
 
   def nextQuestion: Option[Question] = {
 
     def loop(slot: Slot): (Boolean, Option[Question]) = {
-      val Slot(key, question, children, value, _, _, _, _, _, confirm, confirmed, _, enum) = slot
+      val Slot(key, question, children, value, _, _, _, _, _, confirm, confirmed, _, enum, shortlist) = slot
       val select = enum.isDefined
+
+      lazy val response =
+        if (select) {
+          val printedOptions = if (shortlist.isDefined) {
+            printOptions(shortlist.get)
+          } else {
+            printOptions(enum.get)
+          }
+          val q = question.get + "\n\n" + printedOptions
+          (true, Some(Question(key, q, confirmation = false, select)))
+        } else {
+          (true, Some(Question(key, question.get, confirmation = false, select)))
+        }
+
       if (value.isEmpty) {
         if (children.isDefined) {
           val qs = children.get.map(child => loop(child))
@@ -40,12 +55,7 @@ case class Slot(key: String,
             // and a question is defined at the parent slot (and therefore a
             // composite response can be given), then ask the next question from
             // this slot
-            if (select) {
-              val q = question.get + "\n\n" + printOptions(enum.get)
-              (true, Some(Question(key, q, confirmation = false, select)))
-            } else {
-              (true, Some(Question(key, question.get, confirmation = false, select)))
-            }
+            response
 
           } else {
             // if a composite response is not possible, or some, but not all,
@@ -56,12 +66,7 @@ case class Slot(key: String,
         } else {
           if (question.isDefined) {
             // if no child slots then ask this question if defined
-            if (select) {
-              val q = question.get + "\n\n" + printOptions(enum.get)
-              (true, Some(Question(key, q, confirmation = false, select)))
-            } else {
-              (true, Some(Question(key, question.get, confirmation = false, select)))
-            }
+            response
           } else {
             if (confirm.isDefined && !confirmed) {
               (true, Some(Question(key, confirm.get + "\n" + slot.printValue, confirmation = true, select)))
@@ -85,7 +90,7 @@ case class Slot(key: String,
   def numberQuestions: Int = {
 
     def loop(slot: Slot): Int = {
-      val Slot(_, question, children, value, _, _, _, _, _, confirm, confirmed, _, _) = slot
+      val Slot(_, question, children, value, _, _, _, _, _, confirm, confirmed, _, _, _) = slot
       if (value.isEmpty) {
         if (children.isDefined) {
           val qs = children.get.map(child => loop(child))
@@ -129,10 +134,10 @@ case class Slot(key: String,
 
   def confirmSlot(key: String): Slot =
     if (this.key == key) {
-      Slot(key, question, children, value, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed = true, caption, enum)
+      Slot(key, question, children, value, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed = true, caption, enum, shortlist)
     } else if (children.isDefined) {
       val slots = children.get.map(_.confirmSlot(key))
-      Slot(this.key, question, Some(slots), value, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed, caption, enum)
+      Slot(this.key, question, Some(slots), value, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed, caption, enum, shortlist)
     } else {
       this
     }
@@ -149,9 +154,9 @@ case class Slot(key: String,
   def empty(): Slot =
     if (children.isDefined) {
       val slots = children.get.map(_.empty())
-      Slot(this.key, question, Some(slots), value = None, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed = false, caption, enum)
+      Slot(this.key, question, Some(slots), value = None, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed = false, caption, enum, shortlist)
     } else {
-      Slot(this.key, question, children, value = None, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed = false, caption, enum)
+      Slot(this.key, question, children, value = None, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed = false, caption, enum, shortlist)
     }
 
   def emptySlot(key: String): Slot =
@@ -159,7 +164,7 @@ case class Slot(key: String,
       empty()
     } else if (children.isDefined) {
       val slots = children.get.map(_.emptySlot(key))
-      Slot(this.key, question, Some(slots), value, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed, caption, enum)
+      Slot(this.key, question, Some(slots), value, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed, caption, enum, shortlist)
     } else {
       this
     }
@@ -169,7 +174,7 @@ case class Slot(key: String,
       slot
     } else if (children.isDefined) {
       val slots = children.get.map(_.updateSlot(key, slot))
-      Slot(this.key, question, Some(slots), value, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed, caption, enum)
+      Slot(this.key, question, Some(slots), value, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed, caption, enum, shortlist)
     } else {
       this
     }
@@ -189,7 +194,7 @@ case class Slot(key: String,
   def answers: List[QA] = {
 
     def loop(slot: Slot): List[QA] = {
-      val Slot(_, question, children, value, _, _, _, _, _, _, _, _, _) = slot
+      val Slot(_, question, children, value, _, _, _, _, _, _, _, _, _, _) = slot
       if (question.isDefined) {
         if (value.isDefined) {
           List(QA(question.get, value.get.toString))
@@ -255,6 +260,10 @@ case class Slot(key: String,
     }
     if (enum.nonEmpty) {
       j += n + k("enum") + a(enum.get)
+      n = n1
+    }
+    if (shortlist.nonEmpty) {
+      j += n + k("shortlist") + a(shortlist.get)
       n = n1
     }
     if (parseApi.nonEmpty) {

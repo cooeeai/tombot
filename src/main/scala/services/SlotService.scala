@@ -54,7 +54,7 @@ class SlotService @Inject()(logger: LoggingAdapter,
   }
 
   def fillSlot(slot: Slot, key: String, value: Any): (Option[SlotError], Slot) = {
-    val Slot(slotKey, question, children, slotValue, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed, caption, enum) = slot
+    val Slot(slotKey, question, children, slotValue, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed, caption, enum, shortlist) = slot
     if (slotKey == key) {
       if (validateFn.isDefined && !validateFn.get(value.toString)) {
         val message = invalidMessage.getOrElse(invalidMessageDefault)
@@ -84,10 +84,12 @@ class SlotService @Inject()(logger: LoggingAdapter,
             val params = parseFn.get(value.toString)
             fillChildSlots(slot, params, value)
           } else {
-            (None, Slot(key, question, children, getMaybeValue(enum, value), validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed, caption, enum))
+            val (maybeShortlist, maybeValue) = getMaybeValue(enum, value)
+            (None, Slot(key, question, children, maybeValue, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed, caption, enum, maybeShortlist))
           }
         } else {
-          (None, Slot(key, question, children, getMaybeValue(enum, value), validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed, caption, enum))
+          val (maybeShortlist, maybeValue) = getMaybeValue(enum, value)
+          (None, Slot(key, question, children, maybeValue, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed, caption, enum, maybeShortlist))
         }
       }
     } else if (children.isDefined) {
@@ -96,32 +98,36 @@ class SlotService @Inject()(logger: LoggingAdapter,
       if (error.isDefined) {
         (error, slot)
       } else {
-        (None, Slot(slotKey, question, Some(slots.map(_._2)), slotValue, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed, caption, enum))
+        (None, Slot(slotKey, question, Some(slots.map(_._2)), slotValue, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed, caption, enum, shortlist))
       }
     } else {
       (None, slot)
     }
   }
 
-  private def getMaybeValue(enum: Option[List[String]], value: Any): Option[Any] =
+  // return (maybeShortlist, maybeValue)
+  private def getMaybeValue(enum: Option[List[String]], value: Any): (Option[List[String]], Option[Any]) =
     if (enum.isDefined) {
-      if (value.isInstanceOf[Int] || value.toString.matches("[+-]?\\d+.?\\d+")) {
+      if (isNumber(value)) {
         val idx = value.toString.toInt
-        Some(enum.get(idx))
+        (None, Some(enum.get(idx)))
       } else {
         val v = value.toString.toLowerCase
         val matches = enum.get filter { opt =>
           opt.toLowerCase contains v
         }
         if (matches.length == 1) {
-          Some(matches.head)
+          (None, Some(matches.head))
         } else {
-          None
+          (Some(matches), None)
         }
       }
     } else {
-      Some(value)
+      (None, Some(value))
     }
+
+  private def isNumber(value: Any): Boolean =
+    value.isInstanceOf[Int] || value.toString.matches("[+-]?\\d+.?\\d+")
 
   private def mapToNashornJSObject(params: Map[String, Any]): NashornJSObject = {
     val constructor = engine.eval("Object").asInstanceOf[NashornJSObject]
@@ -150,7 +156,7 @@ class SlotService @Inject()(logger: LoggingAdapter,
   }
 
   private def fillChildSlots(slot: Slot, params: Map[String, Any], value: Any): (Option[SlotError], Slot) = {
-    val Slot(key, question, children, _, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed, caption, enum) = slot
+    val Slot(key, question, children, _, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed, caption, enum, shortlist) = slot
     val xs = children.get map { child =>
       val k = child.key
       if (params.contains(k)) {
@@ -163,7 +169,7 @@ class SlotService @Inject()(logger: LoggingAdapter,
     if (error.isDefined) {
       (error, slot)
     } else {
-      (None, Slot(key, question, Some(xs.map(_._2)), Some(value), validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed, caption, enum))
+      (None, Slot(key, question, Some(xs.map(_._2)), Some(value), validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed, caption, enum, shortlist))
     }
   }
 

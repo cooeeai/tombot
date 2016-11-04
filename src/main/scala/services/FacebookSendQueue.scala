@@ -28,28 +28,27 @@ class FacebookSendQueue @Inject()(facebookService: FacebookService)
 
   when(Idle) {
     case Event(ev: SendEvent, _) =>
-      println("got here")
       send(ev) map { response =>
         self ! response
       }
-      goto(WaitingForResponse) using Todo(None, Vector.empty[(Long, SendEvent)])
+      goto(WaitingForResponse) using Todo(None, Vector.empty)
   }
 
   when(WaitingForResponse) {
-    case Event(response: SendResponse, t: Todo) =>
-      if (t.queue.length < 2) {
+    case Event(SendResponse(messageId), t: Todo) =>
+      if (t.queue.isEmpty) {
         goto(Idle)
       } else {
-        goto(Active) using Todo(Some(response.messageId), t.queue.tail)
+        goto(Active) using Todo(Some(messageId), t.queue)
       }
 
     case Event(ev: SendEvent, t@Todo(_, q)) =>
-      stay using t.copy(queue = q :+ (timestamp, ev))
+      stay using t.copy(queue = q :+(timestamp, ev))
   }
 
   when(Active) {
     case Event(ev: SendEvent, t@Todo(_, q)) =>
-      stay using t.copy(queue = q :+ (timestamp, ev))
+      stay using t.copy(queue = q :+(timestamp, ev))
 
     case Event(FacebookMessageDeliveredEvent(_, _, FacebookDelivery(messageIds, watermark, _)), t: Todo) =>
       if (messageIds.isDefined) {
@@ -68,7 +67,7 @@ class FacebookSendQueue @Inject()(facebookService: FacebookService)
           }
         }
       }
-      goto(WaitingForResponse)
+      goto(WaitingForResponse) using t.copy(queue = t.queue.tail)
 
     case Event(FacebookMessageReadEvent(_, _, FacebookRead(watermark, _)), t: Todo) =>
       val (ts, ev) = t.queue.head
@@ -77,12 +76,12 @@ class FacebookSendQueue @Inject()(facebookService: FacebookService)
           self ! response
         }
       }
-      goto(WaitingForResponse)
+      goto(WaitingForResponse) using t.copy(queue = t.queue.tail)
   }
 
   whenUnhandled {
     case Event(ev, s) =>
-      log.warning("received unhandled request {} in state {}/{}", ev, stateName, s)
+      log.warning("{} received unhandled request {} in state {}/{}", name, ev, stateName, s)
       stay
   }
 
