@@ -2,7 +2,6 @@ package conversationengine
 
 import akka.actor._
 import akka.contrib.pattern.ReceivePipeline
-import akka.stream.Materializer
 import apis.facebookmessenger.{FacebookMessageDeliveredEvent, FacebookMessageReadEvent}
 import apis.googlenlp._
 import com.google.inject.{Inject, Injector}
@@ -17,6 +16,7 @@ import spray.json._
 import utils.Memoize
 
 import scala.concurrent._
+import scala.concurrent.duration._
 import scala.util.{Failure, Random, Success}
 
 /**
@@ -27,8 +27,6 @@ class ConversationActor @Inject()(config: Config,
                                   smallTalkService: SmallTalkService,
                                   catalogService: CatalogService,
                                   bus: LookupBusImpl,
-                                  implicit val system: ActorSystem,
-                                  implicit val fm: Materializer,
                                   val injector: Injector)
   extends Actor
     with ActorInject
@@ -41,7 +39,7 @@ class ConversationActor @Inject()(config: Config,
     with FSM[State, Data] {
 
   import ConversationActor._
-  import system.dispatcher
+  import context.dispatcher
 
   val maxFailCount = config.getInt("max.fail.count")
 
@@ -106,11 +104,15 @@ class ConversationActor @Inject()(config: Config,
 
         // lookup the concierge actor (grandparent)
         context.actorSelection("../..").resolveOne()(timeout) onComplete {
-          case Success(subscriber) => bus unsubscribe subscriber
-          case Failure(e) => log.error(e, e.getMessage)
+          case Success(subscriber) =>
+            bus unsubscribe subscriber
+            ref ! TransferState(sender, ctx)
+            context.system.scheduler.scheduleOnce(3 minutes) {
+              context stop subscriber
+            }
+          case Failure(e) =>
+            log.error(e, e.getMessage)
         }
-        ref ! TransferState(sender, ctx)
-        context stop self
 
       } else {
         log.debug("re-authenticating")
@@ -189,12 +191,6 @@ class ConversationActor @Inject()(config: Config,
       val c1 = shrug(sender, text, ctx)
       stay using c1
 
-    case Event(BillEnquiry(platform, sender, text), ctx: ConversationContext) =>
-      privilegedAction(platform, sender, text, ctx) { c =>
-        val c1 = quickReply(sender, text, "Your current balance is $41.25. Would you like to pay it now?", c)
-        stay using c1
-      }
-
     case Event(ev, ctx: ConversationContext) =>
       log.warning("{} received unhandled request {} in state {}/{}", name, ev, stateName, ctx)
       stay
@@ -257,7 +253,7 @@ class ConversationActor @Inject()(config: Config,
 
   lazy val provider: (Platform) => ActorRef = memoize {
     case platform => platform match {
-      case Facebook => injectActor[FacebookSendQueue]
+      case Facebook => injectActor[FacebookSendQueue]("queue")
     }
   }
 
@@ -278,8 +274,12 @@ class ConversationActor @Inject()(config: Config,
     lazy val sentimentRequest = languageService.getSentiment(text)
 
     // assigning the requests here starts them in parallel
-    val f1 = entitiesRequest withTimeout new TimeoutException("entities future timed out")
-    val f2 = sentimentRequest withTimeout new TimeoutException("sentiment future timed out")
+    val f1 = entitiesRequest
+      .withTimeout(new TimeoutException("entities future timed out"))(timeout, context.system)
+
+    val f2 = sentimentRequest
+      .withTimeout(new TimeoutException("sentiment future timed out"))(timeout, context.system)
+
     (for {
       entitiesResponse <- f1
       sentimentResponse <- f2

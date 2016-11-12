@@ -1,8 +1,7 @@
 package conversationengine
 
-import akka.actor.{Actor, ActorLogging, ActorSystem, FSM}
+import akka.actor.{Actor, ActorLogging, FSM}
 import akka.contrib.pattern.ReceivePipeline
-import akka.stream.Materializer
 import apis.witapi.WitJsonSupport
 import com.google.inject.{Inject, Injector}
 import conversationengine.IntentActor.{Data, State}
@@ -19,8 +18,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class IntentActor @Inject()(sender: String,
                             intentService: IntentService,
                             userService: UserService,
-                            implicit val system: ActorSystem,
-                            implicit val fm: Materializer,
                             val injector: Injector)
   extends Actor
     with ActorInject
@@ -32,7 +29,7 @@ class IntentActor @Inject()(sender: String,
 
   import IntentActor._
 
-  val child = injectActor[ConversationActor]
+  val child = injectActor[ConversationActor]("buy")
 
   startWith(Active, Uninitialized)
 
@@ -73,10 +70,6 @@ class IntentActor @Inject()(sender: String,
           case Some("analyze") =>
             log.debug("responding to [analyze] intent")
             child ! Analyze(platform, sender, text)
-
-          case Some("bill-enquiry") =>
-            log.debug("responding to [bill-enquiry] intent")
-            child ! BillEnquiry(platform, sender, text)
 
           case _ =>
             log.debug("responding to [unknown] intent")

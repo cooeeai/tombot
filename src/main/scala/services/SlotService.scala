@@ -108,8 +108,10 @@ class SlotService @Inject()(logger: LoggingAdapter,
   // return (maybeShortlist, maybeValue)
   private def getMaybeValue(enum: Option[List[String]], value: Any): (Option[List[String]], Option[Any]) =
     if (enum.isDefined) {
-      if (isNumber(value)) {
+      logger.debug(s"value is [${value.toString}]")
+      if (isInt(value)) {
         val idx = value.toString.toInt
+        logger.debug(s"value is number [$idx]")
         (None, Some(enum.get(idx)))
       } else {
         val v = value.toString.toLowerCase
@@ -126,8 +128,8 @@ class SlotService @Inject()(logger: LoggingAdapter,
       (None, Some(value))
     }
 
-  private def isNumber(value: Any): Boolean =
-    value.isInstanceOf[Int] || value.toString.matches("[+-]?\\d+.?\\d+")
+  private def isInt(value: Any): Boolean =
+    value.isInstanceOf[Int] || value.toString.matches("\\d+")
 
   private def mapToNashornJSObject(params: Map[String, Any]): NashornJSObject = {
     val constructor = engine.eval("Object").asInstanceOf[NashornJSObject]

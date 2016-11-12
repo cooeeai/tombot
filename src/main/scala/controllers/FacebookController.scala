@@ -189,12 +189,13 @@ class FacebookController @Inject()(config: Config,
   val routes =
     path("webhook") {
       get {
-        parameters("hub.verify_token", "hub.challenge") { (token, challenge) =>
-          if (token == verifyToken) {
-            complete(challenge)
-          } else {
-            complete("Error, invalid token")
-          }
+        parameters("hub.verify_token", "hub.challenge") {
+          case (token, challenge) =>
+            if (token == verifyToken) {
+              complete(challenge)
+            } else {
+              complete("Error, invalid token")
+            }
         }
       } ~
       post {
@@ -246,15 +247,16 @@ class FacebookController @Inject()(config: Config,
     path("authorize") {
       get {
         logger.info("authorize get request")
-        parameters("redirect_uri", "account_linking_token") { (redirectURI, accountLinkingToken) =>
-          logger.info("received account linking callback")
-          // Authorization Code, per user, passed to the Account Linking callback
-          val authCode = "1234567890"
-          val successURI = s"$redirectURI&authorization_code=$authCode"
-          val api = config.getString("api.host")
-          complete {
-            html.login.render(s"$api/authenticate", accountLinkingToken, redirectURI, successURI)
-          }
+        parameters('redirect_uri, 'account_linking_token) {
+          case (redirectURI, accountLinkingToken) =>
+            logger.info("received account linking callback")
+            // Authorization Code, per user, passed to the Account Linking callback
+            val authCode = "1234567890"
+            val successURI = s"$redirectURI&authorization_code=$authCode"
+            val api = config.getString("api.host")
+            complete {
+              html.login.render(s"$api/authenticate", accountLinkingToken, redirectURI, successURI)
+            }
         }
       }
     } ~
@@ -263,19 +265,19 @@ class FacebookController @Inject()(config: Config,
         logger.info("authentication request posted")
         // requests that don’t have issues are using HttpEntity.Strict with application/x-www-form-urlencoded
         // see https://github.com/akka/akka/issues/18591
-        //formFields('username, 'password, 'redirectURI, 'successURI) { (username, password, redirectURI, successURI) =>
+        //formFields('username, 'password, 'accountLinkingToken, 'redirectURI, 'successURI) { (username, password, accountLinkingToken, redirectURI, successURI) =>
         entity(as[FormData]) { form =>
           val f = form.fields.toMap
           // the following will throw an error if any field is missing
           val username = f("username")
           val password = f("password")
-          val sender = f("sender") // account_linking_token
-        val redirectURI = f("redirectURI")
+          val accountLinkingToken = f("accountLinkingToken")
+          val redirectURI = f("redirectURI")
           val successURI = f("successURI")
           userService.authenticate(username, password) match {
             case Some(user) =>
               logger.debug("login successful")
-              val f = provider.asInstanceOf[FacebookService].getSenderId(sender) map { psid =>
+              val f = provider.asInstanceOf[FacebookService].getSenderId(accountLinkingToken) map { psid =>
                 logger.debug("psid:\n" + psid.toJson.prettyPrint)
                 userService.setUser(psid.recipient, user)
               }

@@ -4,7 +4,6 @@ import java.util.concurrent.TimeoutException
 
 import akka.actor._
 import akka.contrib.pattern.ReceivePipeline
-import akka.stream.Materializer
 import apis.ciscospark.SparkTempMembership
 import com.google.inject.{Inject, Injector}
 import com.typesafe.config.Config
@@ -24,8 +23,6 @@ class ConciergeActor @Inject()(config: Config,
                                sparkService: SparkService,
                                alchemyService: AlchemyService,
                                rulesService: RulesService,
-                               implicit val system: ActorSystem,
-                               implicit val fm: Materializer,
                                val injector: Injector)
   extends Actor
     with ActorInject
@@ -48,12 +45,12 @@ class ConciergeActor @Inject()(config: Config,
   val conversationEngineDefault = config.getString("conversation.engine")
 
   // form conversation actor
-  val formActor = injectActor[FormActor]
+  val formActor = injectActor[FormActor]("form")
 
   // live agent conversation actor
-  val agentConversationActor = injectActor[AgentConversationActor]
+  val agentConversationActor = injectActor[AgentConversationActor]("agent")
 
-  val provider = injectActor[FacebookSendQueue]
+  val provider = injectActor[FacebookSendQueue]("provider")
 
   startWith(UsingBot, ConversationContext(
     actor = getConversationActor(conversationEngineDefault),
@@ -115,7 +112,8 @@ class ConciergeActor @Inject()(config: Config,
 
     case Event(Fallback(sender, history), ctx: ConversationContext) =>
       provider ! TextMessage(sender, s"${ctx.agentName} (Human) is joining the conversation")
-      lazy val fut = sparkService.setupTempRoom(sender) withTimeout new TimeoutException("future timed out")
+      lazy val fut = sparkService.setupTempRoom(sender)
+        .withTimeout(new TimeoutException("future timed out"))(timeout, context.system)
       val tempMembership = Await.result(fut, timeout)
       log.debug(s"setting up temporary membership to room [${tempMembership.roomId}] for sender [$sender]")
 
@@ -135,6 +133,7 @@ class ConciergeActor @Inject()(config: Config,
       goto(UsingHuman) using c1
 
     case Event(FillForm(sender, goal), _) =>
+      println("and here")
       formActor ! NextQuestion(sender)
       goto(FillingForm)
 
@@ -212,9 +211,9 @@ class ConciergeActor @Inject()(config: Config,
   }
 
   def getConversationActor(engineName: String): ActorRef = engineName.toLowerCase match {
-    case "watson" => injectActor[WatsonConversationActor]
-    case "cooee" => injectActor[IntentActor]
-    case _ => injectActor[IntentActor]
+    case "watson" => injectActor[WatsonConversationActor]("watson")
+    case "cooee" => injectActor[IntentActor]("intent")
+    case _ => injectActor[IntentActor]("intent")
   }
 
   def command(name: String) = s"""^[/:]$name.*""".r

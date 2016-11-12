@@ -174,6 +174,8 @@ class FacebookService @Inject()(config: Config,
       entity.locale, entity.timezone, entity.gender)
   }
 
+  // example error message
+  //{"error":{"message":"(#10301) Account linking token expired","type":"OAuthException","code":10301,"fbtrace_id":"C4HHSJ9+b9G"}}
   def getSenderId(accountLinkingToken: String): Future[FacebookUserPSID] = {
     logger.info("getting sender id")
     for {
@@ -181,8 +183,11 @@ class FacebookService @Inject()(config: Config,
         method = HttpMethods.GET,
         uri = s"https://graph.facebook.com/v2.8/me?access_token=$accessToken&fields=recipient&account_linking_token=$accountLinkingToken",
         headers = List(headers.Accept(MediaTypes.`application/json`))))
-      entity <- Unmarshal(response.entity).to[FacebookUserPSID]
-    } yield entity
+      entity <- Unmarshal(response.entity).to[String]
+    } yield {
+      logger.debug(entity)
+      entity.parseJson.convertTo[FacebookUserPSID]
+    }
   }
 
   def setupWelcomeGreeting(): Unit = {

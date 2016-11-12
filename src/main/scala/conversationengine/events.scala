@@ -41,8 +41,6 @@ object events {
 
   case class AnalysisFailure(platform: Platform, sender: String, text: String)
 
-  case class BillEnquiry(platform: Platform, sender: String, text: String) extends TextLike
-
   case class ShowHistory(sender: String)
 
   case class SwitchConversationEngine(sender: String, engine: ConversationEngine)
