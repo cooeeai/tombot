@@ -4,6 +4,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import com.google.common.base.CaseFormat
 import spray.json._
 import spray.json.lenses.JsonLenses._
+import utils.JsonSupportUtils
 
 /**
   * Created by markmo on 9/11/2016.
@@ -524,7 +525,11 @@ case class TelegramSendMessage(chatId: Int,
                                replyToMessageId: Option[Int],
                                replyMarkup: Option[TelegramReplyMarkup])
 
-trait TelegramJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
+case class TelegramFailResult(status: Boolean, code: Int, description: String)
+
+case class TelegramResult[T](status: Boolean, result: T)
+
+trait TelegramJsonSupport extends DefaultJsonProtocol with SprayJsonSupport with JsonSupportUtils {
 
   implicit val telegramUserJsonFormat = jsonFormat(TelegramUser, "id", "first_name", "last_name", "username")
   implicit val telegramChatJsonFormat = jsonFormat(TelegramChat, "id", "type", "title", "username", "first_name", "last_name", "all_members_are_administrators")
@@ -639,23 +644,9 @@ trait TelegramJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
 
   implicit val telegramSendMessageJsonFormat = jsonFormat(TelegramSendMessage, "chat_id", "text", "parse_mode", "disable_web_page_preview", "disable_notification", "reply_to_message_id", "reply_markup")
 
-  implicit object AnyJsonFormat extends JsonFormat[Any] {
+  implicit val telegramFailResultJsonFormat = jsonFormat(TelegramFailResult, "ok", "error_code", "description")
 
-    def write(x: Any) = x match {
-      case n: Int => JsNumber(n)
-      case s: String => JsString(s)
-      case b: Boolean if b => JsTrue
-      case b: Boolean if !b => JsFalse
-    }
-
-    def read(value: JsValue) = value match {
-      case JsNumber(n) => n.intValue()
-      case JsString(s) => s
-      case JsTrue => true
-      case JsFalse => false
-    }
-
-  }
+  implicit def telegramResultJsonFormat[T: JsonFormat] = jsonFormat(TelegramResult.apply[T], "ok", "result")
 
   def getFields(v: Product) = v.getClass.getDeclaredFields.map(_.getName).zip(v.productIterator.to)
 

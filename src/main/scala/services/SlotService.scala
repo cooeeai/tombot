@@ -13,6 +13,7 @@ import com.google.inject.Inject
 import jdk.nashorn.api.scripting.{JSObject => NashornJSObject}
 import memory.{Slot, SlotError}
 import spray.json._
+import utils.JsonSupportUtils
 
 import scala.collection.JavaConversions._
 import scala.concurrent._
@@ -24,9 +25,9 @@ import scala.reflect._
   */
 class SlotService @Inject()(logger: LoggingAdapter,
                             implicit val system: ActorSystem,
-                            implicit val fm: Materializer) {
+                            implicit val fm: Materializer)
+  extends JsonSupportUtils {
 
-  import DefaultJsonProtocol._
   import system.dispatcher
 
   val engine = new ScriptEngineManager(null).getEngineByName("nashorn")
@@ -34,24 +35,6 @@ class SlotService @Inject()(logger: LoggingAdapter,
   val invalidMessageDefault = "Invalid format. Please try again."
 
   val timeout = 30 second
-
-  implicit object AnyJsonFormat extends JsonFormat[Any] {
-
-    def write(x: Any) = x match {
-      case n: Int => JsNumber(n)
-      case s: String => JsString(s)
-      case b: Boolean if b => JsTrue
-      case b: Boolean if !b => JsFalse
-    }
-
-    def read(value: JsValue) = value match {
-      case JsNumber(n) => n.intValue()
-      case JsString(s) => s
-      case JsTrue => true
-      case JsFalse => false
-    }
-
-  }
 
   def fillSlot(slot: Slot, key: String, value: Any): (Option[SlotError], Slot) = {
     val Slot(slotKey, question, children, slotValue, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed, caption, enum, shortlist) = slot
