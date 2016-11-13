@@ -18,7 +18,7 @@ import utils.JsonSupportUtils
   * @param lastName  Optional. User‘s or bot’s last name
   * @param username  Optional. User‘s or bot’s username
   */
-case class TelegramUser(id: Int, firstName: String, lastName: String, username: String)
+case class TelegramUser(id: Int, firstName: String, lastName: Option[String], username: Option[String])
 
 /**
   * This object represents a chat.
@@ -525,6 +525,23 @@ case class TelegramSendMessage(chatId: Int,
                                replyToMessageId: Option[Int],
                                replyMarkup: Option[TelegramReplyMarkup])
 
+/**
+  * Contains information about the current status of a webhook.
+  *
+  * @param url                  Webhook URL, may be empty if webhook is not set up
+  * @param hasCustomCertificate True, if a custom certificate was provided for webhook certificate checks
+  * @param pendingUpdateCount   Number of updates awaiting delivery
+  * @param lastErrorDate        Optional. Unix time for the most recent error that happened when trying to deliver
+  *                             an update via webhook
+  * @param lastErrorMessage     Optional. Error message in human-readable format for the most recent error that
+  *                             happened when trying to deliver an update via webhook
+  */
+case class TelegramWebhookInfo(url: String,
+                               hasCustomCertificate: Boolean,
+                               pendingUpdateCount: Int,
+                               lastErrorDate: Option[Int],
+                               lastErrorMessage: Option[String])
+
 case class TelegramFailResult(status: Boolean, code: Int, description: String)
 
 case class TelegramResult[T](status: Boolean, result: T)
@@ -552,7 +569,7 @@ trait TelegramJsonSupport extends DefaultJsonProtocol with SprayJsonSupport with
     def write(m: TelegramMessage) = objToJson(m)
 
     def read(value: JsValue) = TelegramMessage(
-      value.extract[Int]('id),
+      value.extract[Int]('message_id),
       value.extract[TelegramUser]('from.?),
       value.extract[Int]('date),
       value.extract[TelegramChat]('chat),
@@ -647,6 +664,8 @@ trait TelegramJsonSupport extends DefaultJsonProtocol with SprayJsonSupport with
   implicit val telegramFailResultJsonFormat = jsonFormat(TelegramFailResult, "ok", "error_code", "description")
 
   implicit def telegramResultJsonFormat[T: JsonFormat] = jsonFormat(TelegramResult.apply[T], "ok", "result")
+
+  implicit val telegramWebhookInfoJsonFormat = jsonFormat(TelegramWebhookInfo, "url", "has_custom_certificate", "pending_update_count", "last_error_date", "last_error_message")
 
   def getFields(v: Product) = v.getClass.getDeclaredFields.map(_.getName).zip(v.productIterator.to)
 

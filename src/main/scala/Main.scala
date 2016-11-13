@@ -59,6 +59,7 @@ object Main extends App {
   val addressController = injector.instance[ValidationController]
   val smsController = injector.instance[SMSController]
   val chatController = injector.instance[ChatController]
+  val telegramController = injector.instance[TelegramController]
 
   val routes =
     facebookController.routes ~
@@ -66,7 +67,8 @@ object Main extends App {
     sparkController.routes ~
     addressController.routes ~
     smsController.routes ~
-    chatController.routes
+    chatController.routes ~
+    telegramController.routes
 
   val interface = config.getString("http.interface")
   val port = config.getInt("http.port")

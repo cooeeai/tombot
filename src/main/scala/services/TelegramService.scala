@@ -7,7 +7,7 @@ import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.Materializer
-import apis.telegram.{TelegramJsonSupport, TelegramResult}
+import apis.telegram._
 import com.google.inject.Inject
 import com.typesafe.config.Config
 
@@ -30,23 +30,49 @@ class TelegramService @Inject()(config: Config,
 
   val http = Http()
 
+  val baseURL = "https://api.telegram.org"
+
   def setWebhook(): Future[TelegramResult[Boolean]] = {
-    val filename = "telegram.pem"
-    val in = getClass.getResourceAsStream(filename)
-    val bytes = Stream.continually(in.read()) takeWhile (-1 !=) map (_.toByte) toArray
+    logger.debug("setting telegram webhook")
+//    val filename = "/telegram.pem"
+//    val in = getClass.getResourceAsStream(filename)
+//    val bytes = Stream.continually(in.read()) takeWhile (-1 !=) map (_.toByte) toArray
     val formData = Multipart.FormData(
-      Multipart.FormData.BodyPart("certificate",
-        HttpEntity(MediaTypes.`application/octet-stream`, bytes),
-        Map("filename" -> filename)),
+//      Multipart.FormData.BodyPart("certificate",
+//        HttpEntity(MediaTypes.`application/octet-stream`, bytes),
+//        Map("filename" -> filename)),
       Multipart.FormData.BodyPart("url", HttpEntity(s"$api/telegram-webhook"))
     )
+    //logger.debug("formData:\n" + formData)
     for {
       request <- Marshal(formData).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.POST,
-        uri = s"https://api.telegram.org/bot$accessToken/setWebhook",
+        uri = s"$baseURL/bot$accessToken/setWebhook",
         entity = request))
       entity <- Unmarshal(response.entity).to[TelegramResult[Boolean]]
+    } yield entity
+  }
+
+  def getWebhookInfo: Future[TelegramWebhookInfo] = {
+    logger.debug("getting webhook info")
+    for {
+      response <- http.singleRequest(HttpRequest(
+        method = HttpMethods.GET,
+        uri = s"$baseURL/bot$accessToken/getWebhookInfo"))
+      entity <- Unmarshal(response.entity).to[TelegramWebhookInfo]
+    } yield entity
+  }
+
+  def sendMessage(chatId: Int, text: String): Future[TelegramMessage] = {
+    val payload = TelegramSendMessage(chatId, text, None, None, None, None, None)
+    for {
+      request <- Marshal(payload).to[RequestEntity]
+      response <- http.singleRequest(HttpRequest(
+        method = HttpMethods.POST,
+        uri = s"$baseURL/bot$accessToken/sendMessage",
+        entity = request))
+      entity <- Unmarshal(response.entity).to[TelegramMessage]
     } yield entity
   }
 }
