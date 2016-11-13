@@ -10,6 +10,7 @@ import akka.stream.Materializer
 import apis.telegram._
 import com.google.inject.Inject
 import com.typesafe.config.Config
+import spray.json._
 
 import scala.concurrent.Future
 
@@ -22,6 +23,7 @@ class TelegramService @Inject()(config: Config,
                                 implicit val fm: Materializer)
   extends TelegramJsonSupport {
 
+  import Builder._
   import system.dispatcher
 
   val api = config.getString("api.host")
@@ -34,13 +36,13 @@ class TelegramService @Inject()(config: Config,
 
   def setWebhook(): Future[TelegramResult[Boolean]] = {
     logger.debug("setting telegram webhook")
-//    val filename = "/telegram.pem"
-//    val in = getClass.getResourceAsStream(filename)
-//    val bytes = Stream.continually(in.read()) takeWhile (-1 !=) map (_.toByte) toArray
+    //    val filename = "/telegram.pem"
+    //    val in = getClass.getResourceAsStream(filename)
+    //    val bytes = Stream.continually(in.read()) takeWhile (-1 !=) map (_.toByte) toArray
     val formData = Multipart.FormData(
-//      Multipart.FormData.BodyPart("certificate",
-//        HttpEntity(MediaTypes.`application/octet-stream`, bytes),
-//        Map("filename" -> filename)),
+      //      Multipart.FormData.BodyPart("certificate",
+      //        HttpEntity(MediaTypes.`application/octet-stream`, bytes),
+      //        Map("filename" -> filename)),
       Multipart.FormData.BodyPart("url", HttpEntity(s"$api/telegram-webhook"))
     )
     //logger.debug("formData:\n" + formData)
@@ -64,15 +66,52 @@ class TelegramService @Inject()(config: Config,
     } yield entity
   }
 
-  def sendMessage(chatId: Int, text: String): Future[TelegramMessage] = {
-    val payload = TelegramSendMessage(chatId, text, None, None, None, None, None)
+  def sendTextMessage(chatId: Int, text: String): Future[TelegramMessage] = {
+    val payload = (
+      message
+        forChatId chatId
+        withText text
+        build()
+      )
+    logger.debug(payload.toJson.prettyPrint)
     for {
       request <- Marshal(payload).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.POST,
         uri = s"$baseURL/bot$accessToken/sendMessage",
         entity = request))
-      entity <- Unmarshal(response.entity).to[TelegramMessage]
-    } yield entity
+      entity <- Unmarshal(response.entity).to[String]
+    } yield {
+      logger.debug(entity.toJson.prettyPrint)
+      entity.toJson.convertTo[TelegramMessage]
+    }
+  }
+
+  def sendQuickReply(chatId: Int, text: String): Future[TelegramMessage] = {
+    val keyboard = (
+      inlineKeyboard
+        addPostbackButton("Yes", "yes")
+        addPostbackButton("No", "no")
+        build()
+      )
+    val payload = (
+      message
+        forChatId chatId
+        withText text
+        withInlineKeyboard keyboard
+        build()
+      )
+    logger.debug(payload.toJson.prettyPrint)
+    for {
+      request <- Marshal(payload).to[RequestEntity]
+      response <- http.singleRequest(HttpRequest(
+        method = HttpMethods.POST,
+        uri = s"$baseURL/bot$accessToken/sendMessage",
+        entity = request))
+      entity <- Unmarshal(response.entity).to[String]
+    } yield {
+      logger.debug(entity.toJson.prettyPrint)
+      entity.toJson.convertTo[TelegramMessage]
+    }
   }
 }

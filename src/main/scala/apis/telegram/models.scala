@@ -685,3 +685,94 @@ trait TelegramJsonSupport extends DefaultJsonProtocol with SprayJsonSupport with
     }.toSeq: _*)
 
 }
+
+object Builder {
+
+  class SendMessageBuilder(chatId: Option[Int],
+                           text: Option[String],
+                           parseMode: Option[String],
+                           disableWebPagePreview: Option[Boolean],
+                           disableNotification: Option[Boolean],
+                           replyToMsgId: Option[Int],
+                           replyMarkup: Option[TelegramReplyMarkup]) {
+
+    def forChatId(value: Int) = new SendMessageBuilder(Some(value), text, parseMode, disableWebPagePreview, disableNotification, replyToMsgId, replyMarkup)
+
+    def withText(value: String) = new SendMessageBuilder(chatId, Some(value), parseMode, disableWebPagePreview, disableNotification, replyToMsgId, replyMarkup)
+
+    def usingMarkdown() = new SendMessageBuilder(chatId, text, Some("Markdown"), disableWebPagePreview, disableNotification, replyToMsgId, replyMarkup)
+
+    def usingHTML() = new SendMessageBuilder(chatId, text, Some("HTML"), disableWebPagePreview, disableNotification, replyToMsgId, replyMarkup)
+
+    def withWebPagePreviewOn() = new SendMessageBuilder(chatId, text, parseMode, Some(false), disableNotification, replyToMsgId, replyMarkup)
+
+    def withWebPagePreviewOff() = new SendMessageBuilder(chatId, text, parseMode, Some(true), disableNotification, replyToMsgId, replyMarkup)
+
+    def withNotificationOn() = new SendMessageBuilder(chatId, text, parseMode, disableWebPagePreview, Some(false), replyToMsgId, replyMarkup)
+
+    def withNotificationOff() = new SendMessageBuilder(chatId, text, parseMode, disableWebPagePreview, Some(true), replyToMsgId, replyMarkup)
+
+    def replyToMessageId(value: Int) = new SendMessageBuilder(chatId, text, parseMode, disableWebPagePreview, disableNotification, Some(value), replyMarkup)
+
+    def withInlineKeyboard(inlineKeyboard: TelegramInlineKeyboardMarkup) = new SendMessageBuilder(chatId, text, parseMode, disableWebPagePreview, disableNotification, replyToMsgId, Some(inlineKeyboard))
+
+    def withCustomKeyboard(customKeyboard: TelegramReplyKeyboardMarkup) = new SendMessageBuilder(chatId, text, parseMode, disableWebPagePreview, disableNotification, replyToMsgId, Some(customKeyboard))
+
+    def hideCustomKeyboard() = new SendMessageBuilder(chatId, text, parseMode, disableWebPagePreview, disableNotification, replyToMsgId, Some(TelegramReplyKeyboardHide(hideKeyboard = true, None)))
+
+    def forceReply() = new SendMessageBuilder(chatId, text, parseMode, disableWebPagePreview, disableNotification, replyToMsgId, Some(TelegramForceReply(forceReply = true, None)))
+
+    def build() = TelegramSendMessage(chatId.get, text.get, parseMode, disableWebPagePreview, disableNotification, replyToMsgId, replyMarkup)
+
+  }
+
+  def message = new SendMessageBuilder(None, None, None, None, None, None, None)
+
+  class InlineKeyboardMarkupBuilder(keyboard: List[List[TelegramInlineKeyboardButton]]) {
+
+    def addLinkButton(title: String, url: String) = {
+      val (x :: xs) = keyboard.reverse
+      new InlineKeyboardMarkupBuilder(
+        ((x :+ TelegramInlineKeyboardButton(title, Some(url), None, None, None, None)) :: xs).reverse)
+    }
+
+    def addPostbackButton(title: String, postbackData: String) = {
+      val (x :: xs) = keyboard.reverse
+      new InlineKeyboardMarkupBuilder(
+        ((x :+ TelegramInlineKeyboardButton(title, None, Some(postbackData), None, None, None)) :: xs).reverse)
+    }
+
+    def addRow() = new InlineKeyboardMarkupBuilder(keyboard :+ Nil)
+
+    def build() = TelegramInlineKeyboardMarkup(keyboard)
+
+  }
+
+  def inlineKeyboard = new InlineKeyboardMarkupBuilder(List(List.empty[TelegramInlineKeyboardButton]))
+
+  class ReplyKeyboardMarkupBuilder(keyboard: List[List[TelegramKeyboardButton]],
+                                   resizeKeyboard: Option[Boolean],
+                                   oneTimeKeyboard: Option[Boolean],
+                                   isSelective: Option[Boolean]) {
+
+    def addButton(title: String) = {
+      val (x :: xs) = keyboard.reverse
+      new ReplyKeyboardMarkupBuilder(
+        ((x :+ TelegramKeyboardButton(title, None, None)) :: xs).reverse, resizeKeyboard, oneTimeKeyboard, isSelective)
+    }
+
+    def addRow() = new ReplyKeyboardMarkupBuilder(keyboard :+ Nil, resizeKeyboard, oneTimeKeyboard, isSelective)
+
+    def requestResize() = new ReplyKeyboardMarkupBuilder(keyboard, Some(true), None, None)
+
+    def requestOneTime() = new ReplyKeyboardMarkupBuilder(keyboard, resizeKeyboard, Some(true), None)
+
+    def selective() = new ReplyKeyboardMarkupBuilder(keyboard, resizeKeyboard, oneTimeKeyboard, Some(true))
+
+    def build() = TelegramReplyKeyboardMarkup(keyboard, resizeKeyboard, oneTimeKeyboard, isSelective)
+
+  }
+
+  def customKeyboard = new ReplyKeyboardMarkupBuilder(List(List.empty[TelegramKeyboardButton]), None, None, None)
+
+}

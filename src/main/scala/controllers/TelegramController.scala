@@ -40,7 +40,7 @@ class TelegramController @Inject()(logger: LoggingAdapter,
           message match {
             case Some(msg) =>
               val chat = msg.chat
-              telegramService.sendMessage(chat.id, "Hello World")
+              telegramService.sendTextMessage(chat.id, "Hello World")
             case None => // do nothing
           }
           complete(OK)
