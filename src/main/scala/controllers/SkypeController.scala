@@ -7,7 +7,8 @@ import akkahttptwirl.TwirlSupport._
 import apis.skype._
 import com.google.inject.{Inject, Singleton}
 import com.typesafe.config.Config
-import conversationengine.events._
+import models.Platform
+import models.events.TextResponse
 import services.{Conversation, SkypeService, UserService}
 import spray.json._
 
@@ -35,7 +36,7 @@ class SkypeController @Inject()(config: Config,
       post {
         logger.info("skypewebhook called")
         entity(as[JsObject]) { data =>
-          logger.debug("received body:\n" + data.prettyPrint)
+          logger.debug("received body:\n{}", data.prettyPrint)
           val fields = data.fields
           fields("type") match {
             case JsString("message") =>
@@ -44,7 +45,7 @@ class SkypeController @Inject()(config: Config,
               val sender = userMessage.from.id
               token match {
                 case Some(_) =>
-                  converse(conversationId, Respond(Skype, conversationId, userMessage.text))
+                  converse(conversationId, TextResponse(Skype, conversationId, userMessage.text))
                 case None =>
                   skypeService.getMicrosoftToken map { tk =>
                     token = Some(tk)

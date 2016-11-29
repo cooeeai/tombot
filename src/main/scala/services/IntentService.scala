@@ -8,10 +8,10 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.headers.{Authorization, OAuth2BearerToken}
 import akka.http.scaladsl.model.{HttpMethods, HttpRequest}
 import akka.http.scaladsl.unmarshalling.Unmarshal
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
+import apis.witapi.{Meaning, WitJsonSupport}
 import com.google.inject.Inject
 import com.typesafe.config.Config
-import apis.witapi.{Meaning, WitJsonSupport}
 
 import scala.concurrent.Future
 
@@ -20,19 +20,18 @@ import scala.concurrent.Future
   */
 class IntentService @Inject()(config: Config,
                               logger: LoggingAdapter,
-                              implicit val system: ActorSystem)
+                              implicit val system: ActorSystem,
+                              implicit val fm: Materializer)
   extends WitJsonSupport {
 
   import system.dispatcher
 
-  implicit val materializer = ActorMaterializer()
-
   val accessToken = System.getenv("WIT_AI_API_TOKEN")
+  val url = config.getString("wit.api.url")
+  val version = config.getString("wit.api.version")
 
   def getIntent(text: String): Future[Meaning] = {
-    logger.info("getting intent of [" + text + "]")
-    val url = config.getString("wit.api.url")
-    val version = config.getString("wit.api.version")
+    logger.info("IntentService getting intent of [{}]", text)
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       response <- Http().singleRequest(HttpRequest(

@@ -10,9 +10,9 @@ case class Entity(confidence: Double, value: String, entityType: Option[String])
 
 case class Meaning(messageId: String, text: String, entities: Map[String, List[Entity]]) {
 
-  def getIntent: Option[String] =
+  def getIntent: Option[Entity] =
     if (entities.contains("intent")) {
-      entities("intent").headOption.map(_.value)
+      entities("intent").headOption
     } else {
       None
     }

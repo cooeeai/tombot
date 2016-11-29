@@ -12,7 +12,7 @@ import apis.skype._
 import com.google.inject.{Inject, Singleton}
 import com.typesafe.config.Config
 import memory.Slot
-import models.{UserProfile, Item, ItemLinkAction, ItemPostbackAction}
+import models.{Item, ItemLinkAction, ItemPostbackAction, UserProfile}
 import spray.json._
 
 import scala.concurrent.Future
@@ -44,7 +44,7 @@ class SkypeService @Inject()(config: Config,
   val postbackURL = ""
 
   def sendTextMessage(conversationId: String, text: String): Future[SendResponse] = {
-    logger.info(s"sending Skype message [$text] to conversation [$conversationId]")
+    logger.info("sending Skype message [{}] to conversation [{}]", text, conversationId)
     import Builder._
     val authorization = Authorization(OAuth2BearerToken(token.get.accessToken))
 
@@ -61,7 +61,7 @@ class SkypeService @Inject()(config: Config,
   }
 
   def sendLoginCard(sender: String, conversationId: String): Future[SendResponse] = {
-    logger.info(s"sending Skype signin request to sender [$sender] using conversationId [$conversationId]")
+    logger.info("sending Skype signin request to sender [{}] using conversationId [{}]", sender, conversationId)
     import Builder._
     val authorization = Authorization(OAuth2BearerToken(token.get.accessToken))
 
@@ -74,7 +74,7 @@ class SkypeService @Inject()(config: Config,
         build()
       )
 
-    logger.debug("sending payload:\n" + payload.toJson.prettyPrint)
+    logger.debug("sending payload:\n{}", payload.toJson.prettyPrint)
 
     for {
       request <- Marshal(payload).to[RequestEntity]
@@ -131,7 +131,7 @@ class SkypeService @Inject()(config: Config,
   }
 
   def sendQuickReply(conversationId: String, text: String): Future[SendResponse] = {
-    logger.info(s"sending Skype quick reply using conversationId [$conversationId]")
+    logger.info("sending Skype quick reply using conversationId [{}]", conversationId)
     import Builder._
     val authorization = Authorization(OAuth2BearerToken(token.get.accessToken))
 
@@ -143,7 +143,7 @@ class SkypeService @Inject()(config: Config,
         build()
       )
 
-    logger.debug("sending payload:\n" + payload.toJson.prettyPrint)
+    logger.debug("sending payload:\n{}", payload.toJson.prettyPrint)
 
     for {
       request <- Marshal(payload).to[RequestEntity]

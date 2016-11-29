@@ -4,7 +4,7 @@ import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import apis.telegram.{TelegramJsonSupport, TelegramUpdate}
-import com.google.inject.{Singleton, Inject}
+import com.google.inject.{Inject, Singleton}
 import services.TelegramService
 import spray.json._
 

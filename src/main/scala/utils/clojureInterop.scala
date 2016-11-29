@@ -6,8 +6,6 @@ import java.util.{List => JList, Map => JMap, Set => JSet}
 import clojure.java.api.Clojure
 import clojure.lang._
 
-import spray.json._
-
 import scala.collection.JavaConversions._
 
 /**
@@ -68,7 +66,7 @@ object ClojureInterop {
     case _: IPersistentList => expr.asInstanceOf[JList[Expr]].toList.map(subexpr => clojureToScala(subexpr))
     case _: IPersistentMap => expr.asInstanceOf[JMap[Expr, Expr]].toMap.map { case (k, v) => (clojureToScala(k), clojureToScala(v)) }
     case _: IPersistentSet => expr.asInstanceOf[JSet[Expr]].toSet.asInstanceOf[Set[Expr]].map(subexpr => clojureToScala(subexpr))
-    case _: JList[Expr @unchecked] => expr.asInstanceOf[JList[Expr]].toList.map(subexpr => clojureToScala(subexpr))
+    case _: JList[Expr@unchecked] => expr.asInstanceOf[JList[Expr]].toList.map(subexpr => clojureToScala(subexpr))
     case v: Number => v
     case v: String => v
     case v: Boolean => v
@@ -81,10 +79,10 @@ object ClojureInterop {
   def scalaToClojure(expr: Expr): Any = expr match {
     case CKeyword(ns, name, _) => Keyword.intern(ns, name)
     case CSymbol(ns, name, _) => Symbol.intern(ns, name)
-    case m: Map[Expr @unchecked, Expr @unchecked] => PersistentHashMap.create(m.map { case (k, v) => (scalaToClojure(k), scalaToClojure(v)) })
-    case s: Set[Expr @unchecked] => PersistentHashSet.create(s.map(subexpr => scalaToClojure(subexpr)).toList)
-    case v: Vector[Expr @unchecked] => PersistentVector.create(v.map(subexpr => scalaToClojure(subexpr)))
-    case l: List[Expr @unchecked] => PersistentList.create(l.map(subexpr => scalaToClojure(subexpr)))
+    case m: Map[Expr@unchecked, Expr@unchecked] => PersistentHashMap.create(m.map { case (k, v) => (scalaToClojure(k), scalaToClojure(v)) })
+    case s: Set[Expr@unchecked] => PersistentHashSet.create(s.map(subexpr => scalaToClojure(subexpr)).toList)
+    case v: Vector[Expr@unchecked] => PersistentVector.create(v.map(subexpr => scalaToClojure(subexpr)))
+    case l: List[Expr@unchecked] => PersistentList.create(l.map(subexpr => scalaToClojure(subexpr)))
     case _ => expr
   }
 

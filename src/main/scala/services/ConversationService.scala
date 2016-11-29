@@ -1,13 +1,13 @@
 package services
 
-import akka.actor.ActorSystem
+import akka.actor.{ActorRef, ActorSystem}
 import akka.event.LoggingAdapter
-import akka.util.Timeout
 import com.google.inject.{Inject, Injector, Singleton}
-import conversationengine.{ConciergeActor, LookupBusImpl}
+import engines.{ConciergeActor, LookupBusImpl}
 import modules.akkaguice.ActorInject
 
 import scala.concurrent.duration._
+import scala.concurrent.{Future, Promise}
 import scala.util.{Failure, Success}
 
 /**
@@ -23,17 +23,17 @@ class ConversationService @Inject()(logger: LoggingAdapter,
 
   import system.dispatcher
 
-  implicit val timeout: Timeout = 60 seconds
+  implicit val timeout: akka.util.Timeout = 30 seconds
 
   def converse(sender: String, message: Any): Unit = {
-    logger.debug(s"looking up user linked to sender [$sender]")
+    logger.debug("looking up user linked to sender [{}]", sender)
     val user = userService.getUser(sender)
     val uid = user match {
       case Some(u) => u.id
       case None => sender
     }
-    logger.debug(s"looking up actor for user/" + uid)
-    system.actorSelection("user/" + uid).resolveOne() onComplete {
+    logger.debug("looking up actor for user/{}", uid)
+    system.actorSelection("user/" + uid).resolveOne onComplete {
       case Success(ref) =>
         logger.debug("found actor")
         ref ! message
@@ -45,6 +45,30 @@ class ConversationService @Inject()(logger: LoggingAdapter,
         bus subscribe(ref, s"delivered:$sender")
         ref ! message
     }
+  }
+
+  def getConversationActor(sender: String): Future[ActorRef] = {
+    logger.debug("looking up user linked to sender [{}]", sender)
+    val user = userService.getUser(sender)
+    val uid = user match {
+      case Some(u) => u.id
+      case None => sender
+    }
+    val p = Promise[ActorRef]()
+    logger.debug("looking up actor for user/{}", uid)
+    system.actorSelection("user/" + uid).resolveOne onComplete {
+      case Success(ref) =>
+        logger.debug("found actor")
+        p success ref
+      case Failure(e) =>
+        logger.debug(e.getMessage)
+        logger.debug("creating new actor")
+        val ref = injectTopActor[ConciergeActor](uid)
+        bus subscribe(ref, s"authenticated:$sender")
+        bus subscribe(ref, s"delivered:$sender")
+        p success ref
+    }
+    p.future
   }
 
 }

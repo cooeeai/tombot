@@ -12,7 +12,7 @@ import apis.telstra.{Builder, SMSMessageResponse, SMSMessageStatus, TelstraJsonS
 import com.google.inject.Inject
 import com.typesafe.config.Config
 import memory.Slot
-import models.{UserProfile, Item}
+import models.{Item, UserProfile}
 
 import scala.concurrent.Future
 
@@ -34,7 +34,7 @@ class SMSService @Inject()(config: Config,
   val accessToken = System.getenv("TELSTRA_ACCESS_TOKEN")
 
   def sendTextMessage(sender: String, text: String): Future[SendResponse] = {
-    logger.info(s"sending SMS message [$text] to phone number [$sender]")
+    logger.info("sending SMS message [{}] to phone number [{}]", text, sender)
     import Builder._
     val authorization = Authorization(OAuth2BearerToken(accessToken))
 
@@ -62,7 +62,7 @@ class SMSService @Inject()(config: Config,
     * @return Future[SMSMessageStatus]
     */
   def getMessageStatus(messageId: String): Future[SMSMessageStatus] = {
-    logger.info(s"getting status of message [$messageId]")
+    logger.info("getting status of message [{}]", messageId)
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       response <- http.singleRequest(HttpRequest(

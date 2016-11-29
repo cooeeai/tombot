@@ -6,7 +6,8 @@ import akka.http.scaladsl.server.Directives._
 import apis.telstra.{SMSMessage, SMSReply, TelstraJsonSupport}
 import com.google.inject.Inject
 import com.typesafe.config.Config
-import conversationengine.events.Respond
+import models.Platform
+import models.events.TextResponse
 import services.{Conversation, SMSService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -34,7 +35,7 @@ class SMSController @Inject()(config: Config,
           smsService.getMessageStatus(reply.messageId) map { messageStatus =>
             // no need to check status as message has been delivered
             val sender = messageStatus.to
-            converse(sender, Respond(SMS, sender, reply.content))
+            converse(sender, TextResponse(SMS, sender, reply.content))
           }
           complete(OK)
         }

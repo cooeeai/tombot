@@ -17,23 +17,23 @@ class AlchemyService @Inject()(logger: LoggingAdapter) {
   val apiKey = System.getenv("ALCHEMY_API_KEY")
 
   def getKeywords(text: String): Map[String, Double] = {
-    logger.info(s"getting keywords from [$text]")
+    logger.info("getting keywords from [{}]", text)
     val service = new AlchemyLanguage()
     service.setApiKey(apiKey)
     val params = new util.HashMap[String, Object]()
     params.put(AlchemyLanguage.TEXT, text)
     val sentimentResponse: DocumentSentiment = service.getSentiment(params).execute()
-    logger.debug("sentiment response: " + sentimentResponse.toString)
+    logger.debug("sentiment response: {}", sentimentResponse.toString)
     val keywordsResponse: Keywords = service.getKeywords(params).execute()
-    logger.debug("keywords response: " + keywordsResponse.toString)
+    logger.debug("keywords response: {}", keywordsResponse.toString)
     val maybeSentimentType = if (sentimentResponse.getSentiment != null) {
       Some(sentimentResponse.getSentiment.getType)
     } else {
       None
     }
-    logger.debug("message sentiment is " + maybeSentimentType)
+    logger.debug("message sentiment is {}", maybeSentimentType)
     keywordsResponse.getKeywords filter { keyword: Keyword =>
-      logger.debug(s"[${keyword.getText}] sentiment is ${keyword.getSentiment}")
+      logger.debug("[{}] sentiment is {}", keyword.getText, keyword.getSentiment)
       maybeSentimentType match {
         case Some(sentimentType) =>
           if (keyword.getSentiment != null) {

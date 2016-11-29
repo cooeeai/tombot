@@ -1,0 +1,2 @@
+Main intents, such as "Buy"
+Side intents, such as "Greet"

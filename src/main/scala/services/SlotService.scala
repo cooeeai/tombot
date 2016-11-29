@@ -53,7 +53,7 @@ class SlotService @Inject()(logger: LoggingAdapter,
               val fn = engine.eval(parseExpr.get).asInstanceOf[NashornJSObject]
               val result = fn.call(null, jsObject).asInstanceOf[NashornJSObject]
               val params = jsObjectToMap(result)
-              logger.debug("params:\n" + params)
+              logger.debug("params:\n{}", params)
               fillChildSlots(slot, params, value)
             } else {
               val params = Await.result(callApi[Map[String, Any]](parseApi.get, value), timeout)
@@ -91,10 +91,10 @@ class SlotService @Inject()(logger: LoggingAdapter,
   // return (maybeShortlist, maybeValue)
   private def getMaybeValue(enum: Option[List[String]], value: Any): (Option[List[String]], Option[Any]) =
     if (enum.isDefined) {
-      logger.debug(s"value is [${value.toString}]")
+      logger.debug("value is [{}]", value.toString)
       if (isInt(value)) {
         val idx = value.toString.toInt
-        logger.debug(s"value is number [$idx]")
+        logger.debug("value is number [{}]", idx)
         (None, Some(enum.get(idx)))
       } else {
         val v = value.toString.toLowerCase
@@ -128,14 +128,14 @@ class SlotService @Inject()(logger: LoggingAdapter,
 
   private def callApi[T: ClassTag](uriTemplate: String, value: Any)(implicit reader: JsonReader[T]): Future[T] = {
     val uri = uriTemplate.format(URLEncoder.encode(value.toString, "UTF-8"))
-    logger.debug(s"calling [$uri], returning [${classTag[T].runtimeClass}]")
+    logger.debug("calling {}, returning {}", uri, classTag[T].runtimeClass)
     for {
       response <- Http().singleRequest(HttpRequest(
         method = HttpMethods.GET,
         uri = uri))
       entity <- Unmarshal(response.entity).to[String]
     } yield {
-      logger.debug("response:\n" + entity)
+      logger.debug("response:\n{}", entity)
       entity.parseJson.convertTo[T]
     }
   }

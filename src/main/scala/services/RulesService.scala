@@ -14,7 +14,7 @@ class RulesService @Inject()(logger: LoggingAdapter) {
   import RulesService._
 
   def getContent(text: String): Option[String] = {
-    logger.debug(s"looking up content for [$text]")
+    logger.debug("looking up content for [{}]", text)
 
     @tailrec
     def loop(xs: List[(RulesExecutor, String)]): Option[String] = xs match {

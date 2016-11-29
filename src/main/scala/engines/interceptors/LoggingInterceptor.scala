@@ -1,4 +1,4 @@
-package conversationengine
+package engines.interceptors
 
 import akka.actor.ActorLogging
 import akka.contrib.pattern.ReceivePipeline
@@ -12,7 +12,7 @@ trait LoggingInterceptor extends ActorLogging {
 
   pipelineOuter {
     case ev =>
-      log.debug(getClass.getSimpleName + " received " + ev.toString)
+      log.debug("{} received {}", getClass.getSimpleName, ev.toString)
       Inner(ev)
   }
 

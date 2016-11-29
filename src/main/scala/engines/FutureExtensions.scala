@@ -1,4 +1,4 @@
-package conversationengine
+package engines
 
 import akka.actor.ActorSystem
 import akka.pattern.after
@@ -12,7 +12,7 @@ import scala.concurrent.duration._
   */
 trait FutureExtensions {
 
-  implicit val timeout = 60 second
+  val futureTimeout = 60 second
 
   implicit class FutureExtensions[T](f: Future[T]) {
     def withTimeout(timeout: => Throwable)(implicit duration: FiniteDuration, system: ActorSystem): Future[T] = {

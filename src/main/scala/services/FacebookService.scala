@@ -36,12 +36,12 @@ class FacebookService @Inject()(config: Config,
   val http = Http()
 
   def sendTextMessage(sender: String, text: String): Future[SendResponse] = {
-    logger.info(s"sending text message: [$text] to sender [$sender]")
+    logger.info("sending text message: [{}] to sender [{}]", text, sender)
     import Builder._
 
     val payload = messageElement forSender sender withText text build()
 
-    logger.debug("sending payload:\n" + payload.toJson.prettyPrint)
+    logger.debug("sending payload:\n{}", payload.toJson.prettyPrint)
     for {
       request <- Marshal(payload).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
@@ -49,12 +49,12 @@ class FacebookService @Inject()(config: Config,
         uri = s"https://graph.facebook.com/v2.8/me/messages?access_token=$accessToken",
         headers = List(headers.Accept(MediaTypes.`application/json`)),
         entity = request))
-      entity <- Unmarshal(response.entity).to[FacebookResponse]
+      entity <- Unmarshal(response.entity).to[FacebookAttachmentReuseResponse]
     } yield SendResponse(entity.messageId)
   }
 
   def sendLoginCard(sender: String, conversationId: String): Future[SendResponse] = {
-    logger.info("sending login message to sender: " + sender)
+    logger.info("sending login message to sender: {}", sender)
     import Builder._
 
     val payload = (
@@ -67,7 +67,7 @@ class FacebookService @Inject()(config: Config,
         build()
       )
 
-    logger.debug("sending payload:\n" + payload.toJson.prettyPrint)
+    logger.debug("sending payload:\n{}", payload.toJson.prettyPrint)
     for {
       request <- Marshal(payload).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
@@ -75,12 +75,12 @@ class FacebookService @Inject()(config: Config,
         uri = s"https://graph.facebook.com/v2.8/me/messages?access_token=$accessToken",
         headers = List(headers.Accept(MediaTypes.`application/json`)),
         entity = request))
-      entity <- Unmarshal(response.entity).to[FacebookResponse]
+      entity <- Unmarshal(response.entity).to[FacebookAttachmentReuseResponse]
     } yield SendResponse(entity.messageId)
   }
 
   def sendHeroCard(sender: String, items: List[Item]): Future[SendResponse] = {
-    logger.info("sending generic message to sender: " + sender)
+    logger.info("sending generic message to sender [{}]", sender)
     import Builder._
     val elements = itemsToFacebookElements(items)
     val payload = (
@@ -89,7 +89,7 @@ class FacebookService @Inject()(config: Config,
         withElements elements
         build()
       )
-    logger.debug("sending payload:\n" + payload.toJson.prettyPrint)
+    logger.debug("sending payload:\n{}", payload.toJson.prettyPrint)
     for {
       request <- Marshal(payload).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
@@ -97,12 +97,12 @@ class FacebookService @Inject()(config: Config,
         uri = s"https://graph.facebook.com/v2.8/me/messages?access_token=$accessToken",
         headers = List(headers.Accept(MediaTypes.`application/json`)),
         entity = request))
-      entity <- Unmarshal(response.entity).to[FacebookResponse]
+      entity <- Unmarshal(response.entity).to[FacebookAttachmentReuseResponse]
     } yield SendResponse(entity.messageId)
   }
 
   def sendReceiptCard(sender: String, slot: Slot): Future[SendResponse] = {
-    logger.info("sending receipt message to sender: " + sender)
+    logger.info("sending receipt message to sender [{}]", sender)
     import Builder._
     val elements = paymentService.getElements
     val receiptId = "order" + Math.floor(Math.random() * 1000)
@@ -128,7 +128,7 @@ class FacebookService @Inject()(config: Config,
         addAdjustment(name = "Coupon DAY1", amount = "-100.00")
         build()
       )
-    logger.debug("sending payload:\n" + payload.toJson.prettyPrint)
+    logger.debug("sending payload:\n{}", payload.toJson.prettyPrint)
     for {
       request <- Marshal(payload).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
@@ -136,12 +136,12 @@ class FacebookService @Inject()(config: Config,
         uri = s"https://graph.facebook.com/v2.8/me/messages?access_token=$accessToken",
         headers = List(headers.Accept(MediaTypes.`application/json`)),
         entity = request))
-      entity <- Unmarshal(response.entity).to[FacebookResponse]
+      entity <- Unmarshal(response.entity).to[FacebookAttachmentReuseResponse]
     } yield SendResponse(entity.messageId)
   }
 
   def sendQuickReply(sender: String, text: String): Future[SendResponse] = {
-    logger.info("sending quick reply to sender: " + sender)
+    logger.info("sending quick reply to sender [{}]", sender)
     import Builder._
     val payload = (
       quickReply
@@ -149,7 +149,7 @@ class FacebookService @Inject()(config: Config,
         withText text
         build()
       )
-    logger.debug("sending payload:\n" + payload.toJson.prettyPrint)
+    logger.debug("sending payload:\n{}", payload.toJson.prettyPrint)
     for {
       request <- Marshal(payload).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
@@ -157,12 +157,12 @@ class FacebookService @Inject()(config: Config,
         uri = s"https://graph.facebook.com/v2.8/me/messages?access_token=$accessToken",
         headers = List(headers.Accept(MediaTypes.`application/json`)),
         entity = request))
-      entity <- Unmarshal(response.entity).to[FacebookResponse]
+      entity <- Unmarshal(response.entity).to[FacebookAttachmentReuseResponse]
     } yield SendResponse(entity.messageId)
   }
 
   def getUserProfile(userId: String): Future[UserProfile] = {
-    logger.info(s"getting user profile for id[$userId]")
+    logger.info("getting user profile for id[{}]", userId)
     for {
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.GET,
@@ -183,11 +183,8 @@ class FacebookService @Inject()(config: Config,
         method = HttpMethods.GET,
         uri = s"https://graph.facebook.com/v2.8/me?access_token=$accessToken&fields=recipient&account_linking_token=$accountLinkingToken",
         headers = List(headers.Accept(MediaTypes.`application/json`))))
-      entity <- Unmarshal(response.entity).to[String]
-    } yield {
-      logger.debug(entity)
-      entity.parseJson.convertTo[FacebookUserPSID]
-    }
+      entity <- Unmarshal(response.entity).to[FacebookUserPSID]
+    } yield entity
   }
 
   def setupWelcomeGreeting(): Unit = {
@@ -198,7 +195,7 @@ class FacebookService @Inject()(config: Config,
         "text" -> JsString("Hi, my name is Tom")
       )
     )
-    logger.info("sending payload:\n" + payload.toJson.prettyPrint)
+    logger.info("sending payload:\n{}", payload.toJson.prettyPrint)
     for {
       request <- Marshal(payload).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(

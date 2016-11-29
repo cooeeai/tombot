@@ -21,16 +21,16 @@ class JIRAOAuthClient @Inject()(config: Config, logger: LoggingAdapter) {
     // STEP 1: get request token
     val requestToken: TokenSecretVerifierHolder = client.getRequestToken
     val authorizeURL: String = client.getAuthorizeURLForToken(requestToken.token)
-    logger.debug(s"Token is [${requestToken.token}]")
-    logger.debug(s"Token secret is [${requestToken.secret}]")
-    logger.debug(s"Retrieved request token. Goto [$authorizeURL]")
+    logger.debug("Token is [{}]", requestToken.token)
+    logger.debug("Token secret is [{}]", requestToken.secret)
+    logger.debug("Retrieved request token. Goto {}", authorizeURL)
     (requestToken, authorizeURL)
   }
 
   def accessToken(baseURL: String, requestToken: String, tokenSecret: String, verifier: String): String = {
     val client = new AtlassianOAuthClient(consumerKey, consumerPrivateKey, baseURL, callbackURI)
     val accessToken = client.swapRequestTokenForAccessToken(requestToken, tokenSecret, verifier)
-    logger.debug(s"Access token is [$accessToken]")
+    logger.debug("Access token is [{}]", accessToken)
     accessToken
   }
 

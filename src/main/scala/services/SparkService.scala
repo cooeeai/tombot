@@ -45,7 +45,7 @@ class SparkService @Inject()(config: Config,
   }
 
   def getPerson(personId: String): Future[SparkPerson] = {
-    logger.info(s"get person [$personId]")
+    logger.info("get person [{}]", personId)
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       response <- http.singleRequest(HttpRequest(
@@ -81,7 +81,7 @@ class SparkService @Inject()(config: Config,
   }
 
   def getRoom(roomId: String): Future[SparkRoom] = {
-    logger.info(s"get room [$roomId]")
+    logger.info("get room [{}]", roomId)
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       response <- http.singleRequest(HttpRequest(
@@ -95,7 +95,7 @@ class SparkService @Inject()(config: Config,
   def createRoom(title: String, teamId: String): Future[SparkRoom] = {
     logger.info("create room")
     val payload = SparkRoomRequest(title, teamId)
-    logger.debug("sending payload:\n" + payload.toJson.prettyPrint)
+    logger.debug("sending payload:\n{}", payload.toJson.prettyPrint)
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       request <- Marshal(payload).to[RequestEntity]
@@ -109,9 +109,9 @@ class SparkService @Inject()(config: Config,
   }
 
   def changeRoomTitle(roomId: String, title: String): Future[SparkRoom] = {
-    logger.info(s"update room [$roomId] with title [$title]")
+    logger.info("update room [{}] with title [{}]", roomId, title)
     val payload = JsObject("title" -> JsString(title))
-    logger.debug("sending payload:\n" + payload.prettyPrint)
+    logger.debug("sending payload:\n{}", payload.prettyPrint)
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       request <- Marshal(payload).to[RequestEntity]
@@ -125,7 +125,7 @@ class SparkService @Inject()(config: Config,
   }
 
   def deleteRoom(roomId: String): Unit = {
-    logger.info(s"delete room [$roomId]")
+    logger.info("delete room [{}]", roomId)
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       response <- http.singleRequest(HttpRequest(
@@ -148,7 +148,7 @@ class SparkService @Inject()(config: Config,
   }
 
   def getMembership(membershipId: String): Future[SparkMembership] = {
-    logger.info(s"get membership [$membershipId]")
+    logger.info("get membership [{}]", membershipId)
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       response <- http.singleRequest(HttpRequest(
@@ -162,7 +162,7 @@ class SparkService @Inject()(config: Config,
   def createMembership(roomId: String, personId: Option[String], personEmail: Option[String], isModerator: Boolean): Future[SparkMembership] = {
     logger.info("create membership")
     val payload = SparkMembershipRequest(roomId, personId, personEmail, isModerator)
-    logger.debug("sending payload:\n" + payload.toJson.prettyPrint)
+    logger.debug("sending payload:\n{}", payload.toJson.prettyPrint)
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       request <- Marshal(payload).to[RequestEntity]
@@ -176,9 +176,9 @@ class SparkService @Inject()(config: Config,
   }
 
   def updateModeratorStatus(membershipId: String, isModerator: Boolean): Future[SparkMembership] = {
-    logger.info(s"update membership [$membershipId] is moderator [$isModerator]")
+    logger.info("update membership [{}] (moderator = {})", membershipId, isModerator)
     val payload = JsObject("isModerator" -> JsBoolean(isModerator))
-    logger.debug("sending payload:\n" + payload.prettyPrint)
+    logger.debug("sending payload:\n{}", payload.prettyPrint)
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       request <- Marshal(payload).to[RequestEntity]
@@ -192,7 +192,7 @@ class SparkService @Inject()(config: Config,
   }
 
   def deleteMembership(membershipId: String): Unit = {
-    logger.info(s"delete membership [$membershipId]")
+    logger.info("delete membership [{}]", membershipId)
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       response <- http.singleRequest(HttpRequest(
@@ -215,7 +215,7 @@ class SparkService @Inject()(config: Config,
   }
 
   def getMessage(messageId: String): Future[SparkMessage] = {
-    logger.info(s"get message [$messageId]")
+    logger.info("get message [{}]", messageId)
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       response <- http.singleRequest(HttpRequest(
@@ -234,7 +234,7 @@ class SparkService @Inject()(config: Config,
                  ): Future[SparkMessage] = {
     logger.info("post message")
     val payload = SparkMessageRequest(roomId, toPersonId, toPersonEmail, text, files)
-    logger.debug("sending payload:\n" + payload.toJson.prettyPrint)
+    logger.debug("sending payload:\n{}", payload.toJson.prettyPrint)
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       request <- Marshal(payload).to[RequestEntity]
@@ -248,7 +248,7 @@ class SparkService @Inject()(config: Config,
   }
 
   def deleteMessage(messageId: String): Unit = {
-    logger.info(s"delete message [$messageId]")
+    logger.info("delete message [{}]", messageId)
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       response <- http.singleRequest(HttpRequest(
@@ -271,7 +271,7 @@ class SparkService @Inject()(config: Config,
   }
 
   def getTeam(teamId: String): Future[SparkTeam] = {
-    logger.info(s"get team [$teamId]")
+    logger.info("get team [{}]", teamId)
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       response <- http.singleRequest(HttpRequest(
@@ -285,7 +285,7 @@ class SparkService @Inject()(config: Config,
   def createTeam(name: String): Future[SparkTeam] = {
     logger.info("create team")
     val payload = JsObject("name" -> JsString(name))
-    logger.debug("sending payload:\n" + payload.prettyPrint)
+    logger.debug("sending payload:\n{}", payload.prettyPrint)
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       request <- Marshal(payload).to[RequestEntity]
@@ -301,7 +301,7 @@ class SparkService @Inject()(config: Config,
   def updateTeamName(teamId: String, name: String): Future[SparkTeam] = {
     logger.info("update team name")
     val payload = JsObject("name" -> JsString(name))
-    logger.debug("sending payload:\n" + payload.toJson.prettyPrint)
+    logger.debug("sending payload:\n{}", payload.toJson.prettyPrint)
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       request <- Marshal(payload).to[RequestEntity]
@@ -315,7 +315,7 @@ class SparkService @Inject()(config: Config,
   }
 
   def deleteTeam(teamId: String): Unit = {
-    logger.info(s"delete team [$teamId]")
+    logger.info("delete team [{}]", teamId)
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       response <- http.singleRequest(HttpRequest(
@@ -338,7 +338,7 @@ class SparkService @Inject()(config: Config,
   }
 
   def getWebhook(webhookId: String): Future[SparkWebhook] = {
-    logger.info(s"get webhook [$webhookId]")
+    logger.info("get webhook [{}]", webhookId)
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       response <- http.singleRequest(HttpRequest(
@@ -352,7 +352,7 @@ class SparkService @Inject()(config: Config,
   def createWebhook(name: String, targetUrl: String, resource: String, event: String, filter: Option[String], secret: String): Future[SparkWebhook] = {
     logger.info("create webhook")
     val payload = SparkWebhookRequest(name, targetUrl, resource, event, filter, secret)
-    logger.debug("sending payload:\n" + payload.toJson.prettyPrint)
+    logger.debug("sending payload:\n{}", payload.toJson.prettyPrint)
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       request <- Marshal(payload).to[RequestEntity]
@@ -371,7 +371,7 @@ class SparkService @Inject()(config: Config,
       "name" -> JsString(name),
       "targetUrl" -> JsString(targetUrl)
     )
-    logger.debug("sending payload:\n" + payload.prettyPrint)
+    logger.debug("sending payload:\n{}", payload.prettyPrint)
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       request <- Marshal(payload).to[RequestEntity]
@@ -385,7 +385,7 @@ class SparkService @Inject()(config: Config,
   }
 
   def deleteWebhook(webhookId: String): Unit = {
-    logger.info(s"delete webhook [$webhookId]")
+    logger.info("delete webhook [{}]", webhookId)
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       response <- http.singleRequest(HttpRequest(
@@ -408,7 +408,7 @@ class SparkService @Inject()(config: Config,
   }
 
   def getTeamMembership(membershipId: String): Future[SparkTeamMembership] = {
-    logger.info(s"get team membership [$membershipId]")
+    logger.info("get team membership [{}]", membershipId)
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       response <- http.singleRequest(HttpRequest(
@@ -422,7 +422,7 @@ class SparkService @Inject()(config: Config,
   def addMember(teamId: String, personId: String, personEmail: String, isModerator: Boolean): Future[SparkTeamMembership] = {
     logger.info("add member")
     val payload = SparkTeamMembershipRequest(teamId, personId, personEmail, isModerator)
-    logger.debug("sending payload:\n" + payload.toJson.prettyPrint)
+    logger.debug("sending payload:\n{}", payload.toJson.prettyPrint)
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       request <- Marshal(payload).to[RequestEntity]
@@ -438,7 +438,7 @@ class SparkService @Inject()(config: Config,
   def updateTeamModeratorStatus(membershipId: String, isModerator: Boolean): Future[SparkTeamMembership] = {
     logger.info("update webhook")
     val payload = JsObject("isModerator" -> JsBoolean(isModerator))
-    logger.debug("sending payload:\n" + payload.prettyPrint)
+    logger.debug("sending payload:\n{}", payload.prettyPrint)
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       request <- Marshal(payload).to[RequestEntity]
@@ -452,7 +452,7 @@ class SparkService @Inject()(config: Config,
   }
 
   def deleteTeamMembership(membershipId: String): Unit = {
-    logger.info(s"delete team membership [$membershipId]")
+    logger.info("delete team membership [{}]", membershipId)
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       response <- http.singleRequest(HttpRequest(

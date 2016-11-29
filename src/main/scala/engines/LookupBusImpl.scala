@@ -1,8 +1,7 @@
-package conversationengine
+package engines
 
 import akka.actor.ActorRef
-import akka.event.EventBus
-import akka.event.LookupClassification
+import akka.event.{EventBus, LookupClassification}
 import com.google.inject.Singleton
 
 /**

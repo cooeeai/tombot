@@ -15,7 +15,7 @@ case class FacebookMessage(mid: String, seq: Int, text: String)
 
 // attachment_id is only returned when the is_reusable flag is set to true
 // on messages sent with a multimedia attachment
-case class FacebookResponse(recipientId: String, messageId: String, attachmentId: Option[String])
+case class FacebookAttachmentReuseResponse(recipientId: String, messageId: String, attachmentId: Option[String])
 
 case class FacebookPostback(payload: String)
 
@@ -27,7 +27,7 @@ case class FacebookMessaging(sender: FacebookSender,
 
 case class FacebookEntry(id: String, time: Long, messaging: List[FacebookMessaging])
 
-case class FacebookQuickReplyResponse(obj: String, entry: List[FacebookEntry])
+case class FacebookResponse(obj: String, entry: List[FacebookEntry])
 
 sealed trait FacebookButton {
   val buttonType: String
@@ -115,11 +115,11 @@ trait FacebookJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val facebookSenderJsonFormat = jsonFormat1(FacebookSender)
   implicit val facebookRecipientJsonFormat = jsonFormat1(FacebookRecipient)
   implicit val facebookMessageJsonFormat = jsonFormat3(FacebookMessage)
-  implicit val facebookResponseJsonFormat = jsonFormat(FacebookResponse, "recipient_id", "message_id", "attachment_id")
+  implicit val facebookResponseJsonFormat = jsonFormat(FacebookAttachmentReuseResponse, "recipient_id", "message_id", "attachment_id")
   implicit val facebookPostbackJsonFormat = jsonFormat1(FacebookPostback)
   implicit val facebookMessagingJsonFormat = jsonFormat5(FacebookMessaging)
   implicit val facebookEntryJsonFormat = jsonFormat3(FacebookEntry)
-  implicit val facebookQuickReplyResponseJsonFormat = jsonFormat(FacebookQuickReplyResponse, "object", "entry")
+  implicit val facebookQuickReplyResponseJsonFormat = jsonFormat(FacebookResponse, "object", "entry")
 
   implicit object facebookButtonJsonFormat extends RootJsonFormat[FacebookButton] {
 

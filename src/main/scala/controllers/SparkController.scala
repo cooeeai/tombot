@@ -6,7 +6,7 @@ import akka.http.scaladsl.server.Directives._
 import apis.ciscospark.{SparkJsonSupport, SparkWebhookResponse}
 import com.google.inject.Inject
 import com.typesafe.config.Config
-import conversationengine.events._
+import engines.AgentConversationActor.{SparkMessageEvent, SparkRoomLeftEvent}
 import services.ConversationService
 import spray.json.JsObject
 
@@ -21,7 +21,7 @@ class SparkController @Inject()(config: Config,
   import StatusCodes._
   import conversationService._
 
-  def routes =
+  val routes =
     pathPrefix("sparkwebhook-message-created") {
       path(Segment) { sender =>
         post {
@@ -31,7 +31,7 @@ class SparkController @Inject()(config: Config,
           //          complete(OK)
           //        }
           entity(as[JsObject]) { json =>
-            logger.debug("sparkwebhook response:\n" + json.prettyPrint)
+            logger.debug("sparkwebhook response:\n{}", json.prettyPrint)
             val response = json.convertTo[SparkWebhookResponse]
             converse(sender, SparkMessageEvent(sender, response.data))
             complete(OK)
@@ -48,7 +48,7 @@ class SparkController @Inject()(config: Config,
           //          complete(OK)
           //        }
           entity(as[JsObject]) { json =>
-            logger.debug("sparkwebhook response:\n" + json.prettyPrint)
+            logger.debug("sparkwebhook response:\n{}", json.prettyPrint)
             converse(sender, SparkRoomLeftEvent(sender))
             complete(OK)
           }

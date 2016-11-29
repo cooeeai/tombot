@@ -3,19 +3,17 @@ import akka.event.LoggingAdapter
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.{Route, MalformedRequestContentRejection, RejectionHandler}
+import akka.http.scaladsl.server.{MalformedRequestContentRejection, RejectionHandler}
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{Sink, Source}
 import com.google.inject.Guice
 import com.typesafe.config.Config
 import controllers._
-import modules.akkaguice.AkkaModule
+import modules.akkaguice.{AkkaModule, GuiceAkkaExtension}
 import modules.config.ConfigModule
 import modules.conversation.ConversationModule
 import modules.logging.LoggingModule
 import net.codingwell.scalaguice.InjectorExtensions._
-
-import scala.util.Properties
+import services.LiveEngageChatActor
 
 /**
   * Created by markmo on 16/07/2016.
@@ -31,12 +29,31 @@ object Main extends App {
     new ConversationModule()
   )
 
-  implicit val system = injector.instance[ActorSystem]
-  implicit val materializer = ActorMaterializer()
-  implicit val executionContext = system.dispatcher
-
   val config = injector.instance[Config]
   val logger = injector.instance[LoggingAdapter]
+
+  val interface = config.getString("http.interface")
+  val port = config.getInt("http.port")
+
+  implicit val system = injector.instance[ActorSystem]
+  implicit val fm = ActorMaterializer()
+
+  val facebookController = injector.instance[FacebookController]
+  val skypeController = injector.instance[SkypeController]
+  val sparkController = injector.instance[SparkController]
+  val addressController = injector.instance[ValidationController]
+  val smsController = injector.instance[SMSController]
+  val chatController = injector.instance[ChatController]
+  val telegramController = injector.instance[TelegramController]
+
+  val routes =
+    facebookController.routes ~
+      skypeController.routes ~
+      sparkController.routes ~
+      addressController.routes ~
+      smsController.routes ~
+      chatController.routes ~
+      telegramController.routes
 
   implicit def myRejectionHandler = {
     val handler = RejectionHandler.newBuilder().handle {
@@ -53,46 +70,28 @@ object Main extends App {
     handler.result()
   }
 
-  val facebookController = injector.instance[FacebookController]
-  val skypeController = injector.instance[SkypeController]
-  val sparkController = injector.instance[SparkController]
-  val addressController = injector.instance[ValidationController]
-  val smsController = injector.instance[SMSController]
-  val chatController = injector.instance[ChatController]
-  val telegramController = injector.instance[TelegramController]
+  //  val port = Properties.envOrElse("PORT", "8080").toInt
 
-  val routes =
-    facebookController.routes ~
-    skypeController.routes ~
-    sparkController.routes ~
-    addressController.routes ~
-    smsController.routes ~
-    chatController.routes ~
-    telegramController.routes
-
-  val interface = config.getString("http.interface")
-  val port = config.getInt("http.port")
-
-//  val port = Properties.envOrElse("PORT", "8080").toInt
-
-//  val proxy = Route { context =>
-//    val request = context.request
-//    println("Opening connection to " + request.uri.authority.host.address)
-//    val flow = Http(system).outgoingConnection(request.uri.authority.host.address(), 80)
-//    val handler = Source.single(context.request)
-//      .via(flow)
-//      .runWith(Sink.head)
-//      .flatMap(context.complete(_))
-//    handler
-//  }
+  //  val proxy = Route { context =>
+  //    val request = context.request
+  //    println("Opening connection to " + request.uri.authority.host.address)
+  //    val flow = Http(system).outgoingConnection(request.uri.authority.host.address(), 80)
+  //    val handler = Source.single(context.request)
+  //      .via(flow)
+  //      .runWith(Sink.head)
+  //      .flatMap(context.complete(_))
+  //    handler
+  //  }
 
   val bindingFuture = Http().bindAndHandle(routes, interface, port)
 
   facebookController.setupWelcomeGreeting()
 
-//  println("Server online at http://localhost:8080/\nPress RETURN to stop...")
-//  StdIn.readLine() // let it run until user presses return
-//  bindingFuture
-//    .flatMap(_.unbind()) // trigger unbinding from the port
-//    .onComplete(_ => system.terminate()) // and shutdown when done
+  system.actorOf(GuiceAkkaExtension(system).props(LiveEngageChatActor.name))
+
+  //  println("Server online at http://localhost:8080/\nPress RETURN to stop...")
+  //  StdIn.readLine() // let it run until user presses return
+  //  bindingFuture
+  //    .flatMap(_.unbind()) // trigger unbinding from the port
+  //    .onComplete(_ => system.terminate()) // and shutdown when done
 }

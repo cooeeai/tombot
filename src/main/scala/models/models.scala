@@ -31,3 +31,27 @@ case class ItemPostbackAction(title: String, payload: JsValue) extends ItemActio
 case class Item(title: String, subtitle: String, itemURL: String, imageURL: String, actions: List[ItemAction])
 
 case class UserProfile(firstName: String, lastName: String, picture: String, locale: String, timezone: Int, gender: String)
+
+object Platform extends Enumeration {
+
+  type Platform = Value
+
+  val Facebook, Telegram, LiveEngageChat, Skype, SMS, Web = Value
+
+}
+
+object IntentType extends Enumeration {
+
+  type IntentType = Value
+
+  val GreetIntent, BuyIntent, AnalyzeIntent = Value
+
+}
+
+object ConversationEngine extends Enumeration {
+
+  type ConversationEngine = Value
+
+  val Cooee, Watson = Value
+
+}

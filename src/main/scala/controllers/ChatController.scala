@@ -6,10 +6,10 @@ import akka.http.scaladsl.model.ws.{Message, TextMessage}
 import akka.http.scaladsl.server.Directives._
 import akka.stream.Materializer
 import akka.stream.scaladsl.Flow
-import apis.facebookmessenger.{FacebookJsonSupport, FacebookPostbackButton, FacebookLinkButton, FacebookElement}
+import apis.facebookmessenger.{FacebookElement, FacebookJsonSupport, FacebookLinkButton, FacebookPostbackButton}
 import chat.ChatRooms
 import com.google.inject.Inject
-import models.{ItemPostbackAction, ItemLinkAction, Item}
+import models.{Item, ItemLinkAction, ItemPostbackAction}
 import services.{CatalogService, Conversation}
 import spray.json._
 

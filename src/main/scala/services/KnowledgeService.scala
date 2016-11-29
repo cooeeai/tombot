@@ -25,13 +25,16 @@ class KnowledgeService @Inject()(logger: LoggingAdapter) {
         // query was not understood, no results available
         None
       } else {
-        val pod = queryResult.getPods.head
+        val pod = queryResult.getPods.reverse.head
         if (pod.isError) {
           None
         } else {
           val subpod = pod.getSubpods.head
           val element = subpod.getContents.find(_.isInstanceOf[WAPlainText])
-          Some(element.asInstanceOf[WAPlainText].getText)
+          element match {
+            case Some(el) => Some(el.asInstanceOf[WAPlainText].getText)
+            case None => None
+          }
         }
       }
     } catch {

@@ -40,12 +40,12 @@ class WatsonConversationService @Inject()(config: Config, logger: LoggingAdapter
     val ctx = if (context.isDefined) context.get else new util.HashMap[String, AnyRef]()
     val parsed = parse.invoke(Symbol.intern("en$core"), text, Clojure.read("[:time]")).asInstanceOf[LazySeq]
     for (x <- parsed.toArray) yield {
-      logger.debug("parsed time:\n" + prettyPrintScalaDataStructureAsClojure(x))
+      logger.debug("parsed time:\n{}", prettyPrintScalaDataStructureAsClojure(x))
       val parsedMap = clojureToScala(x).asInstanceOf[Map[Any, Any]]
       val timeBody = parsedMap(CKeyword(null, "body")).asInstanceOf[String]
       val timeValue = parsedMap(CKeyword(null, "value")).asInstanceOf[Map[Any, Any]]
       val timeType = timeValue(CKeyword(null, "type")).asInstanceOf[String]
-      logger.debug("time type: " + timeType)
+      logger.debug("time type: {}", timeType)
 
       timeType match {
 
@@ -90,7 +90,7 @@ class WatsonConversationService @Inject()(config: Config, logger: LoggingAdapter
     val service = new WatsonConversationSvc("2016-07-11")
     service.setUsernameAndPassword(username, password)
     val partialMessage = new MessageRequest.Builder().inputText(text)
-    logger.debug("context: " + javaMapToJson(ctx).prettyPrint)
+    logger.debug("context: {}", javaMapToJson(ctx).prettyPrint)
     partialMessage.context(ctx)
     val message = partialMessage.build()
     service.message(workspaceId, message).execute()

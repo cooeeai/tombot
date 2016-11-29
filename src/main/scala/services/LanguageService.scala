@@ -31,7 +31,7 @@ class LanguageService @Inject()(config: Config,
   val accessToken = System.getenv("GOOGLE_NLP_API_TOKEN")
 
   def getEntities(content: String): Future[GoogleEntities] = {
-    logger.debug(s"extracting entities from content [$content]")
+    logger.debug("extracting entities from content [{}]", content)
     import apis.googlenlp.Builder._
     val payload = entitiesRequest withContent content build()
     val authorization = Authorization(OAuth2BearerToken(accessToken))
@@ -47,7 +47,7 @@ class LanguageService @Inject()(config: Config,
   }
 
   def getSentiment(content: String): Future[GoogleDocumentSentiment] = {
-    logger.debug(s"extracting sentiment from content [$content]")
+    logger.debug("extracting sentiment from content [{}]", content)
     import apis.googlenlp.Builder._
     val payload = sentimentRequest withContent content build()
     val authorization = Authorization(OAuth2BearerToken(accessToken))

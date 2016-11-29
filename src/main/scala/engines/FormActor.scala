@@ -1,10 +1,11 @@
-package conversationengine
+package engines
 
 import akka.actor.{Actor, ActorLogging}
 import akka.contrib.pattern.ReceivePipeline
 import com.google.inject.Inject
-import conversationengine.events._
+import engines.interceptors.LoggingInterceptor
 import memory._
+import models.events._
 import modules.akkaguice.NamedActor
 import services.{FacebookService, SlotContainer, SlotService}
 
@@ -53,7 +54,7 @@ class FormActor @Inject()(facebookService: FacebookService,
 
   //log.debug("slot:\n" + slot.toString)
 
-  override def receive = {
+  def receive = {
 
     case Reset =>
       currentKey = None
@@ -69,9 +70,7 @@ class FormActor @Inject()(facebookService: FacebookService,
       )
       nextQuestion(sender, None)
 
-    case ev: TextLike =>
-      val sender = ev.sender
-      val text = ev.text
+    case TextResponse(_, sender, text) =>
       if (text == "help" || text == "?") {
         facebookService.sendTextMessage(sender,
           s"You are providing details required to complete a ${originalSlot.key}.\n" +
@@ -81,7 +80,7 @@ class FormActor @Inject()(facebookService: FacebookService,
         if (lastKey.isDefined) {
           history += Exchange(Some(text), "going back")
           val key = lastKey.get
-          log.debug(s"last key [$key]")
+          log.debug("last key [{}]", key)
           slot = originalSlot.findSlot(key) match {
             case Some(s) => slot.updateSlot(key, s)
             case None => slot
@@ -136,14 +135,14 @@ class FormActor @Inject()(facebookService: FacebookService,
     if (confirming) {
       confirming = false
       if (value.toLowerCase == "no") {
-        log.debug(s"emptying slot [$key]")
+        log.debug("emptying slot [{}]", key)
         (None, slot.emptySlot(key))
       } else {
-        log.debug(s"confirming contents of slot [$key]")
+        log.debug("confirming contents of slot [{}]", key)
         (None, slot.confirmSlot(key))
       }
     } else {
-      log.debug(s"filling slot [$key] with [$value]")
+      log.debug("filling slot [{}] with [{}]", key, value)
       slotService.fillSlot(slot, key, value)
     }
 
@@ -163,18 +162,20 @@ class FormActor @Inject()(facebookService: FacebookService,
 
       case None =>
         log.debug("No next question")
-        log.debug("slot:\n" + slot.toString)
-        context.parent ! EndFillForm(sender, slot, history.toList.reverse)
+        log.debug("slot:\n{}", slot.toString)
+        // TODO
+        // GetHistory
+        context.parent ! EndFillForm(sender, slot)
 
     }
 
   def printAnswers: String =
     history zip history.tail flatMap { h =>
-      h._2.userSaid match {
+      h._2.request match {
         case None => None
         case Some(a) if Set("back", "quit", "reset", "status", "help") contains a => None
         case Some(a) =>
-          Some("? " + h._1.botSaid + "\n" + "> " + a)
+          Some("? " + h._1.response + "\n" + "> " + a)
       }
     } mkString "\n"
 

@@ -9,7 +9,7 @@ class ChatRoomActor(roomId: Int) extends Actor {
 
   var participants: Map[String, ActorRef] = Map.empty[String, ActorRef]
 
-  override def receive = {
+  def receive = {
     case UserJoined(name, actorRef) =>
       participants += name -> actorRef
       broadcast(SystemMessage(s"User $name joined channel..."))

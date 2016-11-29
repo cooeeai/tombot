@@ -4,9 +4,8 @@ import akka.actor.FSM
 import akka.contrib.pattern.ReceivePipeline
 import apis.facebookmessenger.{FacebookDelivery, FacebookMessageDeliveredEvent, FacebookMessageReadEvent, FacebookRead}
 import com.google.inject.Inject
-import conversationengine.LoggingInterceptor
-import memory.Slot
-import models.Item
+import engines.interceptors.LoggingInterceptor
+import models.events._
 import modules.akkaguice.NamedActor
 import services.FacebookSendQueue.{Data, State}
 
@@ -89,10 +88,11 @@ class FacebookSendQueue @Inject()(facebookService: FacebookService)
 
   def send(ev: SendEvent): Future[SendResponse] = ev match {
     case TextMessage(sender, text) => sendTextMessage(sender, text)
+    //case Prompt(message) => // TODO
+    case QuickReply(sender, text) => sendQuickReply(sender, text)
     case LoginCard(sender, conversationId) => sendLoginCard(sender, conversationId)
     case HeroCard(sender, items) => sendHeroCard(sender, items)
     case ReceiptCard(sender, slot) => sendReceiptCard(sender, slot)
-    case QuickReply(sender, text) => sendQuickReply(sender, text)
   }
 
   def timestamp: Long = System.currentTimeMillis / 1000
@@ -110,13 +110,7 @@ object FacebookSendQueue extends NamedActor {
 
   sealed trait Data
   case object Uninitialized extends Data
-  final case class Todo(current: Option[String], queue: Seq[(Long, SendEvent)]) extends Data
 
-  sealed trait SendEvent
-  case class TextMessage(sender: String, text: String) extends SendEvent
-  case class LoginCard(sender: String, conversationId: String = "") extends SendEvent
-  case class HeroCard(sender: String, items: List[Item]) extends SendEvent
-  case class ReceiptCard(sender: String, slot: Slot) extends SendEvent
-  case class QuickReply(sender: String, text: String) extends SendEvent
+  final case class Todo(current: Option[String], queue: Seq[(Long, SendEvent)]) extends Data
 
 }

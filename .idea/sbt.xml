@@ -13,7 +13,6 @@
             <option value="$PROJECT_DIR$/project" />
           </set>
         </option>
-        <option name="sbtVersion" value="0.13.8" />
         <option name="myModules">
           <set>
             <option value="$USER_HOME$/.sbt/0.13/staging/5a69ebff92df955f8fae/scala-slack-bot-core" />
