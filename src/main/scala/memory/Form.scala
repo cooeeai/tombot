@@ -11,7 +11,7 @@ import com.typesafe.config.Config
 class Form @Inject()(config: Config,
                      logger: LoggingAdapter) {
 
-  val addressApi = config.getString("address.api.url")
+  val addressApi = config.getString("services.cooee.address.url")
 
   val data = Map(
     "purchase" -> Slot(

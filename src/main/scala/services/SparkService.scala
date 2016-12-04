@@ -28,7 +28,7 @@ class SparkService @Inject()(config: Config,
 
   val http = Http()
 
-  val api = config.getString("spark.api.url")
+  val api = config.getString("services.cisco.spark.url")
 
   val accessToken = System.getenv("SPARK_ACCESS_TOKEN")
 

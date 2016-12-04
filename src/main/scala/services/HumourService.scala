@@ -21,7 +21,7 @@ class HumourService @Inject()(config: Config,
 
   import system.dispatcher
 
-  val url = config.getString("tambal.api.url")
+  val url = config.getString("services.tambal.url")
 
   def getJoke: Future[String] = {
     for {

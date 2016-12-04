@@ -23,7 +23,7 @@ class AddressService @Inject()(config: Config,
 
   import system.dispatcher
 
-  val url = config.getString("maps.api.url")
+  val url = config.getString("services.google.maps.url")
 
   val token = System.getenv("GOOGLE_MAPS_API_TOKEN")
 

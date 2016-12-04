@@ -153,7 +153,7 @@ An example form definition is as follows:
         country {
           question = "What is your country?"
         }
-        parseApi = $address.api.url,
+        parseApi = $services.cooee.address.url,
         parseExpr = """
         function (value) {
           return {

@@ -26,7 +26,7 @@ class WatsonConversationActor @Inject()(config: Config,
     with ReceivePipeline
     with LoggingInterceptor {
 
-  val maxFailCount = config.getInt("max-fail-count")
+  val maxFailCount = config.getInt("settings.max-fail-count")
 
   val contextMap = mutable.Map[String, JMap[String, AnyRef]]()
 

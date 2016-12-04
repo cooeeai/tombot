@@ -33,7 +33,7 @@ class WatsonConversationService @Inject()(config: Config, logger: LoggingAdapter
   load.invoke()
   val parse = Clojure.`var`("duckling.core", "parse")
 
-  val tz = DateTimeZone.forID(config.getString("timezone"))
+  val tz = DateTimeZone.forID(config.getString("settings.timezone"))
 
   def converse(text: String, context: Option[JMap[String, AnyRef]]): MessageResponse = {
     logger.info("call watson conversation api")

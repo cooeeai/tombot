@@ -11,9 +11,9 @@ class JIRAOAuthClient @Inject()(config: Config, logger: LoggingAdapter) {
 
   val callbackURI = config.getString("api.host")
 
-  val consumerKey = config.getString("jira.api.consumer.key")
+  val consumerKey = config.getString("services.atlassian.jira.consumer.key")
 
-  val consumerPrivateKey = config.getString("jira.api.consumer.private-key")
+  val consumerPrivateKey = System.getenv("JIRA_CONSUMER_PRIVATE_KEY")
 
   def requestToken(baseURL: String, callback: String = "oob"): (TokenSecretVerifierHolder, String) = {
     val client = new AtlassianOAuthClient(consumerKey, consumerPrivateKey, baseURL, callback)

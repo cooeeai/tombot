@@ -26,7 +26,7 @@ class JIRAService @Inject()(config: Config,
 
   val http = Http()
 
-  val baseURL = config.getString("jira.api.url")
+  val baseURL = config.getString("services.atlassian.jira.url")
 
   val accessToken = System.getenv("JIRA_ACCESS_TOKEN")
 

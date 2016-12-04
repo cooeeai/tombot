@@ -29,7 +29,7 @@ class SMSService @Inject()(config: Config,
 
   val http = Http()
 
-  val uri = config.getString("telstra.api.url")
+  val uri = config.getString("services.telstra.sms.url")
 
   val accessToken = System.getenv("TELSTRA_ACCESS_TOKEN")
 

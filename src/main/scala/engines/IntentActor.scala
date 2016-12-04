@@ -49,7 +49,7 @@ class IntentActor @Inject()(config: Config,
 
   implicit val timeout: Timeout = 30 seconds
 
-  val maxFailCount = config.getInt("max-fail-count")
+  val maxFailCount = config.getInt("settings.max-fail-count")
   val maxMessageLength = 300
 
   val defaultPlatform = Facebook

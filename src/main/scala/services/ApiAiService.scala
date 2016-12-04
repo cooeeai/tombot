@@ -28,7 +28,7 @@ class ApiAiService @Inject()(config: Config,
   import system.dispatcher
 
   val accessToken = System.getenv("APIAI_ACCESS_TOKEN")
-  val api = config.getString("apiai.api.url")
+  val api = config.getString("services.google.apiai.url")
 
   def getIntent(text: String): Future[AaResponse] = {
     logger.info("ApiAiService getting intent of [{}]", text)

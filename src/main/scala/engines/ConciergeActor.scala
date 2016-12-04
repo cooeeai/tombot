@@ -51,9 +51,9 @@ class ConciergeActor @Inject()(config: Config,
 
   implicit val akkaTimeout: akka.util.Timeout = 30 seconds
 
-  val defaultConversationEngine = ConversationEngine.withName(config.getString("conversation-engine"))
-  val maxMessageLength = config.getInt("max-message-length")
-  val voteThreshold = config.getDouble("vote-threshold")
+  val defaultConversationEngine = ConversationEngine.withName(config.getString("settings.default-engine"))
+  val maxMessageLength = config.getInt("settings.max-message-length")
+  val voteThreshold = config.getDouble("settings.vote-threshold")
 
   val defaultProvider = injectActor[FacebookSendQueue]("provider")
   val defaultAgentProvider = injectActor[SparkSendQueue]("agentProvider")

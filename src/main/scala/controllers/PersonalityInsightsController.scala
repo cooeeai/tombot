@@ -25,7 +25,7 @@ class PersonalityInsightsController @Inject()(config: Config,
 
   val sampleText = config.getString("sample-text")
 
-  val sampleSize = config.getInt("personality-max-sample-lines")
+  val sampleSize = config.getInt("settings.personality-max-sample-lines")
 
   val routes =
     pathPrefix("personality") {

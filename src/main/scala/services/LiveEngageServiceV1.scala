@@ -12,7 +12,7 @@ import org.scribe.oauth.OAuthService
   */
 class LiveEngageServiceV1 @Inject()(config: Config) {
 
-  val baseURL = config.getString("liveengage.api.url")
+  val baseURL = config.getString("services.liveperson.chat.url")
 
   val apiKey = System.getenv("LIVEENGAGE_API_KEY")
   val apiSecret = System.getenv("LIVEENGAGE_API_SECRET")

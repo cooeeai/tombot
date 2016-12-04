@@ -26,7 +26,7 @@ class LanguageService @Inject()(config: Config,
 
   implicit val materializer = ActorMaterializer()
 
-  val url = config.getString("google.api.url")
+  val url = config.getString("services.google.language.url")
 
   val accessToken = System.getenv("GOOGLE_NLP_API_TOKEN")
 

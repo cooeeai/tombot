@@ -27,8 +27,8 @@ class IntentService @Inject()(config: Config,
   import system.dispatcher
 
   val accessToken = System.getenv("WIT_AI_API_TOKEN")
-  val url = config.getString("wit.api.url")
-  val version = config.getString("wit.api.version")
+  val url = config.getString("services.facebook.wit.url")
+  val version = config.getString("services.facebook.wit.version")
 
   def getIntent(text: String): Future[Meaning] = {
     logger.info("IntentService getting intent of [{}]", text)

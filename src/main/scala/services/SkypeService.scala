@@ -33,7 +33,8 @@ class SkypeService @Inject()(config: Config,
 
   val api = config.getString("api.host")
 
-  val skypeApi = config.getString("microsoft.api.url")
+  val skypeApi = config.getString("services.microsoft.skype.url")
+  val skypeAuthURL = config.getString("services.microsoft.skype.auth-url")
 
   val clientId = System.getenv("MICROSOFT_CLIENT_ID")
 
@@ -159,7 +160,6 @@ class SkypeService @Inject()(config: Config,
 
   def getMicrosoftToken: Future[MicrosoftToken] = {
     logger.info("getting MS token")
-    val url = config.getString("microsoft.api.auth_url")
 
     val data = FormData(Map(
       "client_id" -> clientId,
@@ -171,7 +171,7 @@ class SkypeService @Inject()(config: Config,
     for {
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.POST,
-        uri = url,
+        uri = skypeAuthURL,
         entity = data))
       entity <- Unmarshal(response.entity).to[MicrosoftToken]
     } yield entity
