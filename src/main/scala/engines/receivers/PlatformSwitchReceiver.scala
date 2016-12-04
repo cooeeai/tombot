@@ -13,8 +13,8 @@ trait PlatformSwitchReceiver extends FSM[State, Data] {
     case Event(SetProvider(platform, previous, ref, ev, sender, _), ctx: ConversationContext) =>
       if (previous.isDefined) {
         ref ! QuickReply(sender, s"Do you want to carry on our conversation from ${previous.get}?")
-        stay using ctx.copy(provider = ref, postAction = Some((ctx) => {
-          self ! ev
+        stay using ctx.copy(provider = ref, postAction = Some((currentActor, ctx) => {
+          currentActor ! ev
           stay
         }))
       } else {

@@ -19,7 +19,7 @@ class Form @Inject()(config: Config,
       children = Some(List(
         Slot(
           "name",
-          Some("Please provide your full name as <first-name> <last-name>"),
+          Some("Please provide your full name as <first name> <last name>"),
           children = Some(List(
             Slot(
               "firstName",
@@ -142,7 +142,7 @@ class Form @Inject()(config: Config,
           children = Some(List(
             Slot(
               "street1",
-              Some("What is your street as <street-number> <street-name> <street-type>")
+              Some("What is your street as <street number> <street name> <street type>")
             ),
             Slot(
               "city",
@@ -159,6 +159,14 @@ class Form @Inject()(config: Config,
             Slot(
               "country",
               Some("What is your country?")
+            ),
+            Slot(
+              "latitude",
+              Some("What is the latitude of your location?")
+            ),
+            Slot(
+              "longitude",
+              Some("What is the longitude of your location?")
             )
           )),
           parseApi = Some(addressApi),
@@ -166,11 +174,13 @@ class Form @Inject()(config: Config,
             """
               |function (value) {
               |  return {
-              |    street1: value.street_1,
+              |    street1: value.street1,
               |    city: value.city,
               |    state: value.state,
-              |    postcode: value.postal_code,
-              |    country: value.country
+              |    postcode: value.postcode,
+              |    country: value.country,
+              |    latitude: value.latitude,
+              |    longitude: value.longitude
               |  };
               |}
             """.stripMargin),

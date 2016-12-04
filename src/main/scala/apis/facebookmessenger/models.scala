@@ -30,7 +30,7 @@ case class FacebookEntry(id: String, time: Long, messaging: List[FacebookMessagi
 case class FacebookResponse(obj: String, entry: List[FacebookEntry])
 
 sealed trait FacebookButton {
-  val buttonType: String
+  def buttonType: String
 }
 
 case class FacebookLinkButton(title: String, url: String) extends FacebookButton {
@@ -58,7 +58,7 @@ case class FacebookSummary(subtotal: BigDecimal, shippingCost: BigDecimal, total
 case class FacebookAdjustment(name: String, amount: BigDecimal)
 
 sealed trait FacebookTemplate {
-  val templateType: String
+  def templateType: String
 }
 
 case class FacebookGenericTemplate(elements: List[FacebookElement]) extends FacebookTemplate {
@@ -400,11 +400,11 @@ object Builder {
         quickReplies = FacebookQuickReply(
           contentType = "text",
           title = "Yes",
-          payload = ""
+          payload = "yes"
         ) :: FacebookQuickReply(
           contentType = "text",
           title = "No",
-          payload = ""
+          payload = "no"
         ) :: Nil
       ))
 

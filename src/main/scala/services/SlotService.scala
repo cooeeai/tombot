@@ -12,6 +12,7 @@ import akka.stream.Materializer
 import com.google.inject.Inject
 import jdk.nashorn.api.scripting.{JSObject => NashornJSObject}
 import memory.{Slot, SlotError}
+import models.AddressJsonSupport
 import spray.json._
 import utils.JsonSupportUtils
 
@@ -26,7 +27,7 @@ import scala.reflect._
 class SlotService @Inject()(logger: LoggingAdapter,
                             implicit val system: ActorSystem,
                             implicit val fm: Materializer)
-  extends JsonSupportUtils {
+  extends JsonSupportUtils with AddressJsonSupport {
 
   import system.dispatcher
 
@@ -133,10 +134,10 @@ class SlotService @Inject()(logger: LoggingAdapter,
       response <- Http().singleRequest(HttpRequest(
         method = HttpMethods.GET,
         uri = uri))
-      entity <- Unmarshal(response.entity).to[String]
+      entity <- Unmarshal(response.entity).to[JsValue]
     } yield {
-      logger.debug("response:\n{}", entity)
-      entity.parseJson.convertTo[T]
+      logger.debug("response:\n{}", entity.prettyPrint)
+      entity.asJsObject.convertTo[T]
     }
   }
 

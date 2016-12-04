@@ -10,14 +10,14 @@ import apis.facebookmessenger.{FacebookElement, FacebookJsonSupport, FacebookLin
 import chat.ChatRooms
 import com.google.inject.Inject
 import models.{Item, ItemLinkAction, ItemPostbackAction}
-import services.{CatalogService, Conversation}
+import services.{CatalogService, ConversationService}
 import spray.json._
 
 /**
   * Created by markmo on 21/10/2016.
   */
 class ChatController @Inject()(logger: LoggingAdapter,
-                               conversationService: Conversation,
+                               conversationService: ConversationService,
                                catalogService: CatalogService,
                                implicit val system: ActorSystem,
                                implicit val fm: Materializer) extends FacebookJsonSupport {
@@ -31,16 +31,30 @@ class ChatController @Inject()(logger: LoggingAdapter,
 
   val testService: Flow[Message, Message, _] = Flow[Message] map {
     case TextMessage.Strict(text) =>
+      logger.debug("ChatController received [{}]", text)
       val sender = "123"
-      val items = catalogService.items("mobile")
-      val elements = itemsToFacebookElements(items)
-      val payload = (
-        genericTemplate
-          forSender sender
-          withElements elements
-          build()
-        )
-      TextMessage(payload.toJson.compactPrint)
+      val textLower = text.toLowerCase
+      if (text == "card") {
+        val items = catalogService.items("mobile")
+        val elements = itemsToFacebookElements(items)
+        val payload = (
+          genericTemplate
+            forSender sender
+            withElements elements
+            build()
+          )
+        TextMessage(payload.toJson.compactPrint)
+      } else if (text == "qr") {
+        val payload = quickReply forSender sender withText "Are you sure?" build()
+        TextMessage(payload.toJson.compactPrint)
+      } else if (text.startsWith("[") || text.startsWith("{")) {
+        val json = text.parseJson
+        TextMessage("")
+      } else if (textLower == "hi" || textLower == "hello") {
+        TextMessage("Hello")
+      } else {
+        TextMessage("")
+      }
     case _ =>
       TextMessage("Message type unsupported")
   }
@@ -53,8 +67,11 @@ class ChatController @Inject()(logger: LoggingAdapter,
     } ~
     pathPrefix("ws-chat" / IntNumber) { chatId =>
       parameter('name) { username =>
-        handleWebSocketMessages(testService)
-        //handleWebSocketMessages(ChatRooms.findOrCreate(chatId).webSocketFlow(username))
+        //handleWebSocketMessages(testService)
+        logger.debug("starting chat {}", chatId)
+        logger.debug("username {}", username)
+
+        handleWebSocketMessages(ChatRooms.findOrCreate(chatId, conversationService).webSocketFlow(username))
       }
     }
 

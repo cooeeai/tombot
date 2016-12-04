@@ -43,7 +43,7 @@ object ComplexConversationActor {
 
   case class ConversationContext(provider: ActorRef,
                                  authenticated: Boolean,
-                                 postAction: Option[ConversationContext => FSM.State[State, Data]]) extends Data
+                                 postAction: Option[(ActorRef, ConversationContext) => FSM.State[State, Data]]) extends Data
 
   case class TransferState(sender: String, ctx: ConversationContext)
 

@@ -26,7 +26,7 @@ class CatalogService @Inject()(config: Config) {
           ),
           ItemPostbackAction(
             title = "Buy",
-            payload = JsString("Order for iPhone 6s 64GB Space Grey")
+            payload = JsString("iPhone 6s 64GB Space Grey")
           ))
       ),
       Item(
@@ -35,9 +35,13 @@ class CatalogService @Inject()(config: Config) {
         itemURL = "https://www.telstra.com.au/mobile-phones/mobiles-on-a-plan/iphone-6s",
         imageURL = s"$api/img/iphone-6s-plus-front-silver-400.jpg",
         actions = List(
+          ItemLinkAction(
+            title = "More info",
+            url = "https://www.telstra.com.au/mobile-phones/mobiles-on-a-plan/iphone-6s"
+          ),
           ItemPostbackAction(
             title = "Buy",
-            payload = JsString("Order for iPhone 6s Plus 64GB Silver")
+            payload = JsString("iPhone 6s Plus 64GB Silver")
           )
         )
       )

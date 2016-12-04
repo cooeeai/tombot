@@ -17,7 +17,7 @@ trait QuickReplyReceiver extends ActorLogging with FSM[State, Data] {
           if (confirmed(text)) {
             log.debug("confirmed")
             //historyActor ! Exchange(Some(text), "confirmed")
-            action(ctx.copy(postAction = None))
+            action(self, ctx.copy(postAction = None))
           } else {
             log.debug("denied")
             //historyActor ! Exchange(Some(text), "denied")

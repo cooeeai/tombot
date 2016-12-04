@@ -46,9 +46,9 @@ class LiveEngageService @Inject()(logger: LoggingAdapter,
     }
   }
 
-  def getOTK(adminURL: String): Future[String] = {
+  def getOTK(adminUrl: String): Future[String] = {
     logger.info("getting OTK")
-    logger.debug("adminURL: {}", adminURL)
+    logger.debug("adminUrl: {}", adminUrl)
     val data = FormData(Map(
       "site" -> brandId,
       "user" -> username,
@@ -65,14 +65,14 @@ class LiveEngageService @Inject()(logger: LoggingAdapter,
     for {
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.POST,
-        uri = adminURL,
+        uri = adminUrl,
         entity = data))
     } yield {
       response.status match {
         case StatusCodes.Found =>
           response.headers.find(_.is("location")) map { header =>
-            val redirectURL = header.value()
-            redirectURL.substring(redirectURL.lastIndexOf("/#,") + 3)
+            val redirectUrl = header.value()
+            redirectUrl.substring(redirectUrl.lastIndexOf("/#,") + 3)
           } match {
             case Some(token) => token
             case None => ""
@@ -82,9 +82,9 @@ class LiveEngageService @Inject()(logger: LoggingAdapter,
     }
   }
 
-  def getMessagingToken(liveEngageURL: String, otk: String): Future[String] = {
+  def getMessagingToken(liveEngageUrl: String, otk: String): Future[String] = {
     logger.info("getting messaging token")
-    logger.debug("liveEngageURL: {}", liveEngageURL)
+    logger.debug("liveEngageUrl: {}", liveEngageUrl)
     //logger.debug(s"otk: [$otk]")
     val payload = LpMessagingLoginRequest(LpConfig(), brandId, otk)
 
@@ -92,7 +92,7 @@ class LiveEngageService @Inject()(logger: LoggingAdapter,
       request <- Marshal(payload).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.POST,
-        uri = liveEngageURL,
+        uri = liveEngageUrl,
         entity = request))
       entity <- Unmarshal(response.entity).to[LpMessagingLoginResponse]
     } yield entity.glob
@@ -111,7 +111,7 @@ class LiveEngageService @Inject()(logger: LoggingAdapter,
     } yield entity
   }
 
-  def createAgentSessionURL(accessToken: String): Future[String] = {
+  def createAgentSessionUrl(accessToken: String): Future[String] = {
     logger.info("creating agent session")
     logger.debug("accessToken [{}]", accessToken)
     val payload = JsObject("loginData" -> JsObject())
@@ -127,23 +127,23 @@ class LiveEngageService @Inject()(logger: LoggingAdapter,
     } yield entity.agentSessionLocation.link.url
   }
 
-  def getRingCount(agentSessionURL: String, accessToken: String): Future[LpRequestData] = {
+  def getRingCount(agentSessionUrl: String, accessToken: String): Future[Either[LpErrorResponse, LpRequestData]] = {
     logger.info("get ring count")
-    logger.debug("agentSessionURL: " + agentSessionURL)
+    logger.debug("agentSessionUrl: " + agentSessionUrl)
     logger.debug("accessToken [{}]", accessToken)
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.GET,
-        uri = s"$agentSessionURL/incomingRequests?v=1&NC=true",
+        uri = s"$agentSessionUrl/incomingRequests?v=1&NC=true",
         headers = List(authorization)))
-      entity <- Unmarshal(response.entity).to[LpRequestData]
+      entity <- Unmarshal(response.entity).to[Either[LpErrorResponse, LpRequestData]]
     } yield entity
   }
 
-  def takeChat(agentSessionURL: String, accessToken: String): Future[String] = {
+  def takeChat(agentSessionUrl: String, accessToken: String): Future[Either[LpErrorResponse, String]] = {
     logger.info("take chat")
-    //logger.debug("agentSessionURL: " + agentSessionURL)
+    //logger.debug("agentSessionUrl: " + agentSessionUrl)
     //logger.debug(s"accessToken: [$accessToken]")
     val payload = "{}"
     val authorization = Authorization(OAuth2BearerToken(accessToken))
@@ -151,186 +151,192 @@ class LiveEngageService @Inject()(logger: LoggingAdapter,
       request <- Marshal(payload).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.POST,
-        uri = s"$agentSessionURL/incomingRequests?v=1&NC=true",
+        uri = s"$agentSessionUrl/incomingRequests?v=1&NC=true",
         headers = List(authorization),
         entity = request))
-      entity <- Unmarshal(response.entity).to[LpTakeChatResponse]
-    } yield entity.chatLocation.link.url
+      entity <- Unmarshal(response.entity).to[Either[LpErrorResponse, LpTakeChatResponse]]
+    } yield transformEither[LpTakeChatResponse, String](entity, _.chatLocation.link.url)
   }
 
-  def getChatConversation(chatURL: String, accessToken: String, from: Int = 0): Future[LpChatConversation] = {
+  def getChatConversation(chatUrl: String, accessToken: String, from: Int = 0): Future[Either[LpErrorResponse, LpChatConversation]] = {
     logger.info("get conversation details")
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.GET,
-        uri = s"$chatURL?from=$from&v=1&NC=true",
+        uri = s"$chatUrl?from=$from&v=1&NC=true",
         headers = List(authorization)))
-      entity <- Unmarshal(response.entity).to[LpChatConversation]
+      entity <- Unmarshal(response.entity).to[Either[LpErrorResponse, LpChatConversation]]
     } yield entity
   }
 
-  def continueConversation(nextURL: String, accessToken: String): Future[LpChatConversation] = {
+  def continueConversation(nextUrl: String, accessToken: String): Future[Either[LpErrorResponse, LpChatConversation]] = {
     logger.info("continue conversation")
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.GET,
-        uri = s"$nextURL&v=1&NC=true",
+        uri = s"$nextUrl&v=1&NC=true",
         headers = List(authorization)))
-      entity <- Unmarshal(response.entity).to[String]
-    } yield {
-      val json = entity.parseJson
-      //logger.debug("LiveEngage conversation...\n{}", json.prettyPrint)
-      try {
-        json.convertTo[LpChatConversation]
-      } catch {
-        case e: Throwable =>
-          logger.error(e, e.getMessage)
-          throw new RuntimeException(e.getMessage, e)
-      }
-    }
+      entity <- Unmarshal(response.entity).to[Either[LpErrorResponse, LpChatConversation]]
+    } yield entity
   }
 
-  def getNextEvents(chatConversation: LpChatConversation, accessToken: String): Future[LpChatConversation] = {
+  def getNextEvents(chatConversation: LpChatConversation, accessToken: String): Future[Either[LpErrorResponse, LpChatConversation]] = {
+    logger.info("get next events")
     val authorization = Authorization(OAuth2BearerToken(accessToken))
-    val url = chatConversation.getNextEventsURL
+    val url = chatConversation.getNextEventsUrl
     for {
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.GET,
         uri = s"$url?v=1&NC=true",
         headers = List(authorization)))
-      entity <- Unmarshal(response.entity).to[LpChatConversation]
+      entity <- Unmarshal(response.entity).to[Either[LpErrorResponse, LpChatConversation]]
     } yield entity
   }
 
-  def getChatEvents(eventsURL: String, accessToken: String, from: Int = 0): Future[LpChatEvents] = {
+  def getChatEvents(eventsUrl: String, accessToken: String, from: Int = 0): Future[Either[LpErrorResponse, LpChatEvents]] = {
     logger.info("get chat events")
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.GET,
-        uri = s"$eventsURL?from=$from&v=1&NC=true",
+        uri = s"$eventsUrl?from=$from&v=1&NC=true",
         headers = List(authorization)))
-      entity <- Unmarshal(response.entity).to[LpChatEvents]
+      entity <- Unmarshal(response.entity).to[Either[LpErrorResponse, LpChatEvents]]
     } yield entity
   }
 
-  def sendTextMessage(eventsURL: String, accessToken: String, text: String): Future[LpChatResponse] = {
+  def sendTextMessage(eventsUrl: String, accessToken: String, text: String): Future[Either[LpErrorResponse, LpChatResponse]] = {
+    logger.info("send text message")
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     val event = LpMessage(LpMessageEvent(eventType = "line", text = text, textType = "plain"))
     for {
       request <- Marshal(event).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.POST,
-        uri = s"$eventsURL?v=1&NC=true",
+        uri = s"$eventsUrl?v=1&NC=true",
         headers = List(authorization),
         entity = request))
-      entity <- Unmarshal(response.entity).to[LpChatResponse]
+      entity <- Unmarshal(response.entity).to[Either[LpErrorResponse, LpChatResponse]]
     } yield entity
   }
 
-  def getSessionInfo(agentSessionURL: String, accessToken: String): Future[LpInfoResponse] = {
+  def getSessionInfo(agentSessionUrl: String, accessToken: String): Future[Either[LpErrorResponse, LpInfoResponse]] = {
+    logger.info("get session info")
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.GET,
-        uri = s"$agentSessionURL?v=1&NC=true",
+        uri = s"$agentSessionUrl?v=1&NC=true",
         headers = List(authorization)))
-      entity <- Unmarshal(response.entity).to[LpInfoResponse]
+      entity <- Unmarshal(response.entity).to[Either[LpErrorResponse, LpInfoResponse]]
     } yield entity
   }
 
-  def getAvailableSkillsForTransfer(transferURL: String, accessToken: String): Future[LpTransferResponse] = {
+  def getAvailableSkillsForTransfer(transferUrl: String, accessToken: String): Future[Either[LpErrorResponse, LpTransferResponse]] = {
+    logger.info("get available skills for transfer")
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.GET,
-        uri = s"$transferURL?v=1&NC=true",
+        uri = s"$transferUrl?v=1&NC=true",
         headers = List(authorization)))
-      entity <- Unmarshal(response.entity).to[LpTransferResponse]
+      entity <- Unmarshal(response.entity).to[Either[LpErrorResponse, LpTransferResponse]]
     } yield entity
   }
 
-  def transferToSkill(transferURL: String, accessToken: String, skillId: String, text: String): Unit = {
+  def transferToSkill(transferUrl: String, accessToken: String, skillId: String, text: String): Unit = {
+    logger.info("transfer to agent with given skill")
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     val payload = LpTransferRequest(LpSkillTransfer(LpSkillId(skillId), text))
     for {
       request <- Marshal(payload).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.POST,
-        uri = s"$transferURL?v=1&NC=true",
+        uri = s"$transferUrl?v=1&NC=true",
         headers = List(authorization),
         entity = request))
     } yield ()
   }
 
-  def transferToAgent(transferURL: String, accessToken: String, agentId: String, text: String): Unit = {
+  def transferToAgent(transferUrl: String, accessToken: String, agentId: String, text: String): Unit = {
+    logger.info("transfer to specific agent")
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     val payload = LpTransferRequest(LpAgentTransfer(LpAgentId(agentId), text))
     for {
       request <- Marshal(payload).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.POST,
-        uri = s"$transferURL?v=1&NC=true",
+        uri = s"$transferUrl?v=1&NC=true",
         headers = List(authorization),
         entity = request))
     } yield ()
   }
 
-  def getAvailableAgents(availableAgentsURL: String, accessToken: String): Future[LpAvailableAgentsResponse] = {
+  def getAvailableAgents(availableAgentsUrl: String, accessToken: String): Future[Either[LpErrorResponse, LpAvailableAgentsResponse]] = {
+    logger.info("get available agents")
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.GET,
-        uri = s"$availableAgentsURL?v=1&NC=true",
+        uri = s"$availableAgentsUrl?v=1&NC=true",
         headers = List(authorization)))
-      entity <- Unmarshal(response.entity).to[LpAvailableAgentsResponse]
+      entity <- Unmarshal(response.entity).to[Either[LpErrorResponse, LpAvailableAgentsResponse]]
     } yield entity
   }
 
-  def getAvailableAgents(availableAgentsURL: String, accessToken: String, skillName: String): Future[LpAvailableAgentsResponse] = {
+  def getAvailableAgents(availableAgentsUrl: String, accessToken: String, skillName: String): Future[Either[LpErrorResponse, LpAvailableAgentsResponse]] = {
+    logger.info("get available agents with given skill")
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.GET,
-        uri = s"$availableAgentsURL?skill=$skillName&chatState=Online&v=1&NC=true",
+        uri = s"$availableAgentsUrl?skill=$skillName&chatState=Online&v=1&NC=true",
         headers = List(authorization)))
-      entity <- Unmarshal(response.entity).to[LpAvailableAgentsResponse]
+      entity <- Unmarshal(response.entity).to[Either[LpErrorResponse, LpAvailableAgentsResponse]]
     } yield entity
   }
 
-  def getVisitSessionResources(visitSessionURL: String, accessToken: String): Future[LpVisitSessionResponse] = {
+  def getVisitSessionResources(visitSessionUrl: String, accessToken: String): Future[Either[LpErrorResponse, LpVisitSessionResponse]] = {
+    logger.info("get session resources")
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.GET,
-        uri = s"$visitSessionURL?v=1&NC=true",
+        uri = s"$visitSessionUrl?v=1&NC=true",
         headers = List(authorization)))
-      entity <- Unmarshal(response.entity).to[LpVisitSessionResponse]
+      entity <- Unmarshal(response.entity).to[Either[LpErrorResponse, LpVisitSessionResponse]]
     } yield entity
   }
 
-  def getVisitSessionDetails(visitInfoURL: String, accessToken: String): Future[LpVisitSessionDetailsResponse] = {
+  def getVisitSessionDetails(visitInfoUrl: String, accessToken: String): Future[Either[LpErrorResponse, LpVisitSessionDetailsResponse]] = {
+    logger.info("get session details")
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.GET,
-        uri = s"$visitInfoURL?v=1&NC=true",
+        uri = s"$visitInfoUrl?v=1&NC=true",
         headers = List(authorization)))
-      entity <- Unmarshal(response.entity).to[LpVisitSessionDetailsResponse]
+      entity <- Unmarshal(response.entity).to[Either[LpErrorResponse, LpVisitSessionDetailsResponse]]
     } yield entity
   }
 
-  def getVisitSessionCustomVariables(customVariablesURL: String, accessToken: String): Future[LpCustomVariablesResponse] = {
+  def getVisitSessionCustomVariables(customVariablesUrl: String, accessToken: String): Future[Either[LpErrorResponse, LpCustomVariablesResponse]] = {
+    logger.info("get session custom variables")
     val authorization = Authorization(OAuth2BearerToken(accessToken))
     for {
       response <- http.singleRequest(HttpRequest(
         method = HttpMethods.GET,
-        uri = s"$customVariablesURL?v=1&NC=true",
+        uri = s"$customVariablesUrl?v=1&NC=true",
         headers = List(authorization)))
-      entity <- Unmarshal(response.entity).to[LpCustomVariablesResponse]
+      entity <- Unmarshal(response.entity).to[Either[LpErrorResponse, LpCustomVariablesResponse]]
     } yield entity
+  }
+
+  def transformEither[R, T](either: Either[LpErrorResponse, R], fn: R => T) = either match {
+    case Left(e) => Left(e)
+    case Right(r) => Right(fn(r))
   }
 
 }

@@ -1,22 +1,25 @@
 package engines
 
-import akka.actor.{Actor, ActorLogging}
+import akka.actor.{Actor, ActorLogging, ActorRef}
 import akka.contrib.pattern.ReceivePipeline
 import com.google.inject.Inject
+import com.google.inject.assistedinject.Assisted
 import engines.interceptors.LoggingInterceptor
 import memory._
+import models.{Location, Address}
 import models.events._
 import modules.akkaguice.NamedActor
-import services.{FacebookService, SlotContainer, SlotService}
+import services.{SlotContainer, SlotService}
+import xml.Utility.escape
 
 import scala.collection.mutable
 
 /**
   * Created by markmo on 14/09/2016.
   */
-class FormActor @Inject()(facebookService: FacebookService,
-                          slotService: SlotService,
-                          form: Form)
+class FormActor @Inject()(slotService: SlotService,
+                          form: Form,
+                          @Assisted("defaultProvider") val defaultProvider: ActorRef)
   extends Actor
     with ActorLogging
     with ReceivePipeline
@@ -54,7 +57,9 @@ class FormActor @Inject()(facebookService: FacebookService,
 
   //log.debug("slot:\n" + slot.toString)
 
-  def receive = {
+  def receive = withProvider(defaultProvider)
+
+  def withProvider(provider: ActorRef): Receive = {
 
     case Reset =>
       currentKey = None
@@ -63,16 +68,16 @@ class FormActor @Inject()(facebookService: FacebookService,
       slot = originalSlot
 
     case NextQuestion(sender) =>
-      facebookService.sendTextMessage(sender,
+      provider ! TextMessage(sender,
         "I need some details from you to complete this action.\n" +
           "While answering the following questions, these commands\n" +
           "are available to you:\n\n" + commands
       )
-      nextQuestion(sender, None)
+      nextQuestion(provider, sender, None)
 
     case TextResponse(_, sender, text) =>
       if (text == "help" || text == "?") {
-        facebookService.sendTextMessage(sender,
+        provider ! TextMessage(sender,
           s"You are providing details required to complete a ${originalSlot.key}.\n" +
             "Possible responses:\n" + commands
         )
@@ -86,25 +91,25 @@ class FormActor @Inject()(facebookService: FacebookService,
             case None => slot
           }
         } else {
-          facebookService.sendTextMessage(sender, "There is no previous question")
+          provider ! TextMessage(sender, "There is no previous question")
         }
-        nextQuestion(sender, None)
+        nextQuestion(provider, sender, None)
       } else if (text == "reset") {
         history += Exchange(Some(text), "resetting form")
         self ! Reset
-        nextQuestion(sender, None)
+        nextQuestion(provider, sender, None)
       } else if (text == "status") {
         val total = originalSlot.numberQuestions
         val remaining = slot.numberQuestions
         val progress = math.ceil((total - remaining).toDouble * 100 / total).toInt
-        multiMessage(sender,
+        multiMessage(provider, sender,
           printAnswers + "\n\n" +
             s"Progress: $progress%\n" +
             s"Questions remaining: $remaining"
         )
       } else if (text == "quit") {
         confirmingQuit = true
-        facebookService.sendQuickReply(sender,
+        provider ! QuickReply(sender,
           "Warning! You will be unable to complete a " + originalSlot.key +
             ".\nThis action will end your request. Do you want to proceed?"
         )
@@ -113,21 +118,24 @@ class FormActor @Inject()(facebookService: FacebookService,
         if (text.toLowerCase == "yes") {
           context.parent ! Reset
         } else {
-          nextQuestion(sender, Some(text))
+          nextQuestion(provider, sender, Some(text))
         }
       } else if (currentKey.isDefined) {
         val key = currentKey.get
         val (maybeError, s) = updateSlot(key, text)
         if (maybeError.isDefined) {
-          facebookService.sendTextMessage(sender, maybeError.get.message)
+          provider ! TextMessage(sender, maybeError.get.message)
         } else {
           lastKey = currentKey
           slot = s
-          nextQuestion(sender, Some(text))
+          nextQuestion(provider, sender, Some(text))
         }
       } else {
-        nextQuestion(sender, Some(text))
+        nextQuestion(provider, sender, Some(text))
       }
+
+    case SetProvider(_, _, ref, _, _, _) =>
+      context become withProvider(ref)
 
   }
 
@@ -146,19 +154,35 @@ class FormActor @Inject()(facebookService: FacebookService,
       slotService.fillSlot(slot, key, value)
     }
 
-  def nextQuestion(sender: String, text: Option[String]) =
+  def nextQuestion(provider: ActorRef, sender: String, text: Option[String]) =
     slot.nextQuestion match {
 
       case Some(Question(key, question, false, _)) =>
         currentKey = Some(key)
         history += Exchange(text, question)
-        facebookService.sendTextMessage(sender, question)
+        provider ! TextMessage(sender, escape(question))
 
       case Some(Question(key, question, true, _)) =>
         currentKey = Some(key)
         history += Exchange(text, question)
         confirming = true
-        facebookService.sendQuickReply(sender, question)
+        provider ! QuickReply(sender, escape(question))
+        if (key == "address") {
+          val addressSlot = slot.findSlot(key).get
+          val address = Address(
+            street1 = addressSlot.getString("street1"),
+            street2 = "",
+            city = addressSlot.getString("city"),
+            postcode = addressSlot.getString("postcode"),
+            state = addressSlot.getString("state"),
+            country = addressSlot.getString("country"),
+            location = Location(
+              latitude = addressSlot.getValue[Double]("latitude").getOrElse(37.8136),
+              longitude = addressSlot.getValue[Double]("longitude").getOrElse(144.9631)
+            )
+          )
+          provider ! AddressCard(sender, address)
+        }
 
       case None =>
         log.debug("No next question")
@@ -179,7 +203,7 @@ class FormActor @Inject()(facebookService: FacebookService,
       }
     } mkString "\n"
 
-  def multiMessage(sender: String, message: String): Unit =
+  def multiMessage(provider: ActorRef, sender: String, message: String): Unit =
     message.split("\n").foldLeft(0, 0, List[(Int, String)]()) {
       case ((group, len, lines), line) =>
         val len1 = len + line.length
@@ -191,7 +215,7 @@ class FormActor @Inject()(facebookService: FacebookService,
     }._3 groupBy (_._1) foreach {
       case (_, ls) =>
         val lines = ls.map(_._2).reverse
-        facebookService.sendTextMessage(sender, lines mkString "\n")
+        provider ! TextMessage(sender, lines mkString "\n")
     }
 
 }
@@ -199,5 +223,9 @@ class FormActor @Inject()(facebookService: FacebookService,
 object FormActor extends NamedActor {
 
   override final val name = "FormActor"
+
+  trait Factory {
+    def apply(@Assisted("defaultProvider") defaultProvider: ActorRef): Actor
+  }
 
 }

@@ -11,6 +11,7 @@ import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.typesafe.config.Config
 import engines.{LookupBusImpl, MsgEnvelope}
+import example.BuyConversationActor.Buy
 import models.Platform
 import models.events.{QuickReplyResponse, TextResponse, Welcome}
 import services._
@@ -96,7 +97,14 @@ class FacebookController @Inject()(config: Config,
   }
 
   def receivedPostback(event: JsValue): Unit = {
-
+    try {
+      val ev = event.convertTo[FacebookMessaging]
+      val sender = ev.sender.id
+      converse(sender, Buy(Facebook, sender, ev.postback.get.payload))
+    } catch {
+      case e: Throwable =>
+        logger.error(e, e.getMessage)
+    }
   }
 
   def receivedDeliveryConfirmation(event: FacebookMessageDeliveredEvent): Unit = {
@@ -156,6 +164,10 @@ class FacebookController @Inject()(config: Config,
       logger.info("received authentication event")
       receivedAuthentication(event.convertTo[FacebookAuthenticationEvent])
 
+    } else if (f contains "postback") {
+      logger.info("received postback")
+      receivedPostback(event)
+
     } else if (f contains "message") {
       logger.info("received message:\n{}", event.prettyPrint)
       receivedMessage(event)
@@ -163,13 +175,6 @@ class FacebookController @Inject()(config: Config,
     } else if (f contains "delivery") {
       logger.info("received delivery confirmation")
       receivedDeliveryConfirmation(event.convertTo[FacebookMessageDeliveredEvent])
-
-    } else if (f contains "postback") {
-      logger.info("received postback")
-      receivedPostback(event)
-      //facebookService.sendTextMessage(sender, event.postback.get.payload)
-      // TODO
-      //      converse(sender, Buy(Facebook, sender, "iphone 6s plus", text))
 
     } else if (f contains "read") {
       logger.info("received message read event")

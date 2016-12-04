@@ -23,7 +23,33 @@ case class MapsResults(addressComponents: List[AddressComponent], formattedAddre
       case None => ""
     }
 
-  def getAddress = {
+  def getAddress: models.AddressFlat = {
+    var street1 = getComponent("street_address")
+    if (street1.isEmpty) {
+      street1 = getComponent("street_number") + " " + getComponent("route")
+    }
+    //    models.Address(
+    //      street1 = street1,
+    //      street2 = "",
+    //      city = getComponent("locality"),
+    //      postcode = getComponent("postal_code"),
+    //      state = getComponent("administrative_area_level_1"),
+    //      country = getComponent("country"),
+    //      location = models.Location(geometry.location.lat, geometry.location.lng)
+    //    )
+    models.AddressFlat(
+      street1 = street1,
+      street2 = "",
+      city = getComponent("locality"),
+      postcode = getComponent("postal_code"),
+      state = getComponent("administrative_area_level_1"),
+      country = getComponent("country"),
+      latitude = geometry.location.lat,
+      longitude = geometry.location.lng
+    )
+  }
+
+  def getFacebookAddress: FacebookAddress = {
     var street1 = getComponent("street_address")
     if (street1.isEmpty) {
       street1 = getComponent("street_number") + " " + getComponent("route")

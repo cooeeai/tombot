@@ -51,11 +51,11 @@ case class LpLoginResponse(csrf: String,
                            sessionTTl: String,
                            bearer: String) {
 
-  def getMessagingURL: String = csdsCollectionResponse.baseURIs.find(_.service == "asyncMessagingEnt").get.baseURI
+  def getMessagingUrl: String = csdsCollectionResponse.baseURIs.find(_.service == "asyncMessagingEnt").get.baseURI
 
-  def getAdminURL: String = csdsCollectionResponse.baseURIs.find(_.service == "adminArea").get.baseURI
+  def getAdminUrl: String = csdsCollectionResponse.baseURIs.find(_.service == "adminArea").get.baseURI
 
-  def getLiveEngageURL: String = csdsCollectionResponse.baseURIs.find(_.service == "liveEngage").get.baseURI
+  def getLiveEngageUrl: String = csdsCollectionResponse.baseURIs.find(_.service == "liveEngage").get.baseURI
 
 }
 
@@ -133,15 +133,15 @@ case class LpChatEvents(events: LpEvents) {
 
 case class LpChatConversation(chat: LpChat) {
 
-  def getEventsURL: String = chat.link.find(_.rel == "events").get.url
+  def getEventsUrl: String = chat.link.find(_.rel == "events").get.url
 
-  def getNextURL: String = chat.link.find(_.rel == "next").get.url
+  def getNextUrl: String = chat.link.find(_.rel == "next").get.url
 
-  def getNextEventsURL: String = chat.events.link.find(_.rel == "next").get.url
+  def getNextEventsUrl: String = chat.events.link.find(_.rel == "next").get.url
 
-  def getTransferURL: String = chat.link.find(_.rel == "transfer").get.url
+  def getTransferUrl: String = chat.link.find(_.rel == "transfer").get.url
 
-  def getVisitSessionURL: String = chat.link.find(_.rel == "visit-id").get.url
+  def getVisitSessionUrl: String = chat.link.find(_.rel == "visit-id").get.url
 
   def getLastVisitorEvent: Option[LpLineEvent] = chat.events.event match {
     case Some(Right(ev :: vs)) =>
@@ -233,9 +233,9 @@ case class LpVisitSessionId(link: List[LpLink])
 
 case class LpVisitSessionResponse(visitId: LpVisitSessionId) {
 
-  def getInfoURL = visitId.link.find(_.rel == "info").get.url
+  def getInfoUrl = visitId.link.find(_.rel == "info").get.url
 
-  def getCustomVariablesURL = visitId.link.find(_.rel == "custom-variables").get.url
+  def getCustomVariablesUrl = visitId.link.find(_.rel == "custom-variables").get.url
 
 }
 
@@ -257,6 +257,10 @@ case class LpCustomVariable(source: String, scope: String, name: String, time: S
 case class LpCustomVariables(link: LpLink, customVariable: List[LpCustomVariable])
 
 case class LpCustomVariablesResponse(customVariables: LpCustomVariables)
+
+case class LpError(time: String, message: String, internalCode: Int)
+
+case class LpErrorResponse(error: LpError)
 
 trait LpChatJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val lpCredentialsJsonFormat = jsonFormat2(LpCredentials)
@@ -403,5 +407,7 @@ trait LpChatJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val lpCustomVariableJsonFormat = jsonFormat(LpCustomVariable, "@source", "@scope", "name", "time", "displayName", "value")
   implicit val lpCustomVariablesJsonFormat = jsonFormat2(LpCustomVariables)
   implicit val lpCustomVariablesResponseJsonFormat = jsonFormat1(LpCustomVariablesResponse)
+  implicit val lpErrorJsonFormat = jsonFormat3(LpError)
+  implicit val lpErrorResponseJsonFormat = jsonFormat1(LpErrorResponse)
 
 }

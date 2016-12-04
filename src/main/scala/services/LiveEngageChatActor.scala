@@ -1,12 +1,17 @@
 package services
 
 import akka.actor.{Actor, ActorLogging, ActorRef}
+import apis.liveengage.{LpChatJsonSupport, LpErrorResponse}
 import com.google.inject.Inject
 import com.typesafe.config.Config
 import models.events.{SetProvider, TextMessage, TextResponse}
 import modules.akkaguice.NamedActor
+import spray.json._
+import utils.General
 
+import scala.concurrent.Future
 import scala.concurrent.duration._
+import scala.language.implicitConversions
 import scala.util.{Failure, Success}
 
 /**
@@ -15,8 +20,9 @@ import scala.util.{Failure, Success}
 class LiveEngageChatActor @Inject()(config: Config,
                                     leService: LiveEngageService,
                                     conversationService: ConversationService)
-  extends Actor with ActorLogging {
+  extends Actor with ActorLogging with LpChatJsonSupport with General {
 
+  import LiveEngageChatActor._
   import context.dispatcher
   import conversationService._
   import models.Platform._
@@ -25,8 +31,8 @@ class LiveEngageChatActor @Inject()(config: Config,
   for {
     loginResponse <- leService.login()
     accessToken = loginResponse.bearer
-    agentSessionURL <- leService.createAgentSessionURL(accessToken)
-  } yield context become awaitingChat(accessToken, agentSessionURL)
+    agentSessionUrl <- leService.createAgentSessionUrl(accessToken)
+  } yield context become awaitingChat(accessToken, agentSessionUrl)
 
   // a negative consequence of polling is that a user message may be
   // reprocessed before the last process completed
@@ -41,21 +47,24 @@ class LiveEngageChatActor @Inject()(config: Config,
       log.debug("still uninitialized")
   }
 
-  def awaitingChat(accessToken: String, agentSessionURL: String): Receive = {
+  def awaitingChat(accessToken: String, agentSessionUrl: String): Receive = {
 
     case "tick" =>
       log.debug("tick awaitingChat")
       for {
-        data <- leService.getRingCount(agentSessionURL, accessToken) if data.incomingRequests.ringingCount.toInt > 0
-        chatURL <- leService.takeChat(agentSessionURL, accessToken)
-        conversation <- leService.getChatConversation(chatURL, accessToken)
+        dataEither <- leService.getRingCount(agentSessionUrl, accessToken)
+        data <- dataEither.rightFuture if data.incomingRequests.ringingCount.toInt > 0
+        chatUrlEither <- leService.takeChat(agentSessionUrl, accessToken)
+        chatUrl <- chatUrlEither.rightFuture
+        conversationEither <- leService.getChatConversation(chatUrl, accessToken)
+        conversation <- conversationEither.rightFuture
       } yield {
-        val eventsURL = conversation.getEventsURL
-        val nextURL = conversation.getNextURL
-        log.debug("chatURL: {}", chatURL)
-        log.debug("eventsURL: {}", eventsURL)
-        log.debug("nextURL: {}", nextURL)
-        context become inChat(accessToken, nextURL, eventsURL)
+        val eventsUrl = conversation.getEventsUrl
+        val nextUrl = conversation.getNextUrl
+        log.debug("chatUrl: {}", chatUrl)
+        log.debug("eventsUrl: {}", eventsUrl)
+        log.debug("nextUrl: {}", nextUrl)
+        context become inChat(accessToken, nextUrl, eventsUrl)
         conversation.getLastVisitorEvent match {
           case Some(ev) =>
             // TODO
@@ -85,15 +94,16 @@ class LiveEngageChatActor @Inject()(config: Config,
 
   }
 
-  def inChat(accessToken: String, chatURL: String, eventsURL: String): Receive = {
+  def inChat(accessToken: String, chatUrl: String, eventsUrl: String): Receive = {
 
     case "tick" =>
       log.debug("tick inChat")
       for {
-        conversation <- leService.continueConversation(chatURL, accessToken)
+        conversationEither <- leService.continueConversation(chatUrl, accessToken)
+        conversation <- conversationEither.rightFuture
       } yield {
-        val nextURL = conversation.getNextURL
-        log.debug("nextURL: {}", nextURL)
+        val nextUrl = conversation.getNextUrl
+        log.debug("nextUrl: {}", nextUrl)
         conversation.getLastVisitorEvent match {
           case Some(ev) =>
             // TODO
@@ -119,17 +129,35 @@ class LiveEngageChatActor @Inject()(config: Config,
           case None =>
             log.debug("no new events")
         }
-        context become inChat(accessToken, nextURL, eventsURL)
+        context become inChat(accessToken, nextUrl, eventsUrl)
       }
 
     case TextMessage(sender, text) =>
       log.debug("sending [{}] to [{}]", text, sender)
-      leService.sendTextMessage(eventsURL, accessToken, text)
+      leService.sendTextMessage(eventsUrl, accessToken, text)
 
   }
+
+  class RichEither[T](either: Either[LpErrorResponse, T]) {
+
+    def rightFuture = either.fold(handleError, Future.successful)
+
+    def handleError(e: LpErrorResponse) = {
+      log.error(e.toJson.prettyPrint)
+      Future.failed(LpException(e.error.message))
+    }
+
+  }
+
+  implicit def eitherToRichEither[T](either: Either[LpErrorResponse, T]): RichEither[T] =
+    new RichEither[T](either)
 
 }
 
 object LiveEngageChatActor extends NamedActor {
+
   override final val name = "LiveEngageChatActor"
+
+  case class LpException(message: String) extends Exception(message)
+
 }

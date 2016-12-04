@@ -4,13 +4,14 @@ import akka.actor.{ActorSystem, Props}
 import akka.http.scaladsl.model.ws.{Message, TextMessage}
 import akka.stream.scaladsl._
 import akka.stream.{FlowShape, OverflowStrategy}
+import services.ConversationService
 
 /**
   * Created by markmo on 22/10/2016.
   */
-class ChatRoom(roomId: Int, system: ActorSystem) {
+class ChatRoom(roomId: Int, conversationService: ConversationService, system: ActorSystem) {
 
-  private[this] val chatRoomActor = system.actorOf(Props(classOf[ChatRoomActor], roomId))
+  private[this] val chatRoomActor = system.actorOf(Props(classOf[ChatRoomActor], roomId, conversationService), s"chat$roomId")
 
   def webSocketFlow(user: String): Flow[Message, Message, _] =
     Flow.fromGraph(GraphDSL.create(Source.actorRef[ChatMessage](bufferSize = 5, OverflowStrategy.fail)) {
@@ -29,7 +30,9 @@ class ChatRoom(roomId: Int, system: ActorSystem) {
           // flow used as output - returns Message
           val backToWebSocket = builder.add(
             Flow[ChatMessage] map {
-              case ChatMessage(author, text) => TextMessage(s"[$author]: $text")
+              case ChatMessage(author, text) =>
+                //TextMessage(s"[$author]: $text")
+                TextMessage(text)
             }
           )
 
@@ -63,5 +66,8 @@ class ChatRoom(roomId: Int, system: ActorSystem) {
 }
 
 object ChatRoom {
-  def apply(roomId: Int)(implicit system: ActorSystem) = new ChatRoom(roomId, system)
+
+  def apply(roomId: Int, conversationService: ConversationService)(implicit system: ActorSystem) =
+    new ChatRoom(roomId, conversationService, system)
+
 }

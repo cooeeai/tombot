@@ -41,7 +41,7 @@ class ConversationService @Inject()(logger: LoggingAdapter,
         logger.debug(e.getMessage)
         logger.debug("creating new actor")
         val ref = injectTopActor[ConciergeActor](uid)
-        bus subscribe(ref, s"authenticated:$sender")
+        bus subscribe(ref, s"accountLinked:$sender")
         bus subscribe(ref, s"delivered:$sender")
         ref ! message
     }
@@ -64,7 +64,7 @@ class ConversationService @Inject()(logger: LoggingAdapter,
         logger.debug(e.getMessage)
         logger.debug("creating new actor")
         val ref = injectTopActor[ConciergeActor](uid)
-        bus subscribe(ref, s"authenticated:$sender")
+        bus subscribe(ref, s"accountLinked:$sender")
         bus subscribe(ref, s"delivered:$sender")
         p success ref
     }

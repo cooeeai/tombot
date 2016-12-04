@@ -18,13 +18,18 @@ object events {
   type TempMembershipMap = Map[String, SparkTempMembership]
 
   trait PlatformAware {
-    val platform: Platform
-    val sender: String
+
+    def platform: Platform
+
+    def sender: String
   }
 
+  // marker trait used to authenticate certain events
   trait Privileged {
-    val sender: String
-    val text: String
+
+    def sender: String
+
+    def text: String
   }
 
   case class IntentVote(probability: Double, event: Any, multistep: Boolean = false)
@@ -41,7 +46,9 @@ object events {
 
   case class Welcome(platform: Platform, sender: String)
 
-  case class Authenticated(sender: String, ref: ActorRef)
+  case class AccountLinked(sender: String, ref: ActorRef)
+
+  case class Authenticated(event: Any)
 
   case class Unhandled(event: TextResponse)
 
@@ -79,6 +86,8 @@ object events {
   case class ReceiptCard(sender: String, slot: Slot) extends SendEvent
 
   case class QuickReply(sender: String, text: String) extends SendEvent
+
+  case class AddressCard(sender: String, address: Address) extends SendEvent
 
   case object GetHistory
 

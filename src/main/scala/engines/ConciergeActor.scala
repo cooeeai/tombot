@@ -34,7 +34,8 @@ class ConciergeActor @Inject()(config: Config,
                                val injector: Injector,
                                greetActorFactory: GreetActor.Factory,
                                buyIntentActorFactory: BuyConversationActor.Factory,
-                               liveAgentActorFactory: AgentConversationActor.Factory)
+                               liveAgentActorFactory: AgentConversationActor.Factory,
+                               formActorFactory: FormActor.Factory)
   extends ActorInject
     with ActorLogging
     with ReceivePipeline
@@ -54,11 +55,11 @@ class ConciergeActor @Inject()(config: Config,
   val maxMessageLength = config.getInt("max-message-length")
   val voteThreshold = config.getDouble("vote-threshold")
 
-  val formActor = injectActor[FormActor]("form")
   val defaultProvider = injectActor[FacebookSendQueue]("provider")
   val defaultAgentProvider = injectActor[SparkSendQueue]("agentProvider")
   val historyActor = injectActor[HistoryActor]("history")
   val greetActor = injectActor(greetActorFactory(defaultProvider, historyActor), "greet")
+  val formActor = injectActor(formActorFactory(defaultProvider), "form")
   val liveAgentActor = injectActor(liveAgentActorFactory(defaultProvider, defaultAgentProvider, historyActor), "agent")
   val defaultConversationActor = getConversationActor(defaultConversationEngine)
 
@@ -67,9 +68,9 @@ class ConciergeActor @Inject()(config: Config,
   val intentResolvers = Vector(
     injectActor[CommandIntentActor]("command"),
     injectActor[RuleIntentActor]("rule"),
-    injectActor[WitIntentActor]("wit"),
-    injectActor[ApiAiIntentActor]("apiai"),
-    injectActor[WolframAlphaIntentActor]("alpha")
+    injectActor[WitIntentActor]("wit")
+    //    injectActor[ApiAiIntentActor]("apiai"),
+    //    injectActor[WolframAlphaIntentActor]("alpha")
   )
 
   val initialData = ConciergeContext(
@@ -179,6 +180,7 @@ class ConciergeActor @Inject()(config: Config,
       } else {
         ctx.child ! ev
       }
+      formActor ! ev
       liveAgentActor ! ev
       stay using ctx.copy(provider = ref)
 

@@ -18,7 +18,7 @@ import services.LiveEngageChatActor
 /**
   * Created by markmo on 16/07/2016.
   */
-object Main extends App {
+object Main extends App with CorsSupport {
 
   import StatusCodes._
 
@@ -45,6 +45,7 @@ object Main extends App {
   val smsController = injector.instance[SMSController]
   val chatController = injector.instance[ChatController]
   val telegramController = injector.instance[TelegramController]
+  val personalityInsightsController = injector.instance[PersonalityInsightsController]
 
   val routes =
     facebookController.routes ~
@@ -53,7 +54,8 @@ object Main extends App {
       addressController.routes ~
       smsController.routes ~
       chatController.routes ~
-      telegramController.routes
+      telegramController.routes ~
+      personalityInsightsController.routes
 
   implicit def myRejectionHandler = {
     val handler = RejectionHandler.newBuilder().handle {
@@ -83,11 +85,11 @@ object Main extends App {
   //    handler
   //  }
 
-  val bindingFuture = Http().bindAndHandle(routes, interface, port)
+  val bindingFuture = Http().bindAndHandle(corsHandler(routes), interface, port)
 
   facebookController.setupWelcomeGreeting()
 
-  system.actorOf(GuiceAkkaExtension(system).props(LiveEngageChatActor.name))
+//  system.actorOf(GuiceAkkaExtension(system).props(LiveEngageChatActor.name))
 
   //  println("Server online at http://localhost:8080/\nPress RETURN to stop...")
   //  StdIn.readLine() // let it run until user presses return

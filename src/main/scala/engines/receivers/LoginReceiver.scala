@@ -1,7 +1,7 @@
 package engines.receivers
 
 import akka.actor.{ActorLogging, ActorRef, FSM}
-import engines.ComplexConversationActor.{ConversationContext, Data, State, TransferState}
+import engines.ComplexConversationActor._
 import engines.{LookupBusImpl, MsgEnvelope}
 import models.events._
 
@@ -13,9 +13,11 @@ import scala.util.{Failure, Success}
   */
 trait LoginReceiver extends ActorLogging with FSM[State, Data] {
 
-  val bus: LookupBusImpl
-  val historyActor: ActorRef
-  implicit val timeout: akka.util.Timeout
+  def bus: LookupBusImpl
+
+  def historyActor: ActorRef
+
+  implicit def timeout: akka.util.Timeout
 
   import context.dispatcher
 
@@ -23,29 +25,31 @@ trait LoginReceiver extends ActorLogging with FSM[State, Data] {
 
     case Event(Login(ev, sender, text), ctx: ConversationContext) =>
       if (ctx.authenticated) {
-        self ! ev
+        self ! Authenticated(ev)
         stay
       } else {
         historyActor ! Exchange(Some(text), "login")
         ctx.provider ! TextMessage(sender, "I need to confirm your identity if that is OK")
         ctx.provider ! LoginCard(sender)
-        stay using ctx.copy(postAction = Some(ctx => {
-          self ! ev
+        stay using ctx.copy(postAction = Some((currentActor, ctx) => {
+          currentActor ! Authenticated(ev)
           stay
         }))
       }
 
     case Event(Welcome(platform, sender), ctx: ConversationContext) =>
       ctx.provider ! TextMessage(sender, "Welcome, login successful")
-      bus publish MsgEnvelope(s"authenticated:$sender", Authenticated(sender, self))
+      bus publish MsgEnvelope(s"accountLinked:$sender", AccountLinked(sender, self))
       stay
 
-    case Event(Authenticated(sender, ref), ctx: ConversationContext) => {
+    case Event(AccountLinked(sender, ref), ctx: ConversationContext) => {
       log.debug("self {}", self.toString())
       log.debug("ref {}", ref.toString())
       if (self != ref) {
         log.debug("transferring state")
 
+        // TODO
+        // maintain concierge actor reference?
         // lookup the concierge actor (grandparent)
         context.actorSelection("../..").resolveOne onComplete {
           case Success(subscriber) =>
@@ -60,7 +64,7 @@ trait LoginReceiver extends ActorLogging with FSM[State, Data] {
 
       } else {
         log.debug("re-authenticating")
-        self ! TransferState(sender, ctx)
+        //self ! TransferState(sender, ctx)
       }
       stay
     }
@@ -69,7 +73,13 @@ trait LoginReceiver extends ActorLogging with FSM[State, Data] {
       ctx.postAction match {
         case Some(action) =>
           historyActor ! Exchange(None, "logged in")
-          action(ctx.copy(authenticated = true, postAction = None))
+          val c1 = ctx.copy(authenticated = true, postAction = None)
+          // TODO
+          // perform action after updating state
+          context.system.scheduler.scheduleOnce(50 milliseconds) {
+            action(self, c1)
+          }
+          stay using c1
         case None =>
           historyActor ! Exchange(None, "logged in")
           stay using ctx.copy(authenticated = true)

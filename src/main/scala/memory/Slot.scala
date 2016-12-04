@@ -134,10 +134,40 @@ case class Slot(key: String,
 
   def confirmSlot(key: String): Slot =
     if (this.key == key) {
-      Slot(key, question, children, value, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed = true, caption, enum, shortlist)
+      Slot(
+        key,
+        question,
+        children,
+        value,
+        validateFn,
+        invalidMessage,
+        parseApi,
+        parseExpr,
+        parseFn,
+        confirm,
+        confirmed = true,
+        caption,
+        enum,
+        shortlist
+      )
     } else if (children.isDefined) {
       val slots = children.get.map(_.confirmSlot(key))
-      Slot(this.key, question, Some(slots), value, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed, caption, enum, shortlist)
+      Slot(
+        this.key,
+        question,
+        Some(slots),
+        value,
+        validateFn,
+        invalidMessage,
+        parseApi,
+        parseExpr,
+        parseFn,
+        confirm,
+        confirmed,
+        caption,
+        enum,
+        shortlist
+      )
     } else {
       this
     }
@@ -154,9 +184,39 @@ case class Slot(key: String,
   def empty(): Slot =
     if (children.isDefined) {
       val slots = children.get.map(_.empty())
-      Slot(this.key, question, Some(slots), value = None, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed = false, caption, enum, shortlist)
+      Slot(
+        this.key,
+        question,
+        Some(slots),
+        value = None,
+        validateFn,
+        invalidMessage,
+        parseApi,
+        parseExpr,
+        parseFn,
+        confirm,
+        confirmed = false,
+        caption,
+        enum,
+        shortlist
+      )
     } else {
-      Slot(this.key, question, children, value = None, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed = false, caption, enum, shortlist)
+      Slot(
+        this.key,
+        question,
+        children,
+        value = None,
+        validateFn,
+        invalidMessage,
+        parseApi,
+        parseExpr,
+        parseFn,
+        confirm,
+        confirmed = false,
+        caption,
+        enum,
+        shortlist
+      )
     }
 
   def emptySlot(key: String): Slot =
@@ -164,7 +224,22 @@ case class Slot(key: String,
       empty()
     } else if (children.isDefined) {
       val slots = children.get.map(_.emptySlot(key))
-      Slot(this.key, question, Some(slots), value, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed, caption, enum, shortlist)
+      Slot(
+        this.key,
+        question,
+        Some(slots),
+        value,
+        validateFn,
+        invalidMessage,
+        parseApi,
+        parseExpr,
+        parseFn,
+        confirm,
+        confirmed,
+        caption,
+        enum,
+        shortlist
+      )
     } else {
       this
     }
@@ -174,26 +249,36 @@ case class Slot(key: String,
       slot
     } else if (children.isDefined) {
       val slots = children.get.map(_.updateSlot(key, slot))
-      Slot(this.key, question, Some(slots), value, validateFn, invalidMessage, parseApi, parseExpr, parseFn, confirm, confirmed, caption, enum, shortlist)
+      Slot(
+        this.key,
+        question,
+        Some(slots),
+        value,
+        validateFn,
+        invalidMessage,
+        parseApi,
+        parseExpr,
+        parseFn,
+        confirm,
+        confirmed,
+        caption,
+        enum,
+        shortlist
+      )
     } else {
       this
     }
 
-  def getValue(key: String): Option[Any] =
-    if (this.key == key) {
-      value
-    } else if (children.isDefined) {
-      children.get.map(_.getValue(key)).find(_.isDefined) match {
-        case Some(x) => x
-        case None => None
-      }
-    } else {
-      None
-    }
+  def getValue[T](key: String): Option[T] =
+    traverse(this).find(_.key == key) flatMap (_.value map (_.asInstanceOf[T]))
+
+  private def traverse(slot: Slot): Stream[Slot] =
+    slot #:: slot.children.map(_.foldLeft(Stream.empty[Slot]) {
+      case (a, s) => a #::: traverse(s)
+    }).getOrElse(Stream.empty[Slot])
 
   def answers: List[QA] = {
-
-    def loop(slot: Slot): List[QA] = {
+    def dfs(slot: Slot): List[QA] = {
       val Slot(_, question, children, value, _, _, _, _, _, _, _, _, _, _) = slot
       if (question.isDefined) {
         if (value.isDefined) {
@@ -202,13 +287,12 @@ case class Slot(key: String,
           Nil
         }
       } else if (children.isDefined) {
-        children.get.flatMap(child => loop(child))
+        children.get.flatMap(dfs)
       } else {
         Nil
       }
     }
-
-    loop(this)
+    dfs(this)
   }
 
   def printAnswers: String =

@@ -21,7 +21,7 @@ libraryDependencies ++= Seq(
   "net.virtual-void" %% "json-lenses" % "0.6.1",
   "com.google.inject" % "guice" % "4.1.0",
   "net.codingwell" %% "scala-guice" % "4.0.1",
-  "com.ibm.watson.developer_cloud" % "java-sdk" % "3.3.0",
+  "com.ibm.watson.developer_cloud" % "java-sdk" % "3.5.1",
   "org.scala-lang.modules" % "scala-xml_2.11" % "1.0.4",
   "commons-codec" % "commons-codec" % "1.3",
   "org.apache.httpcomponents" % "httpclient" % "4.0.1",
@@ -34,6 +34,7 @@ libraryDependencies ++= Seq(
   "net.oauth.core" % "oauth-httpclient4" % "20090913",
   "org.scribe" % "scribe" % "1.3.7",
   "com.google.inject.extensions" % "guice-assistedinject" % "4.1.0",
+  "com.github.etaty" %% "rediscala" % "1.7.0",
   "btomala" %% "akka-http-twirl" % "1.1.0" excludeAll
     ExclusionRule(organization = "com.typesafe.akka")
 )

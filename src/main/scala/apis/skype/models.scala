@@ -27,9 +27,9 @@ case class SkypeImage(url: String, alt: Option[String], value: Option[String])
   * tap String Value depending on the type of action. For openURL is a URL, for signin is the URL to the authentication flow, for imBack is a user defined string, for call can be “skype:skypeid” or “tel:telephone”, for showImage not required.
   */
 sealed trait SkypeButton {
-  val buttonType: String
-  val title: String
-  val value: String
+  def buttonType: String
+  def title: String
+  def value: String
 }
 
 case class SkypeSigninButton(title: String, value: String) extends SkypeButton {
@@ -81,7 +81,7 @@ case class SkypeReceiptAttachmentContent(title: Option[String],
                                          buttons: Option[List[SkypeButton]])
 
 sealed trait SkypeAttachment {
-  val contentType: String
+  def contentType: String
 }
 
 case class SkypeSigninAttachment(content: SkypeSigninAttachmentContent) extends SkypeAttachment {
@@ -115,8 +115,8 @@ case class SkypeUserMessage(id: String,
 case class SkypeBotMessage(messageType: String, text: String, attachments: Option[List[SkypeAttachment]])
 
 sealed trait SkypeAttachmentLayout {
-  val attachmentLayout: String
-  val attachments: List[SkypeAttachment]
+  def attachmentLayout: String
+  def attachments: List[SkypeAttachment]
 }
 
 case class SkypeCarousel(attachments: List[SkypeAttachment]) extends SkypeAttachmentLayout {

@@ -54,7 +54,7 @@ class BuyConversationActor @Inject()(smallTalkService: SmallTalkService,
 
   when(Buying) {
 
-    case Event(Buy(platform, sender, productType, text), _) =>
+    case Event(Buy(platform, sender, productType), _) =>
       context.parent ! FillForm(sender, "purchase")
       stay
 
@@ -105,8 +105,8 @@ object BuyConversationActor extends NamedActor {
   case object Buying extends State
 
   case class Qualify(platform: Platform, sender: String, productType: Option[String], text: String)
-    extends PlatformAware with Privileged
+    extends PlatformAware// with Privileged
 
-  case class Buy(platform: Platform, sender: String, productType: String, text: String) extends PlatformAware
+  case class Buy(platform: Platform, sender: String, productType: String) extends PlatformAware
 
 }

@@ -17,7 +17,7 @@ object ItemActionType extends Enumeration {
 }
 
 sealed trait ItemAction {
-  val actionType: ItemActionType.Value
+  def actionType: ItemActionType.Value
 }
 
 case class ItemLinkAction(title: String, url: String) extends ItemAction {
@@ -31,6 +31,25 @@ case class ItemPostbackAction(title: String, payload: JsValue) extends ItemActio
 case class Item(title: String, subtitle: String, itemURL: String, imageURL: String, actions: List[ItemAction])
 
 case class UserProfile(firstName: String, lastName: String, picture: String, locale: String, timezone: Int, gender: String)
+
+case class Location(latitude: Double, longitude: Double)
+
+case class Address(street1: String, street2: String, city: String, postcode: String, state: String, country: String, location: Location) {
+  override def toString = street1 + ", " + street2 + ", " + city + ", " + state + " " + postcode
+}
+
+case class AddressFlat(street1: String, street2: String, city: String, postcode: String, state: String, country: String, latitude: Double, longitude: Double) {
+  override def toString = street1 + ", " + street2 + ", " + city + ", " + state + " " + postcode
+}
+
+case class AddressResponse(address: Address, text: String)
+
+trait AddressJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
+  implicit val locationJsonFormat = jsonFormat2(Location)
+  implicit val addressJsonFormat = jsonFormat7(Address)
+  implicit val addressFlatJsonFormat = jsonFormat8(AddressFlat)
+  implicit val addressResponseJsonFormat = jsonFormat2(AddressResponse)
+}
 
 object Platform extends Enumeration {
 

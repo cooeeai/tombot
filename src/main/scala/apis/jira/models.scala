@@ -8,7 +8,7 @@ import spray.json.lenses.JsonLenses._
   * Created by markmo on 15/10/2016.
   */
 sealed trait JIRAIssueType {
-  val name: String
+  def name: String
 }
 
 case object JIRABug extends JIRAIssueType {
