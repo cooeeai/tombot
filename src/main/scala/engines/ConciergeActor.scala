@@ -52,6 +52,7 @@ class ConciergeActor @Inject()(config: Config,
   implicit val akkaTimeout: akka.util.Timeout = 30 seconds
 
   val defaultConversationEngine = ConversationEngine.withName(config.getString("settings.default-engine"))
+  val maxFailCount = config.getInt("settings.max-fail-count")
   val maxMessageLength = config.getInt("settings.max-message-length")
   val voteThreshold = config.getDouble("settings.vote-threshold")
 
@@ -67,7 +68,7 @@ class ConciergeActor @Inject()(config: Config,
   // do these need to be children?
   val intentResolvers = Vector(
     injectActor[CommandIntentActor]("command"),
-    injectActor[RuleIntentActor]("rule"),
+//    injectActor[RuleIntentActor]("rule"),
     injectActor[WitIntentActor]("wit")
     //    injectActor[ApiAiIntentActor]("apiai"),
     //    injectActor[WolframAlphaIntentActor]("alpha")
@@ -143,11 +144,29 @@ class ConciergeActor @Inject()(config: Config,
       self ! ev
       stay
 
-    case Event(IntentUnknown(sender, text), _) =>
+    case Event(IntentUnknown(sender, text), ctx: ConciergeContext) =>
       log.debug("intent unknown")
-      val message = smallTalkService.getSmallTalkResponse(sender, text)
-      self ! Say(sender, text, message)
-      stay
+      if (ctx.failCount > maxFailCount) {
+        self ! Fallback(sender, Nil)
+        goto(WithoutIntent) using ctx.copy(failCount = 0)
+      } else {
+        val message = smallTalkService.getSmallTalkResponse(sender, text)
+        self ! Say(sender, text, message)
+        goto(WithoutIntent) using ctx.copy(failCount = ctx.failCount + 1)
+      }
+
+    case Event(Unhandled(ev@TextResponse(_, sender, _)), ctx: ConciergeContext) =>
+      if (ctx.failCount > maxFailCount) {
+        self ! Fallback(sender, Nil)
+        goto(WithoutIntent) using ctx.copy(failCount = 0)
+      } else {
+        // TODO
+        // is this the best pattern to resend message after state change?
+        context.system.scheduler.scheduleOnce(50 milliseconds) {
+          self ! ev
+        }
+        goto(WithoutIntent) using ctx.copy(failCount = ctx.failCount + 1)
+      }
 
     case Event(ev: Greet, _) =>
       greetActor ! ev
@@ -189,23 +208,24 @@ class ConciergeActor @Inject()(config: Config,
       stay using ctx.copy(child = getConversationActor(engine))
 
     case Event(Fallback(sender, history), ctx: ConciergeContext) =>
-      val message = s"${ctx.agentName} (Human) is joining the conversation"
+      val message = "Hold on...transferring you to one of my human coworkers"
       ctx.provider ! TextMessage(sender, message)
-      for {
-        tempMembership <- sparkService.setupTempRoom(sender)
-          .withTimeout(new TimeoutException("future timed out"))(futureTimeout, context.system)
-      } yield {
-        log.debug("setup temporary membership to room [{}] for sender [{}]", tempMembership.roomId, sender)
-
-        // print transcript history
-        history map {
-          case Exchange(Some(request), response) => s"user: $request\ntombot: $response"
-          case Exchange(None, response) => s"tombot: $response"
-        } foreach { text =>
-          liveAgentActor ! SparkTextMessage(Some(tempMembership.roomId), None, None, text, None)
-        }
-        self ! UpdateTempMemberships(ctx.tempMemberships + (sender -> tempMembership))
-      }
+      ctx.provider ! TransferToAgent
+//      for {
+//        tempMembership <- sparkService.setupTempRoom(sender)
+//          .withTimeout(new TimeoutException("future timed out"))(futureTimeout, context.system)
+//      } yield {
+//        log.debug("setup temporary membership to room [{}] for sender [{}]", tempMembership.roomId, sender)
+//
+//        // print transcript history
+//        history map {
+//          case Exchange(Some(request), response) => s"user: $request\ntombot: $response"
+//          case Exchange(None, response) => s"tombot: $response"
+//        } foreach { text =>
+//          liveAgentActor ! SparkTextMessage(Some(tempMembership.roomId), None, None, text, None)
+//        }
+//        self ! UpdateTempMemberships(ctx.tempMemberships + (sender -> tempMembership))
+//      }
       stay
 
     case Event(UpdateTempMemberships(tempMemberships), ctx: ConciergeContext) =>
@@ -294,6 +314,7 @@ object ConciergeActor extends NamedActor {
   case class ConciergeContext(provider: ActorRef,
                               child: ActorRef,
                               tempMemberships: TempMembershipMap,
-                              agentName: String) extends Data
+                              agentName: String,
+                              failCount: Int = 0) extends Data
 
 }

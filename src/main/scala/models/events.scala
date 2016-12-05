@@ -65,6 +65,8 @@ object events {
 
   case class Fallback(sender: String, history: List[Exchange])
 
+  case class TransferToAgent()
+
   case class FillForm(sender: String, goal: String)
 
   case class EndFillForm(sender: String, slot: Slot)

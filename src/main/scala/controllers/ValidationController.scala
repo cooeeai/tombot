@@ -1,9 +1,11 @@
 package controllers
 
+import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import akka.http.scaladsl.server.Directives._
 import com.google.inject.Inject
 import models.AddressJsonSupport
 import services.AddressService
+import spray.json._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -18,7 +20,8 @@ class ValidationController @Inject()(addressService: AddressService) extends Add
         parameters("q") { q =>
           complete {
             addressService.getAddress(q) map { response =>
-              response.results.head.getAddress
+              HttpEntity(ContentTypes.`application/json`,
+                response.results.head.getAddress.toJson.compactPrint)
             }
           }
         }

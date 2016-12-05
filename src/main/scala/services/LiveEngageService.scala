@@ -5,7 +5,7 @@ import akka.event.LoggingAdapter
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.headers.{Authorization, OAuth2BearerToken}
+import akka.http.scaladsl.model.headers.{Authorization, OAuth2BearerToken, RawHeader}
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.Materializer
 import apis.liveengage._
@@ -180,6 +180,18 @@ class LiveEngageService @Inject()(logger: LoggingAdapter,
         headers = List(authorization)))
       entity <- Unmarshal(response.entity).to[Either[LpErrorResponse, LpChatConversation]]
     } yield entity
+//      entity <- Unmarshal(response.entity).to[String]
+//    } yield {
+//      val json = entity.parseJson
+//      logger.debug(json.prettyPrint)
+//      try {
+//        json.convertTo[Either[LpErrorResponse, LpChatConversation]]
+//      } catch {
+//        case e: Throwable =>
+//          logger.error(e, e.getMessage)
+//          throw new RuntimeException(e.getMessage, e)
+//      }
+//    }
   }
 
   def getNextEvents(chatConversation: LpChatConversation, accessToken: String): Future[Either[LpErrorResponse, LpChatConversation]] = {
@@ -207,10 +219,10 @@ class LiveEngageService @Inject()(logger: LoggingAdapter,
     } yield entity
   }
 
-  def sendTextMessage(eventsUrl: String, accessToken: String, text: String): Future[Either[LpErrorResponse, LpChatResponse]] = {
-    logger.info("send text message")
+  def sendTextMessage(eventsUrl: String, accessToken: String, text: String, textType: String = "plain"): Future[Either[LpErrorResponse, LpChatResponse]] = {
+    logger.info("send text message in {} format", textType)
     val authorization = Authorization(OAuth2BearerToken(accessToken))
-    val event = LpMessage(LpMessageEvent(eventType = "line", text = text, textType = "plain"))
+    val event = LpMessage(LpMessageEvent(eventType = "line", text = text, textType))
     for {
       request <- Marshal(event).to[RequestEntity]
       response <- http.singleRequest(HttpRequest(
@@ -331,6 +343,25 @@ class LiveEngageService @Inject()(logger: LoggingAdapter,
         uri = s"$customVariablesUrl?v=1&NC=true",
         headers = List(authorization)))
       entity <- Unmarshal(response.entity).to[Either[LpErrorResponse, LpCustomVariablesResponse]]
+    } yield entity
+  }
+
+  // TODO
+  // expected result is either a JSON error object or empty response body
+  // using `String` works but does not seem semantically correct
+  def setAgentTyping(agentTypingUrl: String, accessToken: String, isTyping: Boolean): Future[Either[LpErrorResponse, String]] = {
+    val status = if (isTyping) "typing" else "not-typing"
+    logger.info("set agent typing status to {}", status)
+    val payload = LpAgentTypingStatus(status)
+    val authorization = Authorization(OAuth2BearerToken(accessToken))
+    for {
+      request <- Marshal(payload).to[RequestEntity]
+      response <- http.singleRequest(HttpRequest(
+        method = HttpMethods.POST,
+        uri = s"$agentTypingUrl?v=1&NC=true",
+        entity = request,
+        headers = List(authorization, RawHeader("X-HTTP-Method-Override", "PUT"))))
+      entity <- Unmarshal(response.entity).to[Either[LpErrorResponse, String]]
     } yield entity
   }
 

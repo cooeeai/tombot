@@ -89,7 +89,7 @@ object Main extends App with CorsSupport {
 
   facebookController.setupWelcomeGreeting()
 
-//  system.actorOf(GuiceAkkaExtension(system).props(LiveEngageChatActor.name))
+  system.actorOf(GuiceAkkaExtension(system).props(LiveEngageChatActor.name))
 
   //  println("Server online at http://localhost:8080/\nPress RETURN to stop...")
   //  StdIn.readLine() // let it run until user presses return

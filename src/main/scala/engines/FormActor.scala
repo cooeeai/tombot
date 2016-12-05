@@ -76,6 +76,7 @@ class FormActor @Inject()(slotService: SlotService,
       nextQuestion(provider, sender, None)
 
     case TextResponse(_, sender, text) =>
+      log.debug("form received text [{}]", text)
       if (text == "help" || text == "?") {
         provider ! TextMessage(sender,
           s"You are providing details required to complete a ${originalSlot.key}.\n" +

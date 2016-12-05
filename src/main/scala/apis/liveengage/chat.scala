@@ -83,7 +83,7 @@ case class LpLineEvent(id: String,
                        eventType: String,
                        time: String,
                        textType: String,
-                       text: String,
+                       text: JsValue,
                        by: String,
                        source: String,
                        systemMessageId: Option[Int],
@@ -143,6 +143,8 @@ case class LpChatConversation(chat: LpChat) {
 
   def getVisitSessionUrl: String = chat.link.find(_.rel == "visit-id").get.url
 
+  def getAgentTypingUrl: String = chat.info.link.find(_.rel == "agent-typing").get.url
+
   def getLastVisitorEvent: Option[LpLineEvent] = chat.events.event match {
     case Some(Right(ev :: vs)) =>
       (ev :: vs).reverse.find {
@@ -166,7 +168,11 @@ case class LpChatResponse(chatEventLocation: LpLocation)
 
 case class LpAgentSessionId(link: List[LpLink])
 
-case class LpInfoResponse(agentSessionId: LpAgentSessionId)
+case class LpInfoResponse(agentSessionId: LpAgentSessionId) {
+
+  def getAvailableAgentsUrl: String = agentSessionId.link.find(_.rel == "available-agents").get.url
+
+}
 
 case class LpErrorMessage(errormsg: String)
 
@@ -199,17 +205,17 @@ case class LpSkillsInfo(skillInfo: List[LpSkillInfo])
 case class LpAgent(id: String,
                    chatState: String,
                    voiceState: String,
-                   maxChats: Int,
+                   maxChats: String,
                    username: String,
                    nickname: String,
                    email: String,
                    privilegeGroup: String,
                    skills: LpSkills,
                    skillsInfo: LpSkillsInfo,
-                   chats: Int,
+                   chats: Option[String],
                    agentGroupName: String,
                    agentGroupId: String,
-                   elapsedTimeInState: Long)
+                   elapsedTimeInState: String)
 
 case class LpAgents(agent: List[LpAgent])
 
@@ -217,15 +223,25 @@ case class LpAvailableAgents(agents: LpAgents, link: LpLink)
 
 case class LpAvailableAgentsResponse(availableAgents: LpAvailableAgents) {
 
-  def getNextBestAgent(skillId: String): Option[LpAgent] =
+  def getNextBestAgent(skillId: String): Option[LpAgent] = {
     availableAgents.agents.agent
       .sortBy(_.chats)
-      .find(a => a.skills.skill.contains(skillId) && (a.maxChats == -1 || a.chats < a.maxChats))
+      .find(a => {
+        val maxChats = a.maxChats.toInt
+        a.nickname != "Tombot" &&
+          a.skills.skill.contains(skillId) &&
+          (maxChats == -1 || a.chats.getOrElse("0").toInt < maxChats)
+      })
+  }
 
   def getNextBestAgent: Option[LpAgent] =
     availableAgents.agents.agent
       .sortBy(_.chats)
-      .find(a => a.maxChats == -1 || a.chats < a.maxChats)
+      .find(a => {
+        val maxChats = a.maxChats.toInt
+        a.nickname != "Tombot" &&
+          (maxChats == -1 || a.chats.getOrElse("0").toInt < maxChats)
+      })
 
 }
 
@@ -261,6 +277,8 @@ case class LpCustomVariablesResponse(customVariables: LpCustomVariables)
 case class LpError(time: String, message: String, internalCode: Int)
 
 case class LpErrorResponse(error: LpError)
+
+case class LpAgentTypingStatus(agentTyping: String)
 
 trait LpChatJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val lpCredentialsJsonFormat = jsonFormat2(LpCredentials)
@@ -301,7 +319,7 @@ trait LpChatJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
           "@type" -> JsString(l.eventType),
           "time" -> JsString(l.time),
           "textType" -> JsString(l.textType),
-          "text" -> JsString(l.text),
+          "text" -> l.text,
           "by" -> JsString(l.by),
           "source" -> JsString(l.source),
           "subType" -> JsString(l.subType)
@@ -327,7 +345,7 @@ trait LpChatJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
           value.extract[String]("@type"),
           value.extract[String]("time"),
           value.extract[String]("textType"),
-          value.extract[String]("text"),
+          value.extract[JsValue]("text"),
           value.extract[String]("by"),
           value.extract[String]("source"),
           value.extract[Int]('systemMessageId.?),
@@ -409,5 +427,6 @@ trait LpChatJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val lpCustomVariablesResponseJsonFormat = jsonFormat1(LpCustomVariablesResponse)
   implicit val lpErrorJsonFormat = jsonFormat3(LpError)
   implicit val lpErrorResponseJsonFormat = jsonFormat1(LpErrorResponse)
+  implicit val lpAgentTypingStatusJsonFormat = jsonFormat1(LpAgentTypingStatus)
 
 }
