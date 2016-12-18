@@ -55,7 +55,7 @@ object Platform extends Enumeration {
 
   type Platform = Value
 
-  val Facebook, Telegram, LiveEngageChat, Skype, SMS, Web = Value
+  val Facebook, Telegram, LiveEngageChat, Skype, SMS, Web, WVA = Value
 
 }
 
@@ -71,6 +71,25 @@ object ConversationEngine extends Enumeration {
 
   type ConversationEngine = Value
 
-  val Cooee, Watson = Value
+  val Cooee, Watson, WVA = Value
+
+}
+
+object IntentResolutionEvaluationStrategy extends Enumeration {
+
+  type IntentResolutionEvaluationStrategy = Value
+
+  val FirstViable = Value("first-viable")
+  val FirstCertain = Value("first-certain")
+  val All = Value("all")
+
+}
+
+object IntentResolutionSelectionStrategy extends Enumeration {
+
+  type IntentResolutionSelectionStrategy = Value
+
+  val TopScore = Value("top-score")
+  val Random = Value("random")
 
 }

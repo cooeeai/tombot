@@ -86,63 +86,63 @@ class Form @Inject()(config: Config,
           }),
           invalidMessage = Some("Invalid format. Please try again.")
         ),
-        Slot(
-          "paymentMethod",
-          children = Some(List(
-            Slot(
-              "cardholderName",
-              Some("What is the card holder's name?")
-            ),
-            Slot(
-              "cardNumber",
-              Some("What is the card number?"),
-              caption = Some("Card number ending in")
-            ),
-            Slot(
-              "securityCode",
-              Some("What is the security code for the card?")
-            ),
-            Slot(
-              "expiryDate",
-              Some("Please provide the expiry date as e.g. 01/18"),
-              children = Some(List(
-                Slot("expiryMonth"),
-                Slot("expiryYear")
-              )),
-              parseExpr = Some(
-                """
-                  |function (value) {
-                  |  var re = /(\d+{1,2})/(\d+{2})/;
-                  |  var match = re.exec(value);
-                  |  return {
-                  |    expiryMonth: match[1],
-                  |    expiryYear: match[2]
-                  |  };
-                  |}
-                """.stripMargin)
-              /*
-              parseFn = Some(value => {
-                val re = """(\d+{1,2})/(\d+{2})""".r
-                value.trim match {
-                  case re(month, year) =>
-                    Map(
-                      "expiryMonth" -> month,
-                      "expiryYear" -> year
-                    )
-                  case _ => Map()
-                }
-              })*/
-            )
-          )),
-          confirm = Some("Are the following payment details correct?")
-        ),
+//        Slot(
+//          "paymentMethod",
+//          children = Some(List(
+//            Slot(
+//              "cardholderName",
+//              Some("What is the card holder's name?")
+//            ),
+//            Slot(
+//              "cardNumber",
+//              Some("What is the card number?"),
+//              caption = Some("Card number ending in")
+//            ),
+//            Slot(
+//              "securityCode",
+//              Some("What is the security code for the card?")
+//            ),
+//            Slot(
+//              "expiryDate",
+//              Some("Please provide the expiry date as e.g. 01/18"),
+//              children = Some(List(
+//                Slot("expiryMonth"),
+//                Slot("expiryYear")
+//              )),
+//              parseExpr = Some(
+//                """
+//                  |function (value) {
+//                  |  var re = /(\d+{1,2})/(\d+{2})/;
+//                  |  var match = re.exec(value);
+//                  |  return {
+//                  |    expiryMonth: match[1],
+//                  |    expiryYear: match[2]
+//                  |  };
+//                  |}
+//                """.stripMargin)
+//              /*
+//              parseFn = Some(value => {
+//                val re = """(\d+{1,2})/(\d+{2})""".r
+//                value.trim match {
+//                  case re(month, year) =>
+//                    Map(
+//                      "expiryMonth" -> month,
+//                      "expiryYear" -> year
+//                    )
+//                  case _ => Map()
+//                }
+//              })*/
+//            )
+//          )),
+//          confirm = Some("Are the following payment details correct?")
+//        ),
         Slot(
           "address",
           Some("Please provide your address as <street> <city> <state> <postcode>"),
           children = Some(List(
             Slot(
               "street1",
-              Some("What is your street as <street number> <street name> <street type>")
+              Some("What is your street as <street number> <street name> <street type>?")
             ),
             Slot(
               "city",

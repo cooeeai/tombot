@@ -15,7 +15,9 @@ import spray.json.lenses.JsonLenses._
 class ChatRoomActor(roomId: Int, conversationService: ConversationService)
   extends Actor with ActorLogging with FacebookJsonSupport with AddressJsonSupport {
 
+  import Platform._
   import context.dispatcher
+  import conversationService._
 
   var participants: Map[String, ActorRef] = Map.empty[String, ActorRef]
 
@@ -24,8 +26,8 @@ class ChatRoomActor(roomId: Int, conversationService: ConversationService)
       participants += name -> actorRef
       broadcast(SystemMessage(s"User $name joined channel..."))
       log.debug("User {} joined channel[{}]", name, roomId)
-      conversationService.getConversationActor(name) map { ref =>
-        ref ! SetProvider(Platform.Web, None, self, NullEvent, name, handleEventImmediately = true)
+      getConversationActor(name) map { ref =>
+        ref ! SetProvider(Web, None, self, NullEvent, name, handleEventImmediately = true)
       }
 
     case UserLeft(name) =>
@@ -35,16 +37,19 @@ class ChatRoomActor(roomId: Int, conversationService: ConversationService)
 
     case msg@IncomingMessage(sender, message) =>
       log.debug("received {}", message)
+      val messageLower = message.toLowerCase
       if (message.startsWith("{")) {
         // postback
         val json = message.parseJson
         val payload = json.extract[String]('payload)
-        conversationService.converse(sender, Buy(Platform.Web, sender, payload))
+        converse(sender, Buy(Web, sender, payload))
       } else if (message.startsWith("postback:")) {
         val payload = message.substring(9)
-        conversationService.converse(sender, Buy(Platform.Web, sender, payload))
+        converse(sender, Buy(Web, sender, payload))
+      } else if (messageLower == "yes" || messageLower == "no") {
+        converse(sender, QuickReplyResponse(Web, sender, message))
       } else {
-        conversationService.converse(sender, TextResponse(Platform.Web, sender, message))
+        converse(sender, TextResponse(Web, sender, message))
       }
     //broadcast(msg)
 
@@ -79,6 +84,10 @@ class ChatRoomActor(roomId: Int, conversationService: ConversationService)
     case AddressCard(sender, address) =>
       val response = AddressResponse(address, address.toString)
       broadcast(ChatMessage(sender, response.toJson.compactPrint))
+
+    case CustomMessage(sender, json) =>
+      log.debug("sending payload:\n{}", json.prettyPrint)
+      broadcast(ChatMessage(sender, json.compactPrint))
   }
 
   def broadcast(message: ChatMessage): Unit = participants.values.foreach(_ ! message)

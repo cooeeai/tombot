@@ -26,6 +26,6 @@ case class Meaning(messageId: String, text: String, entities: Map[String, List[E
 }
 
 trait WitJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
-  implicit val entityJsonSupport = jsonFormat(Entity, "confidence", "value", "type")
-  implicit val meaningJsonSupport = jsonFormat(Meaning, "msg_id", "_text", "entities")
+  implicit val entityJsonFormat = jsonFormat(Entity, "confidence", "value", "type")
+  implicit val meaningJsonFormat = jsonFormat(Meaning, "msg_id", "_text", "entities")
 }

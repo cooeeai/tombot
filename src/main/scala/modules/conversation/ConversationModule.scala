@@ -17,7 +17,6 @@ import scala.concurrent.duration._
 class ConversationModule extends AbstractModule with ScalaModule with AkkaGuiceSupport {
 
   override def configure(): Unit = {
-    bind[Actor].annotatedWith(Names.named(WatsonConversationActor.name)).to[WatsonConversationActor]
     bind[Actor].annotatedWith(Names.named(ConciergeActor.name)).to[ConciergeActor]
     bind[Actor].annotatedWith(Names.named(FacebookSendQueue.name)).to[FacebookSendQueue]
     bind[Actor].annotatedWith(Names.named(SparkSendQueue.name)).to[SparkSendQueue]
@@ -32,6 +31,8 @@ class ConversationModule extends AbstractModule with ScalaModule with AkkaGuiceS
     bindActorFactory[IntentActor, IntentActor.Factory]
     bindActorFactory[AgentConversationActor, AgentConversationActor.Factory]
     bindActorFactory[FormActor, FormActor.Factory]
+    bindActorFactory[WatsonConversationActor, WatsonConversationActor.Factory]
+    bindActorFactory[WvaConversationActor, WvaConversationActor.Factory]
     bind[FiniteDuration].annotatedWith(Names.named("redisConnectTimeout")).toInstance(2 seconds)
   }
 

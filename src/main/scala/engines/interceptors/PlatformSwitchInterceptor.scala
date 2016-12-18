@@ -34,7 +34,7 @@ trait PlatformSwitchInterceptor extends ActorInject with ActorLogging with Memoi
 
   lazy val provider: (Platform) => ActorRef = memoize {
     case platform => platform match {
-      case Facebook => injectActor[FacebookSendQueue]("facebook")
+      case _ => injectActor[FacebookSendQueue]("facebook") // facebook is the default provider
     }
   }
 

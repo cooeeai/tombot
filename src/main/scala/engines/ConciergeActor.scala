@@ -1,7 +1,5 @@
 package engines
 
-import java.util.concurrent.TimeoutException
-
 import akka.actor._
 import akka.contrib.pattern.ReceivePipeline
 import akka.pattern.ask
@@ -14,8 +12,8 @@ import engines.ConciergeActor.{Data, State}
 import engines.GreetActor.Greet
 import engines.interceptors.{LoggingInterceptor, PlatformSwitchInterceptor}
 import example.BuyConversationActor
-import models.ConversationEngine
 import models.events._
+import models.{ConversationEngine, IntentResolutionEvaluationStrategy, IntentResolutionSelectionStrategy}
 import modules.akkaguice.{ActorInject, NamedActor}
 import services.SparkSendQueue.{TextMessage => SparkTextMessage}
 import services._
@@ -23,7 +21,7 @@ import utils.General
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Random, Success}
 
 /**
   * Created by markmo on 9/09/2016.
@@ -35,7 +33,9 @@ class ConciergeActor @Inject()(config: Config,
                                greetActorFactory: GreetActor.Factory,
                                buyIntentActorFactory: BuyConversationActor.Factory,
                                liveAgentActorFactory: AgentConversationActor.Factory,
-                               formActorFactory: FormActor.Factory)
+                               formActorFactory: FormActor.Factory,
+                               watsonConversationFactory: WatsonConversationActor.Factory,
+                               wvaConversationFactory: WvaConversationActor.Factory)
   extends ActorInject
     with ActorLogging
     with ReceivePipeline
@@ -47,6 +47,7 @@ class ConciergeActor @Inject()(config: Config,
 
   import ConciergeActor._
   import ConversationEngine._
+  import IntentResolutionSelectionStrategy._
   import context.dispatcher
 
   implicit val akkaTimeout: akka.util.Timeout = 30 seconds
@@ -55,6 +56,11 @@ class ConciergeActor @Inject()(config: Config,
   val maxFailCount = config.getInt("settings.max-fail-count")
   val maxMessageLength = config.getInt("settings.max-message-length")
   val voteThreshold = config.getDouble("settings.vote-threshold")
+
+  val intentResolutionEvaluationStrategy =
+    IntentResolutionEvaluationStrategy withName config.getString("settings.intent-resolution-strategy.evaluation")
+  val intentResolutionSelectionStrategy =
+    IntentResolutionSelectionStrategy withName config.getString("settings.intent-resolution-strategy.selection")
 
   val defaultProvider = injectActor[FacebookSendQueue]("provider")
   val defaultAgentProvider = injectActor[SparkSendQueue]("agentProvider")
@@ -66,12 +72,13 @@ class ConciergeActor @Inject()(config: Config,
 
   // TODO
   // do these need to be children?
-  val intentResolvers = Vector(
+  // sequence in preferred order of execution
+  val intentResolvers = List(
     injectActor[CommandIntentActor]("command"),
-//    injectActor[RuleIntentActor]("rule"),
-    injectActor[WitIntentActor]("wit")
-    //    injectActor[ApiAiIntentActor]("apiai"),
-    //    injectActor[WolframAlphaIntentActor]("alpha")
+    injectActor[WitIntentActor]("wit"),
+    injectActor[RuleIntentActor]("rule"),
+    injectActor[ApiAiIntentActor]("apiai"),
+    injectActor[WolframAlphaIntentActor]("alpha")
   )
 
   val initialData = ConciergeContext(
@@ -80,12 +87,17 @@ class ConciergeActor @Inject()(config: Config,
     tempMemberships = Map[String, SparkTempMembership](),
     agentName = "Mark")
 
-  startWith(WithoutIntent, initialData)
+  if (defaultConversationEngine == WVA) {
+    // let WVA resolve intent
+    startWith(WithIntent, initialData)
+  } else {
+    startWith(WithoutIntent, initialData)
+  }
 
   when(WithoutIntent) {
 
     case Event(ev: TextResponse, _) =>
-      resolveIntent(ev)
+      resolveIntent2(ev)
       stay
 
     case Event(StartMultistep, _) =>
@@ -96,7 +108,10 @@ class ConciergeActor @Inject()(config: Config,
   when(WithIntent) {
 
     case Event(ev: TextResponse, ctx: ConciergeContext) =>
-      ctx.provider ! ev
+      // TODO
+      // was this a mistake?
+      //ctx.provider ! ev
+      ctx.child ! ev
       stay
 
   }
@@ -136,6 +151,10 @@ class ConciergeActor @Inject()(config: Config,
   }
 
   whenUnhandled {
+
+    case Event(ev: InitiateChat, ctx: ConciergeContext) =>
+      ctx.child ! ev
+      stay
 
     case Event(IntentVote(_, ev, multistep), ctx: ConciergeContext) =>
       if (multistep) {
@@ -192,15 +211,18 @@ class ConciergeActor @Inject()(config: Config,
 
     case Event(ev@SetProvider(platform, _, ref, wrappedEvent, _, handleEventImmediately), ctx: ConciergeContext) =>
       currentPlatform = Some(platform)
-      if (handleEventImmediately) {
+      if (handleEventImmediately && wrappedEvent != NullEvent) {
         log.debug("handle {} immediately", wrappedEvent)
         self ! wrappedEvent
-        ctx.child ! ev.copy(event = NullEvent)
+        val notification = ev.copy(event = NullEvent)
+        ctx.child ! notification
+        formActor ! notification
+        liveAgentActor ! notification
       } else {
         ctx.child ! ev
+        formActor ! ev
+        liveAgentActor ! ev
       }
-      formActor ! ev
-      liveAgentActor ! ev
       stay using ctx.copy(provider = ref)
 
     case Event(SetEngine(sender, engine), ctx: ConciergeContext) =>
@@ -211,21 +233,21 @@ class ConciergeActor @Inject()(config: Config,
       val message = "Hold on...transferring you to one of my human coworkers"
       ctx.provider ! TextMessage(sender, message)
       ctx.provider ! TransferToAgent
-//      for {
-//        tempMembership <- sparkService.setupTempRoom(sender)
-//          .withTimeout(new TimeoutException("future timed out"))(futureTimeout, context.system)
-//      } yield {
-//        log.debug("setup temporary membership to room [{}] for sender [{}]", tempMembership.roomId, sender)
-//
-//        // print transcript history
-//        history map {
-//          case Exchange(Some(request), response) => s"user: $request\ntombot: $response"
-//          case Exchange(None, response) => s"tombot: $response"
-//        } foreach { text =>
-//          liveAgentActor ! SparkTextMessage(Some(tempMembership.roomId), None, None, text, None)
-//        }
-//        self ! UpdateTempMemberships(ctx.tempMemberships + (sender -> tempMembership))
-//      }
+      //      for {
+      //        tempMembership <- sparkService.setupTempRoom(sender)
+      //          .withTimeout(new TimeoutException("future timed out"))(futureTimeout, context.system)
+      //      } yield {
+      //        log.debug("setup temporary membership to room [{}] for sender [{}]", tempMembership.roomId, sender)
+      //
+      //        // print transcript history
+      //        history map {
+      //          case Exchange(Some(request), response) => s"user: $request\ntombot: $response"
+      //          case Exchange(None, response) => s"tombot: $response"
+      //        } foreach { text =>
+      //          liveAgentActor ! SparkTextMessage(Some(tempMembership.roomId), None, None, text, None)
+      //        }
+      //        self ! UpdateTempMemberships(ctx.tempMemberships + (sender -> tempMembership))
+      //      }
       stay
 
     case Event(UpdateTempMemberships(tempMemberships), ctx: ConciergeContext) =>
@@ -247,7 +269,9 @@ class ConciergeActor @Inject()(config: Config,
 
     case Event(ev, ctx: ConciergeContext) =>
       log.warning("{} received unhandled request {} in state {}/{}", name, ev, stateName, ctx)
-      ctx.child ! ev
+      // TODO
+      // required?
+      //ctx.child ! ev
       stay
 
   }
@@ -267,12 +291,28 @@ class ConciergeActor @Inject()(config: Config,
         self ! IntentUnknown(ev.sender, ev.text)
 
       case Success(votes) if votes.nonEmpty =>
-        val top = votes.sortBy(-_.probability).head
-        if (top.probability > voteThreshold) {
-          log.debug("winning vote: {}", top)
-          self ! top
+        if (intentResolutionSelectionStrategy == TopScore) {
+          val sorted =
+            votes
+              .filter(_.probability > voteThreshold)
+              .sortBy(-_.probability)
+          sorted match {
+            case x :: _ =>
+              log.debug("winning vote: {}", x)
+              self ! x
+            case _ =>
+              self ! IntentUnknown(ev.sender, ev.text)
+          }
         } else {
-          self ! IntentUnknown(ev.sender, ev.text)
+          // random
+          val filtered = votes.filter(_.probability > voteThreshold)
+          if (filtered.isEmpty) {
+            self ! IntentUnknown(ev.sender, ev.text)
+          } else {
+            val winningVote = filtered(random.nextInt(filtered.length))
+            log.debug("winning vote: {}", winningVote)
+            self ! winningVote
+          }
         }
 
       case Failure(e) =>
@@ -282,8 +322,64 @@ class ConciergeActor @Inject()(config: Config,
     }
   }
 
+  // bail out at first minimally viable vote
+  def resolveIntent2(ev: TextResponse): Unit = {
+
+    def loop(resolvers: List[ActorRef]): Future[Option[IntentVote]] = resolvers match {
+      case Nil => Future.successful(None)
+      case x :: xs =>
+        ask(x, ev).mapTo[IntentVote] flatMap { vote =>
+          if (vote.probability > voteThreshold) {
+            log.debug("first minimally viable vote: {}", vote)
+            Future.successful(Some(vote))
+          } else {
+            loop(xs)
+          }
+        }
+    }
+
+    loop(intentResolvers) map {
+      case Some(vote) =>
+        self ! vote
+      case None =>
+        IntentUnknown(ev.sender, ev.text)
+    }
+  }
+
+  // bail out at first certain vote
+  def resolveIntent3(ev: TextResponse): Unit = {
+
+    def loop(resolvers: List[ActorRef], votes: List[IntentVote]): Future[List[IntentVote]] =
+      resolvers match {
+        case Nil => Future.successful(votes)
+        case x :: xs =>
+          ask(x, ev).mapTo[IntentVote] flatMap { vote =>
+            if (vote.probability == 1.0) {
+              log.debug("winning vote: {}", vote)
+              Future.successful(vote :: votes)
+            } else {
+              loop(xs, vote :: votes)
+            }
+          }
+      }
+
+    loop(intentResolvers, Nil) map {
+      case x :: xs =>
+        if (intentResolutionSelectionStrategy == TopScore) {
+          self ! (x :: xs).sortBy(-_.probability).head
+        } else {
+          // random
+          val list = x :: xs
+          self ! list(random.nextInt(list.length))
+        }
+      case Nil =>
+        IntentUnknown(ev.sender, ev.text)
+    }
+  }
+
   def getConversationActor(engine: ConversationEngine): ActorRef = engine match {
-    case Watson => injectActor[WatsonConversationActor]("watson")
+    case Watson => injectActor(watsonConversationFactory(defaultProvider, historyActor), "watson")
+    case WVA => injectActor(wvaConversationFactory(defaultProvider, historyActor), "wva")
     case Cooee => injectActor(buyIntentActorFactory(defaultProvider, historyActor), "cooee")
   }
 
@@ -316,5 +412,7 @@ object ConciergeActor extends NamedActor {
                               tempMemberships: TempMembershipMap,
                               agentName: String,
                               failCount: Int = 0) extends Data
+
+  val random = new Random
 
 }

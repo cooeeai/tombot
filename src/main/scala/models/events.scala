@@ -5,6 +5,7 @@ import apis.ciscospark.SparkTempMembership
 import memory.Slot
 import models.ConversationEngine.ConversationEngine
 import models.Platform.Platform
+import spray.json.JsValue
 
 /**
   * Created by markmo on 4/10/2016.
@@ -31,6 +32,8 @@ object events {
 
     def text: String
   }
+
+  case class InitiateChat(platform: Platform, sender: String) extends PlatformAware
 
   case class IntentVote(probability: Double, event: Any, multistep: Boolean = false)
 
@@ -90,6 +93,8 @@ object events {
   case class QuickReply(sender: String, text: String) extends SendEvent
 
   case class AddressCard(sender: String, address: Address) extends SendEvent
+
+  case class CustomMessage(sender: String, message: JsValue)
 
   case object GetHistory
 

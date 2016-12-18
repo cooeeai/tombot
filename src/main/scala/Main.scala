@@ -39,23 +39,25 @@ object Main extends App with CorsSupport {
   implicit val fm = ActorMaterializer()
 
   val facebookController = injector.instance[FacebookController]
-  val skypeController = injector.instance[SkypeController]
-  val sparkController = injector.instance[SparkController]
+//  val skypeController = injector.instance[SkypeController]
+//  val sparkController = injector.instance[SparkController]
   val addressController = injector.instance[ValidationController]
-  val smsController = injector.instance[SMSController]
+//  val smsController = injector.instance[SMSController]
   val chatController = injector.instance[ChatController]
-  val telegramController = injector.instance[TelegramController]
-  val personalityInsightsController = injector.instance[PersonalityInsightsController]
+//  val telegramController = injector.instance[TelegramController]
+//  val personalityInsightsController = injector.instance[PersonalityInsightsController]
+  val wvaChatController = injector.instance[WvaChatController]
 
   val routes =
     facebookController.routes ~
-      skypeController.routes ~
-      sparkController.routes ~
+//      skypeController.routes ~
+//      sparkController.routes ~
       addressController.routes ~
-      smsController.routes ~
+//      smsController.routes ~
       chatController.routes ~
-      telegramController.routes ~
-      personalityInsightsController.routes
+//      telegramController.routes ~
+//      personalityInsightsController.routes ~
+      wvaChatController.routes
 
   implicit def myRejectionHandler = {
     val handler = RejectionHandler.newBuilder().handle {
@@ -89,7 +91,9 @@ object Main extends App with CorsSupport {
 
   facebookController.setupWelcomeGreeting()
 
-  system.actorOf(GuiceAkkaExtension(system).props(LiveEngageChatActor.name))
+  if (config.getString("settings.fallback-engine") == "LP") {
+    system.actorOf(GuiceAkkaExtension(system).props(LiveEngageChatActor.name))
+  }
 
   //  println("Server online at http://localhost:8080/\nPress RETURN to stop...")
   //  StdIn.readLine() // let it run until user presses return

@@ -52,4 +52,22 @@ object Implicits {
                                     (implicit errorHandler: LpErrorHandler = _ => ()): RichEither[T] =
     new RichEither[T](either, errorHandler)
 
+
+  type StringErrorHandler = (String => Unit)
+
+  class RichStringErrorEither[T](either: Either[String, T], errorHandler: StringErrorHandler) {
+
+    def rightFuture = either.fold(handleError, Future.successful)
+
+    def handleError(e: String) = {
+      errorHandler(e)
+      Future.failed(new Exception(e))
+    }
+
+  }
+
+  implicit def eitherToRichStringErrorEither[T](either: Either[String, T])
+                                               (implicit errorHandler: StringErrorHandler = _ => ()): RichStringErrorEither[T] =
+    new RichStringErrorEither[T](either, errorHandler)
+
 }

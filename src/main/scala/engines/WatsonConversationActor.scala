@@ -3,14 +3,13 @@ package engines
 import java.lang.{Boolean => JBoolean}
 import java.util.{Map => JMap}
 
-import akka.actor.{Actor, ActorLogging}
-import akka.contrib.pattern.ReceivePipeline
+import akka.actor.{Actor, ActorRef}
 import com.google.inject.Inject
-import com.typesafe.config.Config
-import engines.interceptors.LoggingInterceptor
-import models.events.{Exchange, Fallback, TextResponse}
+import com.google.inject.assistedinject.Assisted
+import models.events.{TextResponse, Unhandled}
 import modules.akkaguice.NamedActor
-import services.{FacebookService, WatsonConversationService}
+import services.WatsonConversationService
+import utils.General
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
@@ -18,26 +17,16 @@ import scala.collection.mutable
 /**
   * Created by markmo on 11/09/2016.
   */
-class WatsonConversationActor @Inject()(config: Config,
-                                        facebookService: FacebookService,
-                                        watsonConversationService: WatsonConversationService)
-  extends Actor
-    with ActorLogging
-    with ReceivePipeline
-    with LoggingInterceptor {
-
-  val maxFailCount = config.getInt("settings.max-fail-count")
+class WatsonConversationActor @Inject()(watsonConversationService: WatsonConversationService,
+                                        @Assisted("defaultProvider") val defaultProvider: ActorRef,
+                                        @Assisted("historyActor") val historyActor: ActorRef)
+  extends SimpleConversationActor with General {
 
   val contextMap = mutable.Map[String, JMap[String, AnyRef]]()
 
-  var failCount = 0
-
-  val history = mutable.ListBuffer[Exchange]()
-
-  def receive = {
-    case ev: TextResponse =>
-      val sender = ev.sender
-      val response = watsonConversationService.converse(ev.text, contextMap.get(sender))
+  override def withProvider(provider: ActorRef): Receive = {
+    case ev@TextResponse(_, sender, text) =>
+      val response = watsonConversationService.converse(text, contextMap.get(sender))
 
       log.debug("intents: {}",
         response.getIntents
@@ -50,19 +39,13 @@ class WatsonConversationActor @Inject()(config: Config,
           .mkString(", "))
 
       val conversationCtx = response.getContext
-      val text = response.getText.mkString("\n")
-      history append Exchange(Some(ev.text), text)
+      val message = response.getText.mkString("\n")
       if (conversationCtx.getOrDefault("nomatch", JBoolean.FALSE).asInstanceOf[JBoolean]) {
         log.debug("nomatch")
-        failCount += 1
         conversationCtx.remove("nomatch")
-      }
-      if (failCount > maxFailCount) {
-        context.parent ! Fallback(sender, history.toList)
-        failCount = 0
-        history.clear()
+        context.parent ! Unhandled(ev)
       } else {
-        facebookService.sendTextMessage(sender, text)
+        say(provider, historyActor, sender, text, message)
       }
       contextMap(sender) = conversationCtx
   }
@@ -72,5 +55,10 @@ class WatsonConversationActor @Inject()(config: Config,
 object WatsonConversationActor extends NamedActor {
 
   override final val name = "WatsonConversationActor"
+
+  trait Factory {
+    def apply(@Assisted("defaultProvider") defaultProvider: ActorRef,
+              @Assisted("historyActor") historyActor: ActorRef): Actor
+  }
 
 }

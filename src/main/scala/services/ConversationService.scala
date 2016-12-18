@@ -33,6 +33,9 @@ class ConversationService @Inject()(logger: LoggingAdapter,
       case None => sender
     }
     logger.debug("looking up actor for user/{}", uid)
+
+    // TODO
+    // method too slow
     system.actorSelection("user/" + uid).resolveOne onComplete {
       case Success(ref) =>
         logger.debug("found actor")
