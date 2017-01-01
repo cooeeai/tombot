@@ -35,6 +35,8 @@ libraryDependencies ++= Seq(
   "org.scribe" % "scribe" % "1.3.7",
   "com.google.inject.extensions" % "guice-assistedinject" % "4.1.0",
   "com.github.etaty" %% "rediscala" % "1.7.0",
+  "com.vdurmont" % "emoji-java" % "3.1.3",
+  "org.scala-lang" % "scala-reflect" % scalaVersion.value,
   "btomala" %% "akka-http-twirl" % "1.1.0" excludeAll
     ExclusionRule(organization = "com.typesafe.akka")
 )

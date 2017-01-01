@@ -31,7 +31,7 @@ class SMSService @Inject()(config: Config,
 
   val uri = config.getString("services.telstra.sms.url")
 
-  val accessToken = System.getenv("TELSTRA_ACCESS_TOKEN")
+  val accessToken = System.getenv("INTELLEXER_API_KEY")
 
   def sendTextMessage(sender: String, text: String): Future[SendResponse] = {
     logger.info("sending SMS message [{}] to phone number [{}]", text, sender)

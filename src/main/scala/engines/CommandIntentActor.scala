@@ -18,7 +18,7 @@ class CommandIntentActor @Inject()(alchemyService: AlchemyService) extends Actor
 
   def receive = {
 
-    case ev@TextResponse(_, from, text) =>
+    case ev@TextResponse(_, from, text, _) =>
       log.debug("CommandIntentActor received TextResponse")
 
       if (AlchemyCommand matches text) {

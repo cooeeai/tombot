@@ -18,12 +18,13 @@ case class Slot(key: String,
                 confirmed: Boolean = false,
                 caption: Option[String] = None,
                 enum: Option[List[String]] = None,
-                shortlist: Option[List[String]] = None) {
+                shortlist: Option[List[String]] = None,
+                prompt: Option[String] = None) {
 
   def nextQuestion: Option[Question] = {
 
     def loop(slot: Slot): (Boolean, Option[Question]) = {
-      val Slot(key, question, children, value, _, _, _, _, _, confirm, confirmed, _, enum, shortlist) = slot
+      val Slot(key, question, children, value, _, _, _, _, _, confirm, confirmed, _, enum, shortlist, prompt) = slot
       val select = enum.isDefined
 
       lazy val response =
@@ -34,9 +35,9 @@ case class Slot(key: String,
             printOptions(enum.get)
           }
           val q = question.get + "\n\n" + printedOptions
-          (true, Some(Question(key, q, confirmation = false, select)))
+          (true, Some(Question(key, q, confirmation = false, select, prompt)))
         } else {
-          (true, Some(Question(key, question.get, confirmation = false, select)))
+          (true, Some(Question(key, question.get, confirmation = false, select, prompt)))
         }
 
       if (value.isEmpty) {
@@ -45,7 +46,7 @@ case class Slot(key: String,
           if (qs.forall(!_._1)) {
             // if all child slots have been filled then this parent slot is done
             if (confirm.isDefined && !confirmed) {
-              (true, Some(Question(key, confirm.get + "\n" + slot.printValue, confirmation = true, select)))
+              (true, Some(Question(key, confirm.get + "\n" + slot.printValue, confirmation = true, select, prompt)))
             } else {
               (false, None)
             }
@@ -69,7 +70,7 @@ case class Slot(key: String,
             response
           } else {
             if (confirm.isDefined && !confirmed) {
-              (true, Some(Question(key, confirm.get + "\n" + slot.printValue, confirmation = true, select)))
+              (true, Some(Question(key, confirm.get + "\n" + slot.printValue, confirmation = true, select, prompt)))
             } else {
               (true, None)
             }
@@ -77,7 +78,7 @@ case class Slot(key: String,
         }
       } else {
         if (confirm.isDefined && !confirmed) {
-          (true, Some(Question(key, confirm.get + "\n" + slot.printValue, confirmation = true, select)))
+          (true, Some(Question(key, confirm.get + "\n" + slot.printValue, confirmation = true, select, prompt)))
         } else {
           (false, None)
         }
@@ -90,7 +91,7 @@ case class Slot(key: String,
   def numberQuestions: Int = {
 
     def loop(slot: Slot): Int = {
-      val Slot(_, question, children, value, _, _, _, _, _, confirm, confirmed, _, _, _) = slot
+      val Slot(_, question, children, value, _, _, _, _, _, confirm, confirmed, _, _, _, _) = slot
       if (value.isEmpty) {
         if (children.isDefined) {
           val qs = children.get.map(child => loop(child))
@@ -148,7 +149,8 @@ case class Slot(key: String,
         confirmed = true,
         caption,
         enum,
-        shortlist
+        shortlist,
+        prompt
       )
     } else if (children.isDefined) {
       val slots = children.get.map(_.confirmSlot(key))
@@ -166,7 +168,8 @@ case class Slot(key: String,
         confirmed,
         caption,
         enum,
-        shortlist
+        shortlist,
+        prompt
       )
     } else {
       this
@@ -198,7 +201,8 @@ case class Slot(key: String,
         confirmed = false,
         caption,
         enum,
-        shortlist
+        shortlist,
+        prompt
       )
     } else {
       Slot(
@@ -215,7 +219,8 @@ case class Slot(key: String,
         confirmed = false,
         caption,
         enum,
-        shortlist
+        shortlist,
+        prompt
       )
     }
 
@@ -238,7 +243,8 @@ case class Slot(key: String,
         confirmed,
         caption,
         enum,
-        shortlist
+        shortlist,
+        prompt
       )
     } else {
       this
@@ -263,7 +269,8 @@ case class Slot(key: String,
         confirmed,
         caption,
         enum,
-        shortlist
+        shortlist,
+        prompt
       )
     } else {
       this
@@ -279,7 +286,7 @@ case class Slot(key: String,
 
   def answers: List[QA] = {
     def dfs(slot: Slot): List[QA] = {
-      val Slot(_, question, children, value, _, _, _, _, _, _, _, _, _, _) = slot
+      val Slot(_, question, children, value, _, _, _, _, _, _, _, _, _, _, _) = slot
       if (question.isDefined) {
         if (value.isDefined) {
           List(QA(question.get, value.get.toString))
@@ -364,7 +371,7 @@ case class Slot(key: String,
 
 }
 
-case class Question(slotKey: String, question: String, confirmation: Boolean, select: Boolean)
+case class Question(slotKey: String, question: String, confirmation: Boolean, select: Boolean, prompt: Option[String])
 
 case class SlotError(key: String, message: String)
 

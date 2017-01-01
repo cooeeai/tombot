@@ -43,6 +43,7 @@ object Main extends App with CorsSupport {
 //  val sparkController = injector.instance[SparkController]
   val addressController = injector.instance[ValidationController]
 //  val smsController = injector.instance[SMSController]
+  val emailController = injector.instance[EmailController]
   val chatController = injector.instance[ChatController]
 //  val telegramController = injector.instance[TelegramController]
 //  val personalityInsightsController = injector.instance[PersonalityInsightsController]
@@ -54,6 +55,7 @@ object Main extends App with CorsSupport {
 //      sparkController.routes ~
       addressController.routes ~
 //      smsController.routes ~
+      emailController.routes ~
       chatController.routes ~
 //      telegramController.routes ~
 //      personalityInsightsController.routes ~

@@ -35,6 +35,9 @@ class WatsonVirtualAgentService @Inject()(config: Config,
 
   def start(): Future[Either[String, WvaStartChatResponse]] = {
     logger.debug("start Watson Virtual Agent chat")
+    //logger.debug("bot ID {}", botId)
+    //logger.debug("client ID {}", clientId)
+    //logger.debug("client Secret {}", clientSecret)
     val payload = JsObject(
       "userID" -> JsNull
     )
@@ -49,8 +52,18 @@ class WatsonVirtualAgentService @Inject()(config: Config,
           RawHeader("X-Request-ID", uuid)
         ),
         entity = request))
-      entity <- Unmarshal(response.entity).to[Either[String, WvaStartChatResponse]]
-    } yield entity
+      entity <- Unmarshal(response.entity).to[String]
+    } yield {
+      val json = entity.parseJson
+      logger.debug(json.prettyPrint)
+      try {
+        json.convertTo[Either[String, WvaStartChatResponse]]
+      } catch {
+        case e: Exception =>
+          logger.error(e, e.getMessage)
+          throw new RuntimeException(e.getMessage, e)
+      }
+    }
   }
 
   def send(chatId: String, message: String): Future[Either[String, WvaMessageResponse]] = {

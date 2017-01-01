@@ -12,7 +12,7 @@ class WolframAlphaIntentActor @Inject()(service: KnowledgeService) extends Actor
 
   def receive = {
 
-    case ev@TextResponse(_, from, text) =>
+    case ev@TextResponse(_, from, text, _) =>
       log.debug("WolframAlphaIntentActor received TextResponse")
 
       service.getFacts(text) match {

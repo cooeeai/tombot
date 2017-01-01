@@ -156,6 +156,8 @@ case class WvaStartChatResponse(botId: String, dialogId: String, message: WvaMes
 
 case class WvaMessageRequest(message: Option[String], userID: Option[String])
 
+case class WvaErrorResponse(httpCode: String, httpMessage: String, moreInformation: String)
+
 trait WvaJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val wvaLayoutJsonFormat = jsonFormat2(WvaLayout)
   implicit val wvaInputValidationJsonFormat = jsonFormat3(WvaInputValidation)
@@ -178,4 +180,5 @@ trait WvaJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val wvaMessageResponseJsonFormat = jsonFormat1(WvaMessageResponse)
   implicit val wvaStartChatResponseJsonFormat = jsonFormat(WvaStartChatResponse, "bot_id", "dialog_id", "message")
   implicit val wvaMessageRequestJsonFormat = jsonFormat2(WvaMessageRequest)
+  implicit val wvaErrorResponseJsonFormat = jsonFormat3(WvaErrorResponse)
 }

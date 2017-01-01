@@ -21,7 +21,7 @@ class WitIntentActor @Inject()(intentService: IntentService, userService: UserSe
 
   def receive = {
 
-    case ev@TextResponse(platform, from, text) =>
+    case ev@TextResponse(platform, from, text, _) =>
       log.debug("WitIntentActor received TextResponse")
 
       // avoid closing over mutable state

@@ -93,6 +93,9 @@ class FacebookSendQueue @Inject()(facebookService: FacebookService)
     case LoginCard(sender, conversationId) => sendLoginCard(sender, conversationId)
     case HeroCard(sender, items) => sendHeroCard(sender, items)
     case ReceiptCard(sender, slot) => sendReceiptCard(sender, slot)
+    case _ =>
+      log.warning("invalid SendEvent {}", ev)
+      Future.failed(new Exception("Invalid SendEvent " + ev))
   }
 
   def timestamp: Long = System.currentTimeMillis / 1000

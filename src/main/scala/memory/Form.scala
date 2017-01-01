@@ -18,6 +18,11 @@ class Form @Inject()(config: Config,
       "purchase",
       children = Some(List(
         Slot(
+          "time",
+          Some("When are you next available?"),
+          prompt = Some("time")
+        ),
+        Slot(
           "name",
           Some("Please provide your full name as <first name> <last name>"),
           children = Some(List(

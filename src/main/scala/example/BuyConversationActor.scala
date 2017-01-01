@@ -69,7 +69,7 @@ class BuyConversationActor @Inject()(smallTalkService: SmallTalkService,
     case Event(Reset, _) =>
       goto(Qualifying) using initialData
 
-    case Event(TextResponse(platform, sender, text), ctx: ConversationContext) =>
+    case Event(TextResponse(platform, sender, text, _), ctx: ConversationContext) =>
       smallTalkService.getSmallTalkResponse(sender, text) match {
         case "Didn't get that!" => shrug(platform, sender, text)
         case reply => say(ctx.provider, historyActor, sender, text, reply)

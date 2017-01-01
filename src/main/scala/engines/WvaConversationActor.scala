@@ -37,7 +37,7 @@ class WvaConversationActor @Inject()(wvaService: WatsonVirtualAgentService,
   def receive = defaultReceive orElse uninitialized
 
   def uninitialized: Receive = {
-    case ev@TextResponse(platform, sender, text) =>
+    case ev@TextResponse(platform, sender, text, _) =>
       log.debug("provider {}", provider.path.name)
       if (provider.path.name != "synchronous-request-actor") {
         log.debug("chat starting from a non-WVA client")
@@ -49,7 +49,7 @@ class WvaConversationActor @Inject()(wvaService: WatsonVirtualAgentService,
   }
 
   def chatting(botId: String, chatId: String): Receive = defaultReceive orElse {
-    case ev@TextResponse(_, sender, text) =>
+    case ev@TextResponse(_, sender, text, _) =>
       for {
         responseEither <- wvaService.send(chatId, text)
         response <- responseEither.rightFuture

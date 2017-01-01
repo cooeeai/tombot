@@ -25,7 +25,7 @@ class WatsonConversationActor @Inject()(watsonConversationService: WatsonConvers
   val contextMap = mutable.Map[String, JMap[String, AnyRef]]()
 
   override def withProvider(provider: ActorRef): Receive = {
-    case ev@TextResponse(_, sender, text) =>
+    case ev@TextResponse(_, sender, text, _) =>
       val response = watsonConversationService.converse(text, contextMap.get(sender))
 
       log.debug("intents: {}",

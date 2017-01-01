@@ -15,7 +15,7 @@ class RuleIntentActor @Inject()(rulesService: RulesService) extends Actor with A
 
   def receive = {
 
-    case ev@TextResponse(_, from, text) =>
+    case ev@TextResponse(_, from, text, _) =>
       log.debug("RuleIntentActor received TextResponse")
       if (isQuestion(text)) {
         log.debug("text is a question")

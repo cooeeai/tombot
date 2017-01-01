@@ -15,7 +15,7 @@ class ApiAiIntentActor @Inject()(service: ApiAiService)
 
   def receive = {
 
-    case ev@TextResponse(_, from, text) =>
+    case ev@TextResponse(_, from, text, _) =>
       log.debug("ApiAiIntentActor received TextResponse")
 
       // avoid closing over mutable state

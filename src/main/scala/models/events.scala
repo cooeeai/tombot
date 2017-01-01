@@ -37,7 +37,7 @@ object events {
 
   case class IntentVote(probability: Double, event: Any, multistep: Boolean = false)
 
-  case class TextResponse(platform: Platform, sender: String, text: String) extends PlatformAware
+  case class TextResponse(platform: Platform, sender: String, text: String, context: Option[Map[String, Any]] = None) extends PlatformAware
 
   case class IntentUnknown(sender: String, text: String)
 

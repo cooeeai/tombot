@@ -10,7 +10,7 @@ import com.typesafe.config.Config
 import engines.AgentConversationActor.{SparkMessageEvent, SparkRoomLeftEvent, SparkWrappedEvent}
 import engines.ConciergeActor.{Data, State}
 import engines.GreetActor.Greet
-import engines.interceptors.{LoggingInterceptor, PlatformSwitchInterceptor}
+import engines.interceptors.{EmojiInterceptor, LoggingInterceptor, PlatformSwitchInterceptor}
 import example.BuyConversationActor
 import models.events._
 import models.{ConversationEngine, IntentResolutionEvaluationStrategy, IntentResolutionSelectionStrategy}
@@ -41,6 +41,7 @@ class ConciergeActor @Inject()(config: Config,
     with ReceivePipeline
     with LoggingInterceptor
     with PlatformSwitchInterceptor
+    with EmojiInterceptor
     with FutureExtensions
     with General
     with FSM[State, Data] {
@@ -174,7 +175,7 @@ class ConciergeActor @Inject()(config: Config,
         goto(WithoutIntent) using ctx.copy(failCount = ctx.failCount + 1)
       }
 
-    case Event(Unhandled(ev@TextResponse(_, sender, _)), ctx: ConciergeContext) =>
+    case Event(Unhandled(ev@TextResponse(_, sender, _, _)), ctx: ConciergeContext) =>
       if (ctx.failCount > maxFailCount) {
         self ! Fallback(sender, Nil)
         goto(WithoutIntent) using ctx.copy(failCount = 0)

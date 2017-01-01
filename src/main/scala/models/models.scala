@@ -55,7 +55,7 @@ object Platform extends Enumeration {
 
   type Platform = Value
 
-  val Facebook, Telegram, LiveEngageChat, Skype, SMS, Web, WVA = Value
+  val Email, Facebook, LiveEngageChat, Skype, SMS, Telegram, Web, WVA = Value
 
 }
 

@@ -13,8 +13,8 @@ trait LoginInterceptor extends ActorLogging {
 
   pipelineInner {
 
-    case Authenticated(ev) =>
-      Inner(ev)
+//    case Authenticated(ev) =>
+//      Inner(ev)
 
     case ev: Privileged =>
       val sender = ev.sender
@@ -23,8 +23,8 @@ trait LoginInterceptor extends ActorLogging {
       self ! Login(ev, sender, text)
       HandledCompletely
 
-    case ev =>
-      Inner(ev)
+//    case ev =>
+//      Inner(ev)
 
   }
 }

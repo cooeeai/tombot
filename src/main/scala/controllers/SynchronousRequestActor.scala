@@ -49,7 +49,7 @@ class SynchronousRequestActor @Inject()(conversationService: ConversationService
       }
       sender() ! p.future
 
-    case ev@TextResponse(_, from, _) =>
+    case ev@TextResponse(_, from, _, _) =>
       val p = Promise[JsValue]()
       promises(from) = p
       converse(from, ev)

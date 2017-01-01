@@ -6,13 +6,13 @@ import com.google.inject.Inject
 import com.google.inject.assistedinject.Assisted
 import engines.interceptors.LoggingInterceptor
 import memory._
-import models.{Location, Address}
 import models.events._
+import models.{Address, Location}
 import modules.akkaguice.NamedActor
 import services.{SlotContainer, SlotService}
-import xml.Utility.escape
 
 import scala.collection.mutable
+import scala.xml.Utility.escape
 
 /**
   * Created by markmo on 14/09/2016.
@@ -57,9 +57,9 @@ class FormActor @Inject()(slotService: SlotService,
 
   //log.debug("slot:\n" + slot.toString)
 
-  def receive = withProvider(defaultProvider)
+  def receive = withProvider(defaultProvider, "text")
 
-  def withProvider(provider: ActorRef): Receive = {
+  def withProvider(provider: ActorRef, prompt: String): Receive = {
 
     case Reset =>
       currentKey = None
@@ -75,7 +75,7 @@ class FormActor @Inject()(slotService: SlotService,
       )
       nextQuestion(provider, sender, None)
 
-    case TextResponse(_, sender, text) =>
+    case TextResponse(_, sender, text, _) =>
       log.debug("form received text [{}]", text)
       if (text == "help" || text == "?") {
         provider ! TextMessage(sender,
@@ -136,7 +136,7 @@ class FormActor @Inject()(slotService: SlotService,
       }
 
     case SetProvider(_, _, ref, _, _, _) =>
-      context become withProvider(ref)
+      context become withProvider(ref, prompt)
 
   }
 
@@ -158,12 +158,12 @@ class FormActor @Inject()(slotService: SlotService,
   def nextQuestion(provider: ActorRef, sender: String, text: Option[String]) =
     slot.nextQuestion match {
 
-      case Some(Question(key, question, false, _)) =>
+      case Some(Question(key, question, false, _, prompt)) =>
         currentKey = Some(key)
         history += Exchange(text, question)
         provider ! TextMessage(sender, escape(question))
 
-      case Some(Question(key, question, true, _)) =>
+      case Some(Question(key, question, true, _, _)) =>
         currentKey = Some(key)
         history += Exchange(text, question)
         confirming = true
