@@ -46,7 +46,7 @@ object Main extends App with CorsSupport {
   val emailController = injector.instance[EmailController]
   val chatController = injector.instance[ChatController]
 //  val telegramController = injector.instance[TelegramController]
-//  val personalityInsightsController = injector.instance[PersonalityInsightsController]
+  val personalityInsightsController = injector.instance[PersonalityInsightsController]
   val wvaChatController = injector.instance[WvaChatController]
 
   val routes =
@@ -58,7 +58,7 @@ object Main extends App with CorsSupport {
       emailController.routes ~
       chatController.routes ~
 //      telegramController.routes ~
-//      personalityInsightsController.routes ~
+      personalityInsightsController.routes ~
       wvaChatController.routes
 
   implicit def myRejectionHandler = {
