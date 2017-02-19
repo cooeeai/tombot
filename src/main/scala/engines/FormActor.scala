@@ -5,6 +5,7 @@ import akka.contrib.pattern.ReceivePipeline
 import com.google.inject.Inject
 import com.google.inject.assistedinject.Assisted
 import engines.interceptors.LoggingInterceptor
+import example.Form
 import memory._
 import models.events._
 import models.{Address, Location}

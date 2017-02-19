@@ -1,9 +1,10 @@
-package memory
+package example
 
 import akka.event.LoggingAdapter
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.google.inject.Inject
 import com.typesafe.config.Config
+import memory.Slot
 
 /**
   * Created by markmo on 6/10/2016.

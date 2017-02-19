@@ -76,10 +76,10 @@ class ConciergeActor @Inject()(config: Config,
   // sequence in preferred order of execution
   val intentResolvers = List(
     injectActor[CommandIntentActor]("command"),
-    injectActor[WitIntentActor]("wit"),
-    injectActor[RuleIntentActor]("rule"),
-    injectActor[ApiAiIntentActor]("apiai"),
-    injectActor[WolframAlphaIntentActor]("alpha")
+    injectActor[WitIntentActor]("wit")
+//    injectActor[RuleIntentActor]("rule"),
+//    injectActor[ApiAiIntentActor]("apiai"),
+//    injectActor[WolframAlphaIntentActor]("alpha")
   )
 
   val initialData = ConciergeContext(
@@ -98,7 +98,7 @@ class ConciergeActor @Inject()(config: Config,
   when(WithoutIntent) {
 
     case Event(ev: TextResponse, _) =>
-      resolveIntent2(ev)
+      resolveIntent(ev)
       stay
 
     case Event(StartMultistep, _) =>
@@ -272,7 +272,8 @@ class ConciergeActor @Inject()(config: Config,
       log.warning("{} received unhandled request {} in state {}/{}", name, ev, stateName, ctx)
       // TODO
       // required?
-      //ctx.child ! ev
+      // yes, for all use case specific events such as Qualify
+      ctx.child ! ev
       stay
 
   }
