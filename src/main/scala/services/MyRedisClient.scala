@@ -3,6 +3,7 @@ package services
 import akka.actor.ActorSystem
 import com.google.inject.name.Named
 import com.google.inject.{Inject, Singleton}
+import com.typesafe.config.Config
 import redis.RedisClient
 
 import scala.concurrent.duration.FiniteDuration
@@ -12,8 +13,9 @@ import scala.concurrent.duration.FiniteDuration
   */
 @Singleton
 class MyRedisClient @Inject()(@Named("redisConnectTimeout") connectTimeout: FiniteDuration,
+                              config: Config,
                               system: ActorSystem)
-  extends RedisClient(connectTimeout = Some(connectTimeout))(system) {
+  extends RedisClient(host = config.getString("redis.host"), connectTimeout = Some(connectTimeout))(system) {
 
   var connected = false
 
