@@ -11,7 +11,7 @@ import engines.AgentConversationActor.{SparkMessageEvent, SparkRoomLeftEvent, Sp
 import engines.ConciergeActor.{Data, State}
 import engines.GreetActor.Greet
 import engines.interceptors.{EmojiInterceptor, LoggingInterceptor, PlatformSwitchInterceptor}
-import example.BuyConversationActor
+import example.{RechargeConversationActor, BuyConversationActor}
 import models.events._
 import models.{ConversationEngine, IntentResolutionEvaluationStrategy, IntentResolutionSelectionStrategy}
 import modules.akkaguice.{ActorInject, NamedActor}
@@ -32,6 +32,7 @@ class ConciergeActor @Inject()(config: Config,
                                val injector: Injector,
                                greetActorFactory: GreetActor.Factory,
                                buyIntentActorFactory: BuyConversationActor.Factory,
+                               rechargeIntentActorFactory: RechargeConversationActor.Factory,
                                liveAgentActorFactory: AgentConversationActor.Factory,
                                formActorFactory: FormActor.Factory,
                                watsonConversationFactory: WatsonConversationActor.Factory,
@@ -382,7 +383,8 @@ class ConciergeActor @Inject()(config: Config,
   def getConversationActor(engine: ConversationEngine): ActorRef = engine match {
     case Watson => injectActor(watsonConversationFactory(defaultProvider, historyActor), "watson")
     case WVA => injectActor(wvaConversationFactory(defaultProvider, historyActor), "wva")
-    case Cooee => injectActor(buyIntentActorFactory(defaultProvider, historyActor), "cooee")
+    //case Cooee => injectActor(buyIntentActorFactory(defaultProvider, historyActor), "cooee")
+    case Cooee => injectActor(rechargeIntentActorFactory(defaultProvider, historyActor), "cooee")
   }
 
   def formatHistory(history: History) =

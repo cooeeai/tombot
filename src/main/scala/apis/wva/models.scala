@@ -107,13 +107,15 @@ case class WvaRequestContext(name: String, args: Option[Map[String, String]], re
   */
 case class WvaResponse(output: WvaOutput, context: Option[Map[String, JsValue]])
 
-case class WvaMessageSystemContext(dialogRequestCounter: Int, dialogStack: List[String], dialogTurnCounter: Int)
+case class WvaDialogNode(dialogNode: String)
+
+case class WvaMessageSystemContext(dialogRequestCounter: Int, dialogStack: List[Either[String, WvaDialogNode]], dialogTurnCounter: Int, dialogInProgress: Option[Boolean])
 
 case class WvaMessageContext(conversationId: String, system: WvaMessageSystemContext)
 
 case class WvaIntent(confidence: Double, intent: String)
 
-case class WvaLogData(entities: List[Map[String, JsValue]], intents: List[WvaIntent])
+case class WvaLogData(entities: List[Map[String, JsValue]], intents: Option[List[WvaIntent]])
 
 case class WvaAddress(address: String, lat: Double, lng: Double, timezone: String)
 
@@ -144,7 +146,7 @@ case class WvaMessage(context: WvaMessageContext,
                       nodePosition: String,
                       text: List[String])
 
-case class WvaMessageResponse(message: WvaMessage) {
+case class WvaMessageResponse(botId: String, dialogId: String, message: WvaMessage) {
 
   def layoutName = message.layout match {
     case Some(l) => l.name
@@ -168,7 +170,8 @@ trait WvaJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val wvaOutputJsonFormat = jsonFormat6(WvaOutput)
   implicit val wvaRequestContextJsonFormat = jsonFormat3(WvaRequestContext)
   implicit val wvaResponseJsonFormat = jsonFormat2(WvaResponse)
-  implicit val wvaMessageSystemContextJsonFormat = jsonFormat(WvaMessageSystemContext, "dialog_request_counter", "dialog_stack", "dialog_turn_counter")
+  implicit val wvaDialogNodeJsonFormat = jsonFormat(WvaDialogNode, "dialog_node")
+  implicit val wvaMessageSystemContextJsonFormat = jsonFormat(WvaMessageSystemContext, "dialog_request_counter", "dialog_stack", "dialog_turn_counter", "dialog_in_progress")
   implicit val wvaMessageContextJsonFormat = jsonFormat(WvaMessageContext, "conversation_id", "system")
   implicit val wvaIntentJsonFormat = jsonFormat2(WvaIntent)
   implicit val wvaLogDataJsonFormat = jsonFormat2(WvaLogData)
@@ -177,7 +180,7 @@ trait WvaJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val wvaOpeningTimesJsonFormat = jsonFormat5(WvaOpeningTimes)
   implicit val wvaStoreLocationJsonFormat = jsonFormat8(WvaStoreLocation)
   implicit val wvaMessageJsonFormat = jsonFormat(WvaMessage, "context", "data", "entities", "inputvalidation", "intents", "layout", "log_data", "node_position", "text")
-  implicit val wvaMessageResponseJsonFormat = jsonFormat1(WvaMessageResponse)
+  implicit val wvaMessageResponseJsonFormat = jsonFormat(WvaMessageResponse, "bot_id", "dialog_id", "message")
   implicit val wvaStartChatResponseJsonFormat = jsonFormat(WvaStartChatResponse, "bot_id", "dialog_id", "message")
   implicit val wvaMessageRequestJsonFormat = jsonFormat2(WvaMessageRequest)
   implicit val wvaErrorResponseJsonFormat = jsonFormat3(WvaErrorResponse)

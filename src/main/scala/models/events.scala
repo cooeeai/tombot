@@ -2,6 +2,7 @@ package models
 
 import akka.actor.ActorRef
 import apis.ciscospark.SparkTempMembership
+import apis.facebookmessenger.FacebookGenericMessageTemplate
 import memory.Slot
 import models.ConversationEngine.ConversationEngine
 import models.Platform.Platform
@@ -90,6 +91,8 @@ object events {
   case class LoginCard(sender: String, conversationId: String = "") extends SendEvent
 
   case class HeroCard(sender: String, items: List[Item]) extends SendEvent
+
+  case class Card(sender: String, card: FacebookGenericMessageTemplate) extends SendEvent
 
   case class ReceiptCard(sender: String, slot: Slot) extends SendEvent
 

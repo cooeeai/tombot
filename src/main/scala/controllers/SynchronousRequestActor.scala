@@ -57,6 +57,7 @@ class SynchronousRequestActor @Inject()(conversationService: ConversationService
 
     case CustomMessage(from, message) =>
       if (promises.contains(from)) {
+        log.debug("found promise")
         promises(from).success(message)
       }
   }

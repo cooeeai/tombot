@@ -4,7 +4,7 @@ import akka.actor.Actor
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names
 import engines._
-import example.BuyConversationActor
+import example.{RechargeConversationActor, BuyConversationActor}
 import modules.akkaguice.AkkaGuiceSupport
 import net.codingwell.scalaguice.ScalaModule
 import services._
@@ -28,6 +28,7 @@ class ConversationModule extends AbstractModule with ScalaModule with AkkaGuiceS
     bindActorFactory[GreetActor, GreetActor.Factory]
     bindActorFactory[AnalyzeActor, AnalyzeActor.Factory]
     bindActorFactory[BuyConversationActor, BuyConversationActor.Factory]
+    bindActorFactory[RechargeConversationActor, RechargeConversationActor.Factory]
     bindActorFactory[IntentActor, IntentActor.Factory]
     bindActorFactory[AgentConversationActor, AgentConversationActor.Factory]
     bindActorFactory[FormActor, FormActor.Factory]

@@ -101,6 +101,20 @@ class FacebookService @Inject()(config: Config,
     } yield SendResponse(entity.messageId)
   }
 
+  def sendCard(sender: String, payload: FacebookGenericMessageTemplate): Future[SendResponse] = {
+    logger.info("sending generic message to sender [{}]", sender)
+    logger.debug("sending payload:\n{}", payload.toJson.prettyPrint)
+    for {
+      request <- Marshal(payload).to[RequestEntity]
+      response <- http.singleRequest(HttpRequest(
+        method = HttpMethods.POST,
+        uri = s"https://graph.facebook.com/v2.8/me/messages?access_token=$accessToken",
+        headers = List(headers.Accept(MediaTypes.`application/json`)),
+        entity = request))
+      entity <- Unmarshal(response.entity).to[FacebookAttachmentReuseResponse]
+    } yield SendResponse(entity.messageId)
+  }
+
   def sendReceiptCard(sender: String, slot: Slot): Future[SendResponse] = {
     logger.info("sending receipt message to sender [{}]", sender)
     import Builder._

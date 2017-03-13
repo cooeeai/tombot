@@ -27,4 +27,5 @@ trait CorsSupport {
   def corsHandler(r: Route) = addAccessControlHeaders {
     preflightRequestHandler ~ r
   }
+
 }

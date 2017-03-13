@@ -92,6 +92,7 @@ class FacebookSendQueue @Inject()(facebookService: FacebookService)
     case QuickReply(sender, text) => sendQuickReply(sender, text)
     case LoginCard(sender, conversationId) => sendLoginCard(sender, conversationId)
     case HeroCard(sender, items) => sendHeroCard(sender, items)
+    case Card(sender, card) => sendCard(sender, card)
     case ReceiptCard(sender, slot) => sendReceiptCard(sender, slot)
     case _ =>
       log.warning("invalid SendEvent {}", ev)

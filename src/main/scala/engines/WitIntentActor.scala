@@ -6,6 +6,7 @@ import com.google.inject.Inject
 import engines.AnalyzeActor.Analyze
 import engines.GreetActor.Greet
 import example.BuyConversationActor.Qualify
+import example.RechargeConversationActor.Recharge
 import models.events._
 import modules.akkaguice.NamedActor
 import services.{IntentService, UserService}
@@ -53,6 +54,10 @@ class WitIntentActor @Inject()(intentService: IntentService, userService: UserSe
             log.debug("responding to [analyze] intent")
             // not a conversational intent, therefore do not become
             currentSender ! IntentVote(confidence, Analyze(platform, from, text))
+
+          case Some(Entity(confidence, "recharge", _)) =>
+            log.debug("responding to [recharge] intent")
+            currentSender ! IntentVote(confidence, Recharge(platform, from, text), multistep = true)
 
           case _ =>
             log.warning("responding to [unknown] intent")
